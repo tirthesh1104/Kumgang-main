@@ -67,7 +67,8 @@ function ExportPreviewModal({
   project: any;
   onClose: () => void;
 }) {
-  const { liveDateTime } = useApp();
+  const { liveDateTime, theme } = useApp();
+  const isDark = theme === 'dark';
   const {
     getShipmentForProject,
     getDesignForProject,
@@ -86,30 +87,42 @@ function ExportPreviewModal({
     : (project.contractStatus === 'Signed' ? 50 : 100);
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 z-50 overflow-y-auto">
-      <div className="bg-[#151517] border border-[#303035] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 text-[#F5F5F3]">
+    <div className={`fixed inset-0 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 z-50 overflow-y-auto ${
+      isDark ? 'bg-black/75' : 'bg-slate-900/50'
+    }`}>
+      <div className={`border rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 ${
+        isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-200 text-slate-800'
+      }`}>
         {/* Modal Action Top Bar */}
-        <div className="flex items-center justify-between bg-[#090909] text-white px-6 py-4 rounded-t-2xl border-b border-[#1E1E20]">
+        <div className={`flex items-center justify-between px-6 py-4 rounded-t-2xl border-b ${
+          isDark ? 'bg-[#090909] text-white border-[#1E1E20]' : 'bg-[#0B2239] text-white border-slate-800'
+        }`}>
           <div>
             <div className="flex items-center gap-2">
-              <FileText size={18} className="text-[#C9A86A]" />
-              <h3 className="font-extrabold text-base tracking-wide text-[#FFFFFF]">KUMKANG PROJECT REPORT PREVIEW</h3>
+              <FileText size={18} className={isDark ? 'text-[#C9A86A]' : 'text-sky-400'} />
+              <h3 className="font-extrabold text-base tracking-wide text-white">KUMKANG PROJECT REPORT PREVIEW</h3>
             </div>
-            <p className="text-xs text-[#85858B] mt-0.5 font-medium">
-              Confidential Executive Summary • Ref: <span className="font-mono text-[#C9A86A]">{project.projectId}</span>
+            <p className={`text-xs mt-0.5 font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
+              Confidential Executive Summary • Ref: <span className={`font-mono ${isDark ? 'text-[#C9A86A]' : 'text-sky-300'}`}>{project.projectId}</span>
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => exportProjectPDF(project, shipment)}
-              className="flex items-center gap-2 bg-[#C9A86A] hover:bg-[#D7B97C] text-[#111111] font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow-sm cursor-pointer"
+              className={`flex items-center gap-2 font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow-sm cursor-pointer ${
+                isDark
+                  ? 'bg-[#C9A86A] hover:bg-[#D7B97C] text-[#111111]'
+                  : 'bg-[#1688D4] hover:bg-[#1272B2] text-white'
+              }`}
             >
               <Printer size={14} /> EXPORT TO PDF
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-[#85858B] hover:text-white hover:bg-[#18181B] transition-colors cursor-pointer"
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                isDark ? 'text-[#85858B] hover:text-white hover:bg-[#18181B]' : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
               aria-label="Close preview"
             >
               <X size={20} />
@@ -118,61 +131,85 @@ function ExportPreviewModal({
         </div>
 
         {/* Printable Report Document Body Preview */}
-        <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6 bg-[#0A0A0A]">
-          <div className="bg-[#151517] border border-[#262629] rounded-xl p-6 lg:p-8 shadow-sm space-y-6 max-w-3xl mx-auto text-[#F5F5F3]">
+        <div className={`flex-1 overflow-y-auto p-6 lg:p-8 space-y-6 ${
+          isDark ? 'bg-[#0A0A0A]' : 'bg-slate-100'
+        }`}>
+          <div className={`border rounded-xl p-6 lg:p-8 shadow-sm space-y-6 max-w-3xl mx-auto ${
+            isDark ? 'bg-[#151517] border-[#262629] text-[#F5F5F3]' : 'bg-white border-slate-200 text-slate-800'
+          }`}>
             {/* Report Header */}
-            <div className="flex items-center justify-between border-b-2 border-[#C9A86A] pb-4">
+            <div className={`flex items-center justify-between border-b-2 pb-4 ${
+              isDark ? 'border-[#C9A86A]' : 'border-[#1688D4]'
+            }`}>
               <div>
-                <h2 className="text-xl font-extrabold text-[#FFFFFF] uppercase tracking-wide">KUMKANG KIND EAST AFRICA</h2>
-                <p className="text-xs font-semibold text-[#85858B]">Project Specification & Executive Summary Report</p>
+                <h2 className={`text-xl font-extrabold uppercase tracking-wide ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>KUMKANG KIND EAST AFRICA</h2>
+                <p className={`text-xs font-semibold ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Project Specification & Executive Summary Report</p>
               </div>
               <div className="text-right">
-                <span className="text-xs font-mono font-bold bg-[#2A2419] text-[#E8D6AE] border border-[#55462C] px-3 py-1 rounded-full inline-block">
+                <span className={`text-xs font-mono font-bold px-3 py-1 rounded-full inline-block border ${
+                  isDark ? 'bg-[#2A2419] text-[#E8D6AE] border-[#55462C]' : 'bg-sky-50 text-[#1688D4] border-sky-200'
+                }`}>
                   REF: {project.projectId}
                 </span>
-                <p className="text-[10px] text-[#85858B] font-medium mt-1">{liveDateTime}</p>
+                <p className={`text-[10px] font-medium mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-400'}`}>{liveDateTime}</p>
               </div>
             </div>
 
             {/* Section 1: Project Identity */}
-            <div className="bg-[#111113] border border-[#262629] rounded-xl p-4 space-y-2">
+            <div className={`border rounded-xl p-4 space-y-2 ${
+              isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
+            }`}>
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="text-lg font-extrabold text-[#FFFFFF]">{project.project}</h3>
+                <h3 className={`text-lg font-extrabold ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>{project.project}</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold bg-[#18181B] text-[#F5F5F3] px-2.5 py-0.5 rounded border border-[#303035]">
+                  <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded border ${
+                    isDark ? 'bg-[#18181B] text-[#F5F5F3] border-[#303035]' : 'bg-white text-slate-700 border-slate-300'
+                  }`}>
                     {project.projectId}
                   </span>
                   <StatusBadge status={project.contractStatus} />
                 </div>
               </div>
-              <p className="text-xs font-semibold text-[#B4B4B8]">
-                Customer: <strong className="text-[#FFFFFF]">{project.customer}</strong> {project.block ? `• Block: ${project.block}` : ''} • Country: <strong className="text-[#FFFFFF]">{project.country}</strong>
+              <p className={`text-xs font-semibold ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
+                Customer: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{project.customer}</strong> {project.block ? `• Block: ${project.block}` : ''} • Country: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{project.country}</strong>
               </p>
             </div>
 
             {/* Section 2: Progress Bar */}
-            <div className="space-y-1.5 border-b border-[#262629] pb-4">
+            <div className={`space-y-1.5 border-b pb-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
               <div className="flex justify-between items-center text-xs font-bold">
-                <span className="uppercase text-[#85858B] tracking-wider text-[10px]">Overall Design & Execution Progress</span>
-                <span className="text-[#C9A86A] font-extrabold">{progressPercent}%</span>
+                <span className={`uppercase tracking-wider text-[10px] ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Overall Design & Execution Progress</span>
+                <span className={`font-extrabold ${isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'}`}>{progressPercent}%</span>
               </div>
-              <div className="w-full bg-[#111113] rounded-full h-3 overflow-hidden border border-[#262629]">
-                <div className="bg-[#C9A86A] h-full rounded-full" style={{ width: `${progressPercent}%` }} />
+              <div className={`w-full rounded-full h-3 overflow-hidden border ${
+                isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-200 border-slate-300'
+              }`}>
+                <div className={`h-full rounded-full ${isDark ? 'bg-[#C9A86A]' : 'bg-[#1688D4]'}`} style={{ width: `${progressPercent}%` }} />
               </div>
             </div>
 
             {/* Section 3: Project Lifecycle Journey */}
-            <div className="space-y-2 border-b border-[#262629] pb-4">
-              <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#85858B]">Project Lifecycle Journey</h4>
+            <div className={`space-y-2 border-b pb-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+              <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Project Lifecycle Journey</h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
                 {stages.map(st => (
-                  <div key={st.id} className="bg-[#111113] border border-[#262629] rounded-lg p-2 text-center">
-                    <span className="text-[10px] font-bold text-[#F5F5F3] block truncate">{st.label}</span>
-                    <span className={`text-[9px] font-extrabold uppercase inline-block mt-0.5 px-1.5 py-0.2 rounded ${st.status === 'completed' ? 'bg-[#163127] text-[#70D0A8]' : st.status === 'active' ? 'bg-[#2A2419] text-[#E8D6AE]' : st.status === 'delayed' ? 'bg-[#322917] text-[#E5C47A]' : 'bg-[#18181B] text-[#85858B]'}`}>
+                  <div key={st.id} className={`border rounded-lg p-2 text-center ${
+                    isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <span className={`text-[10px] font-bold block truncate ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{st.label}</span>
+                    <span className={`text-[9px] font-extrabold uppercase inline-block mt-0.5 px-1.5 py-0.2 rounded ${
+                      st.status === 'completed'
+                        ? (isDark ? 'bg-[#163127] text-[#70D0A8]' : 'bg-emerald-100 text-emerald-700')
+                        : st.status === 'active'
+                        ? (isDark ? 'bg-[#2A2419] text-[#E8D6AE]' : 'bg-sky-100 text-sky-700')
+                        : st.status === 'delayed'
+                        ? (isDark ? 'bg-[#322917] text-[#E5C47A]' : 'bg-amber-100 text-amber-700')
+                        : (isDark ? 'bg-[#18181B] text-[#85858B]' : 'bg-slate-200 text-slate-500')
+                    }`}>
                       {st.status === 'completed' ? 'Done' : st.status === 'active' ? 'Active' : st.status === 'delayed' ? 'Delayed' : 'Pending'}
                     </span>
                     {(st.actualDate || st.plannedDate) && (
-                      <span className="text-[8px] text-[#85858B] block mt-1 truncate">{st.actualDate || st.plannedDate}</span>
+                      <span className={`text-[8px] block mt-1 truncate ${isDark ? 'text-[#85858B]' : 'text-slate-400'}`}>{st.actualDate || st.plannedDate}</span>
                     )}
                   </div>
                 ))}
@@ -181,78 +218,82 @@ function ExportPreviewModal({
 
             {/* Section 4: Financial & Technical Summary */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="bg-[#111113] border border-[#262629] rounded-xl p-4 space-y-2">
-                <h4 className="font-extrabold uppercase tracking-wider text-[10px] text-[#85858B]">Commercial & Financial Details</h4>
-                <div className="flex justify-between border-b border-[#262629] pb-1">
-                  <span className="text-[#85858B]">Contract Value:</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.totalAmountUSD ? `$${project.totalAmountUSD.toLocaleString()}` : '—'}</span>
+              <div className={`border rounded-xl p-4 space-y-2 ${
+                isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Commercial & Financial Details</h4>
+                <div className={`flex justify-between border-b pb-1 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Contract Value:</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.totalAmountUSD ? `$${project.totalAmountUSD.toLocaleString()}` : '—'}</span>
                 </div>
-                <div className="flex justify-between border-b border-[#262629] pb-1">
-                  <span className="text-[#85858B]">Advance Collected:</span>
-                  <span className="font-bold text-[#70D0A8]">{project.advanceUSD ? `$${project.advanceUSD.toLocaleString()}` : '$0'}</span>
+                <div className={`flex justify-between border-b pb-1 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Advance Collected:</span>
+                  <span className={`font-bold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>{project.advanceUSD ? `$${project.advanceUSD.toLocaleString()}` : '$0'}</span>
                 </div>
-                <div className="flex justify-between border-b border-[#262629] pb-1">
-                  <span className="text-[#85858B]">Outstanding Balance:</span>
-                  <span className="font-bold text-[#E5C47A]">{project.balanceUSD ? `$${project.balanceUSD.toLocaleString()}` : '$0'}</span>
+                <div className={`flex justify-between border-b pb-1 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Outstanding Balance:</span>
+                  <span className={`font-bold ${isDark ? 'text-[#E5C47A]' : 'text-amber-600'}`}>{project.balanceUSD ? `$${project.balanceUSD.toLocaleString()}` : '$0'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#85858B]">Payment Term / Status:</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.paymentTerm || '—'} ({project.paymentStatus || '—'})</span>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Payment Term / Status:</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.paymentTerm || '—'} ({project.paymentStatus || '—'})</span>
                 </div>
               </div>
 
-              <div className="bg-[#111113] border border-[#262629] rounded-xl p-4 space-y-2">
-                <h4 className="font-extrabold uppercase tracking-wider text-[10px] text-[#85858B]">Technical Specifications & Scope</h4>
-                <div className="flex justify-between border-b border-[#262629] pb-1">
-                  <span className="text-[#85858B]">Contract Qty (m²):</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.contractQtyM2 ? `${project.contractQtyM2.toLocaleString()} m²` : '—'}</span>
+              <div className={`border rounded-xl p-4 space-y-2 ${
+                isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Technical Specifications & Scope</h4>
+                <div className={`flex justify-between border-b pb-1 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Contract Qty (m²):</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.contractQtyM2 ? `${project.contractQtyM2.toLocaleString()} m²` : '—'}</span>
                 </div>
-                <div className="flex justify-between border-b border-[#262629] pb-1">
-                  <span className="text-[#85858B]">Contract Weight (Tons):</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.contractWeightTons ? `${project.contractWeightTons} T` : '—'}</span>
+                <div className={`flex justify-between border-b pb-1 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Contract Weight (Tons):</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.contractWeightTons ? `${project.contractWeightTons} T` : '—'}</span>
                 </div>
-                <div className="flex justify-between border-b border-[#262629] pb-1">
-                  <span className="text-[#85858B]">Actual Design Qty (m²):</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.actualDesignQtyM2 ? `${project.actualDesignQtyM2.toLocaleString()} m²` : '—'}</span>
+                <div className={`flex justify-between border-b pb-1 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Actual Design Qty (m²):</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.actualDesignQtyM2 ? `${project.actualDesignQtyM2.toLocaleString()} m²` : '—'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#85858B]">Incoterm:</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.incoterm || '—'}</span>
+                  <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Incoterm:</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.incoterm || '—'}</span>
                 </div>
               </div>
             </div>
 
             {/* Section 5: Schedule & Dates */}
-            <div className="space-y-2 border-b border-[#262629] pb-4 text-xs">
-              <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#85858B]">Project Schedule & Key Dates</h4>
+            <div className={`space-y-2 border-b pb-4 text-xs ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+              <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Project Schedule & Key Dates</h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div className="bg-[#111113] p-2.5 rounded-lg border border-[#262629]">
-                  <span className="text-[10px] text-[#85858B] block">Contract Date</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.contractDate || '—'}</span>
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className={`text-[10px] block ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Date</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.contractDate || '—'}</span>
                 </div>
-                <div className="bg-[#111113] p-2.5 rounded-lg border border-[#262629]">
-                  <span className="text-[10px] text-[#85858B] block">Shell Plan Confirm</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.shellPlanConfirmation || '—'}</span>
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className={`text-[10px] block ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Shell Plan Confirm</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.shellPlanConfirmation || '—'}</span>
                 </div>
-                <div className="bg-[#111113] p-2.5 rounded-lg border border-[#262629]">
-                  <span className="text-[10px] text-[#85858B] block">MD Completion</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.mdCompletion || '—'}</span>
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className={`text-[10px] block ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>MD Completion</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.mdCompletion || '—'}</span>
                 </div>
-                <div className="bg-[#111113] p-2.5 rounded-lg border border-[#262629]">
-                  <span className="text-[10px] text-[#85858B] block">Delivery Request</span>
-                  <span className="font-bold text-[#F5F5F3]">{project.deliveryRequest || '—'}</span>
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+                  <span className={`text-[10px] block ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Delivery Request</span>
+                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.deliveryRequest || '—'}</span>
                 </div>
               </div>
             </div>
 
             {/* Section 6: Design Elements Table */}
             {designElements.length > 0 && (
-              <div className="space-y-2 text-xs border-b border-[#262629] pb-4">
-                <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#85858B]">Design Elements Monitoring</h4>
+              <div className={`space-y-2 text-xs border-b pb-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Design Elements Monitoring</h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-[#111113] text-[#85858B] border-b border-[#262629]">
+                      <tr className={`border-b ${isDark ? 'bg-[#111113] text-[#85858B] border-[#262629]' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
                         <th className="p-2 font-bold">Element</th>
                         <th className="p-2 font-bold">Planned Date</th>
                         <th className="p-2 font-bold">Actual Date</th>
@@ -261,11 +302,11 @@ function ExportPreviewModal({
                     </thead>
                     <tbody>
                       {designElements.map(d => (
-                        <tr key={d.designId} className="border-b border-[#262629]">
-                          <td className="p-2 font-bold text-[#F5F5F3]">{d.element}</td>
-                          <td className="p-2 text-[#B4B4B8]">{d.plannedDate || '—'}</td>
-                          <td className="p-2 text-[#B4B4B8]">{d.actualDate || '—'}</td>
-                          <td className="p-2 font-semibold text-[#F5F5F3]">{d.status}</td>
+                        <tr key={d.designId} className={`border-b ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
+                          <td className={`p-2 font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{d.element}</td>
+                          <td className={`p-2 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.plannedDate || '—'}</td>
+                          <td className={`p-2 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.actualDate || '—'}</td>
+                          <td className={`p-2 font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{d.status}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -276,12 +317,12 @@ function ExportPreviewModal({
 
             {/* Section 7: Production Parts Table */}
             {productionParts.length > 0 && (
-              <div className="space-y-2 text-xs border-b border-[#262629] pb-4">
-                <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#85858B]">Production Monitoring</h4>
+              <div className={`space-y-2 text-xs border-b pb-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Production Monitoring</h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-[#111113] text-[#85858B] border-b border-[#262629]">
+                      <tr className={`border-b ${isDark ? 'bg-[#111113] text-[#85858B] border-[#262629]' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
                         <th className="p-2 font-bold">Part / Block</th>
                         <th className="p-2 font-bold">Order Qty</th>
                         <th className="p-2 font-bold">Finished Qty</th>
@@ -290,11 +331,11 @@ function ExportPreviewModal({
                     </thead>
                     <tbody>
                       {productionParts.map((p, i) => (
-                        <tr key={i} className="border-b border-[#262629]">
-                          <td className="p-2 font-bold text-[#F5F5F3]">{p.part}</td>
-                          <td className="p-2 text-[#B4B4B8]">{p.orderQtyM2 ? `${p.orderQtyM2} m²` : p.orderQtyKg ? `${p.orderQtyKg} kg` : '—'}</td>
-                          <td className="p-2 text-[#B4B4B8]">{p.finishedQtyM2 ? `${p.finishedQtyM2} m²` : p.finishedQtyKg ? `${p.finishedQtyKg} kg` : '—'}</td>
-                          <td className="p-2 font-bold text-[#70D0A8]">{Math.round(p.completionPercent || 0)}%</td>
+                        <tr key={i} className={`border-b ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
+                          <td className={`p-2 font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{p.part}</td>
+                          <td className={`p-2 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{p.orderQtyM2 ? `${p.orderQtyM2} m²` : p.orderQtyKg ? `${p.orderQtyKg} kg` : '—'}</td>
+                          <td className={`p-2 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{p.finishedQtyM2 ? `${p.finishedQtyM2} m²` : p.finishedQtyKg ? `${p.finishedQtyKg} kg` : '—'}</td>
+                          <td className={`p-2 font-bold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>{Math.round(p.completionPercent || 0)}%</td>
                         </tr>
                       ))}
                     </tbody>
@@ -305,26 +346,28 @@ function ExportPreviewModal({
 
             {/* Section 8: Shipment */}
             {shipment && (
-              <div className="bg-[#17272E] border border-[#294651] rounded-xl p-4 text-xs space-y-1.5">
-                <h4 className="font-extrabold text-[#89C9DF] uppercase tracking-wider text-[10px]">Live Shipment Status & Logistics</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-[#F5F5F3]">
-                  <div><span className="text-[#85858B]">Status:</span> <strong>{shipment.status}</strong></div>
-                  <div><span className="text-[#85858B]">ETD:</span> <strong>{shipment.etd || '—'}</strong></div>
-                  <div><span className="text-[#85858B]">ETA:</span> <strong>{shipment.eta || '—'}</strong></div>
-                  <div><span className="text-[#85858B]">Timeline:</span> <strong>{shipment.deliveryTimeline || '—'}</strong></div>
-                  <div><span className="text-[#85858B]">Block:</span> <strong>{shipment.block || '—'}</strong></div>
+              <div className={`border rounded-xl p-4 text-xs space-y-1.5 ${
+                isDark ? 'bg-[#17272E] border-[#294651]' : 'bg-sky-50 border-sky-200'
+              }`}>
+                <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#89C9DF]' : 'text-sky-800'}`}>Live Shipment Status & Logistics</h4>
+                <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>
+                  <div><span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Status:</span> <strong>{shipment.status}</strong></div>
+                  <div><span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>ETD:</span> <strong>{shipment.etd || '—'}</strong></div>
+                  <div><span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>ETA:</span> <strong>{shipment.eta || '—'}</strong></div>
+                  <div><span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Timeline:</span> <strong>{shipment.deliveryTimeline || '—'}</strong></div>
+                  <div><span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Block:</span> <strong>{shipment.block || '—'}</strong></div>
                 </div>
               </div>
             )}
 
             {/* Section 9: Payments Breakdown */}
             {paymentBreakdown.length > 0 && (
-              <div className="space-y-2 text-xs border-b border-[#262629] pb-4">
-                <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#85858B]">Payment Schedule Breakdown</h4>
+              <div className={`space-y-2 text-xs border-b pb-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Payment Schedule Breakdown</h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-[#111113] text-[#85858B] border-b border-[#262629]">
+                      <tr className={`border-b ${isDark ? 'bg-[#111113] text-[#85858B] border-[#262629]' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
                         <th className="p-2 font-bold">Description</th>
                         <th className="p-2 font-bold">Amount (USD)</th>
                         <th className="p-2 font-bold">Advance Paid</th>
@@ -333,11 +376,11 @@ function ExportPreviewModal({
                     </thead>
                     <tbody>
                       {paymentBreakdown.map((p, i) => (
-                        <tr key={i} className="border-b border-[#262629]">
-                          <td className="p-2 font-bold text-[#F5F5F3]">{p.description || 'Installment'}</td>
-                          <td className="p-2 text-[#B4B4B8]">{p.amountUSD ? `$${p.amountUSD.toLocaleString()}` : '—'}</td>
-                          <td className="p-2 font-semibold text-[#70D0A8]">{p.advancePaidUSD ? `$${p.advancePaidUSD.toLocaleString()}` : '—'}</td>
-                          <td className="p-2 font-semibold text-[#E5C47A]">{p.balanceUSD ? `$${p.balanceUSD.toLocaleString()}` : '—'}</td>
+                        <tr key={i} className={`border-b ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
+                          <td className={`p-2 font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{p.description || 'Installment'}</td>
+                          <td className={`p-2 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{p.amountUSD ? `$${p.amountUSD.toLocaleString()}` : '—'}</td>
+                          <td className={`p-2 font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>{p.advancePaidUSD ? `$${p.advancePaidUSD.toLocaleString()}` : '—'}</td>
+                          <td className={`p-2 font-semibold ${isDark ? 'text-[#E5C47A]' : 'text-amber-600'}`}>{p.balanceUSD ? `$${p.balanceUSD.toLocaleString()}` : '—'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -348,28 +391,38 @@ function ExportPreviewModal({
 
             {/* Remarks */}
             {project.remark && (
-              <div className="bg-[#322917] border border-[#5B4724] rounded-xl p-3 text-xs text-[#E5C47A] font-medium">
+              <div className={`border rounded-xl p-3 text-xs font-medium ${
+                isDark ? 'bg-[#322917] border-[#5B4724] text-[#E5C47A]' : 'bg-amber-50 border-amber-200 text-amber-900'
+              }`}>
                 <strong className="block mb-0.5">Remarks:</strong> {project.remark}
               </div>
             )}
 
-            <div className="text-center text-[10px] text-[#85858B] border-t border-[#262629] pt-4">
+            <div className={`text-center text-[10px] border-t pt-4 ${isDark ? 'text-[#85858B] border-[#262629]' : 'text-slate-400 border-slate-200'}`}>
               Generated automatically by Kumkang Project Monitor • Confidential Report
             </div>
           </div>
         </div>
 
         {/* Modal Bottom Actions */}
-        <div className="flex items-center justify-between bg-[#090909] px-6 py-4 rounded-b-2xl border-t border-[#1E1E20]">
+        <div className={`flex items-center justify-between px-6 py-4 rounded-b-2xl border-t ${
+          isDark ? 'bg-[#090909] border-[#1E1E20]' : 'bg-[#0B2239] border-slate-800 text-white'
+        }`}>
           <button
             onClick={onClose}
-            className="text-xs font-bold text-[#B4B4B8] hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
+            className={`text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer ${
+              isDark ? 'text-[#B4B4B8] hover:text-white' : 'text-slate-300 hover:text-white'
+            }`}
           >
             Close Preview
           </button>
           <button
             onClick={() => exportProjectPDF(project, shipment)}
-            className="flex items-center gap-2 bg-[#C9A86A] hover:bg-[#D7B97C] text-[#111111] font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
+            className={`flex items-center gap-2 font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer ${
+              isDark
+                ? 'bg-[#C9A86A] hover:bg-[#D7B97C] text-[#111111]'
+                : 'bg-[#1688D4] hover:bg-[#1272B2] text-white'
+            }`}
           >
             <Printer size={15} /> EXPORT TO PDF
           </button>
@@ -380,7 +433,8 @@ function ExportPreviewModal({
 }
 
 export function ProjectDetail() {
-  const { selectedProjectId, selectedFolder, navigate } = useApp();
+  const { selectedProjectId, selectedFolder, navigate, theme } = useApp();
+  const isDark = theme === 'dark';
   const {
     getProjectById, getDesignForProject, getProductionForProject,
     getShipmentForProject, getPaymentsForProject
@@ -419,7 +473,7 @@ export function ProjectDetail() {
       initial={{ opacity: 0, x: 12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="space-y-5 text-[#F5F5F3]"
+      className={`space-y-5 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}
     >
       {/* Action Bar Header with Back Navigation & EDIT / EXPORT Buttons */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -427,33 +481,41 @@ export function ProjectDetail() {
           {selectedFolder ? (
             <button
               onClick={() => navigate('dashboard')}
-              className="btn-secondary"
+              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold border transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#222226]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
             >
-              <ArrowLeft size={14} className="text-[#C9A86A]" /> Back to {selectedFolder} Folder
+              <ArrowLeft size={14} className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'} /> Back to {selectedFolder} Folder
             </button>
           ) : null}
           <button
             onClick={() => navigate('projects')}
-            className="btn-secondary"
+            className={`px-3.5 py-2 rounded-xl text-xs font-extrabold border transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+              isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#222226]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+            }`}
           >
-            <ArrowLeft size={14} className="text-[#85858B]" /> Back to Projects List
+            <ArrowLeft size={14} className={isDark ? 'text-[#85858B]' : 'text-slate-500'} /> Back to Projects List
           </button>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="btn-primary"
+            className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm ${
+              isDark ? 'bg-[#C9A86A] text-[#111111] hover:bg-[#D7B97C]' : 'bg-[#1688D4] text-white hover:bg-[#0284C7]'
+            }`}
           >
-            <Edit3 size={15} className="btn-icon-edit" />
+            <Edit3 size={15} />
             EDIT PROJECT
           </button>
 
           <button
             onClick={() => setIsExportPreviewOpen(true)}
-            className="btn-champagne"
+            className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs ${
+              isDark ? 'bg-[#2A2419] text-[#E8D6AE] border-[#55462C] hover:bg-[#342C1F]' : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+            }`}
           >
-            <FileText size={15} className="btn-icon-download" />
+            <FileText size={15} />
             EXPORT
           </button>
         </div>
@@ -463,30 +525,46 @@ export function ProjectDetail() {
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`p-6 rounded-xl border ${needsAttention ? 'bg-[#34191B] border-[#5A292B]' : 'bg-[#151517] border-[#262629]'}`}
+        className={`p-6 rounded-2xl border shadow-2xs ${
+          needsAttention 
+            ? (isDark ? 'bg-[#34191B] border-[#5A292B]' : 'bg-red-50 border-red-200') 
+            : (isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200')
+        }`}
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className={`text-xs font-bold px-2 py-1 rounded border font-mono ${needsAttention ? 'text-[#F08A8A] bg-[#18181B] border-[#5A292B]' : 'text-[#F5F5F3] bg-[#18181B] border-[#303035]'}`}>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-md border font-mono ${
+                needsAttention 
+                  ? (isDark ? 'text-[#F08A8A] bg-[#18181B] border-[#5A292B]' : 'text-red-700 bg-red-100 border-red-300')
+                  : (isDark ? 'text-[#F5F5F3] bg-[#18181B] border-[#303035]' : 'text-slate-800 bg-slate-100 border-slate-300')
+              }`}>
                 {project.projectId}
               </span>
               <StatusBadge status={project.contractStatus} />
               <PaymentBadge status={project.paymentStatus} />
               {needsAttention && (
-                <span className="flex items-center gap-1 text-xs font-bold text-[#F08A8A] bg-[#34191B] border border-[#5A292B] px-2 py-1 rounded">
+                <span className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md border ${
+                  isDark ? 'text-[#F08A8A] bg-[#34191B] border-[#5A292B]' : 'text-red-700 bg-red-100 border-red-300'
+                }`}>
                   <AlertTriangle size={11} />
                   Balance Due: ${project.balanceUSD?.toLocaleString()}
                 </span>
               )}
             </div>
-            <h1 className={`text-2xl font-bold ${needsAttention ? 'text-[#FFFFFF]' : 'text-[#FFFFFF]'}`}>{project.project}</h1>
-            <p className="text-[#B4B4B8] mt-1">{project.customer}{project.block ? ` · Block ${project.block}` : ''}</p>
+            <h1 className={`text-2xl font-extrabold ${
+              needsAttention 
+                ? (isDark ? 'text-[#FFFFFF]' : 'text-red-900') 
+                : (isDark ? 'text-[#FFFFFF]' : 'text-slate-900')
+            }`}>{project.project}</h1>
+            <p className={`mt-1 font-semibold text-sm ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
+              {project.customer}{project.block ? ` · Block ${project.block}` : ''} • {project.country}
+            </p>
           </div>
           {progressPercent != null && (
             <div className="text-right">
-              <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${needsAttention ? 'text-[#F08A8A]' : 'text-[#85858B]'}`}>Design Progress</p>
-              <p className={`text-4xl font-bold ${needsAttention ? 'text-[#F08A8A]' : 'text-[#FFFFFF]'}`}>{progressPercent}%</p>
+              <p className={`text-[10px] font-extrabold uppercase tracking-widest mb-1 ${needsAttention ? 'text-red-500' : 'text-slate-400'}`}>Design Progress</p>
+              <p className={`text-4xl font-extrabold ${needsAttention ? (isDark ? 'text-[#F08A8A]' : 'text-red-600') : (isDark ? 'text-[#FFFFFF]' : 'text-slate-900')}`}>{progressPercent}%</p>
               <div className="mt-2 w-32">
                 <ProgressBar value={progressPercent} color={needsAttention ? 'orange' : 'forest'} size="lg" />
               </div>

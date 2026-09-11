@@ -204,15 +204,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   }, [currentPage, selectedProjectId, selectedCountry]);
 
-  // Theme Management (Default: Dark Mode for new users)
+  // Theme Management (Default: Light Mode for all users)
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     try {
       const saved = localStorage.getItem('kumkang_theme');
       if (saved === 'light') return 'light';
       if (saved === 'dark') return 'dark';
-      return 'dark'; // Fallback to Dark Mode for first-time users
+      return 'light'; // Default to Light Mode
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 

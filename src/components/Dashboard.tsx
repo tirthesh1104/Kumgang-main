@@ -77,179 +77,226 @@ function AttentionAlert({ project }: { project: ProjectMaster }) {
 }
 
 function ExecutiveMetricsSection() {
-  const { selectedCountry, setSelectedCountry, setSelectedFolder, theme } = useApp();
+  const { selectedCountry, setSelectedCountry, selectedFolder, setSelectedFolder, navigate, theme } = useApp();
   const isDark = theme === 'dark';
   const { projects } = useData();
 
   // Aggregate real portfolio data by country
   const countryData = projects.reduce((acc, p) => {
     const c = p.country || 'Other';
-    if (!acc[c]) acc[c] = { count: 0, areaM2: 0 };
+    if (!acc[c]) acc[c] = { count: 0, areaM2: 0, customers: new Set<string>() };
     acc[c].count += 1;
     acc[c].areaM2 += (p.actualDesignQtyM2 || p.contractQtyM2 || 0);
+    if (p.customer) acc[c].customers.add(p.customer);
     return acc;
-  }, {} as Record<string, { count: number; areaM2: number }>);
+  }, {} as Record<string, { count: number; areaM2: number; customers: Set<string> }>);
 
   const countryEntries = Object.entries(countryData);
   const maxCount = Math.max(...countryEntries.map(([, d]) => d.count), 1);
   const countryMap = isDark ? darkCountryColorsMap : lightCountryColorsMap;
 
+  // If a country is selected, filter project folders (by customer/client)
+  const countryProjects = selectedCountry
+    ? projects.filter(p => p.country?.toLowerCase() === selectedCountry.toLowerCase())
+    : [];
+
+  const folderData = countryProjects.reduce((acc, p) => {
+    const folder = p.customer || p.project || 'General Projects';
+    if (!acc[folder]) acc[folder] = [];
+    acc[folder].push(p);
+    return acc;
+  }, {} as Record<string, ProjectMaster[]>);
+
+  const folderEntries = Object.entries(folderData);
+
   return (
-    <>
-      {!selectedCountry ? (
-        <div className="space-y-6 my-2">
-          {/* Row 1: Country Footprint Stacking Cards & Drawing Status */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* 1. PORTFOLIO BY COUNTRY (STICKY STACKING CARDS DECK) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2 px-1">
+    <div className="space-y-6 my-2">
+      {/* HEADER BAR FOR PORTFOLIO FOOTPRINT */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
+            <span>PORTFOLIO BY COUNTRY</span>
+            <span>•</span>
+            <span className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'}>Project Footprint</span>
+          </div>
+          <h3 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>
+            {!selectedCountry 
+              ? 'Portfolio Footprint' 
+              : !selectedFolder 
+              ? `${selectedCountry} Project Folders` 
+              : `${selectedCountry} / ${selectedFolder}`}
+          </h3>
+        </div>
+
+        {/* Breadcrumb Navigation / Back Button */}
+        {selectedCountry && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (selectedFolder) {
+                  setSelectedFolder(null);
+                } else {
+                  setSelectedCountry(null);
+                }
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                isDark 
+                  ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#222226]' 
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 shadow-2xs'
+              }`}
+            >
+              ← Back to {selectedFolder ? selectedCountry : 'All Countries'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* LEVEL 1: ALL COUNTRIES PORTFOLIO FOOTPRINT */}
+      {!selectedCountry && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {countryEntries.map(([country, data], i) => {
+            const percentage = Math.round((data.count / maxCount) * 100);
+            const cTheme = countryMap[country.toLowerCase()] || (
+              isDark
+                ? { bar: 'bg-[#C9A86A]', text: 'text-[#E8D6AE]', bg: 'bg-[#2A2419]', border: 'border-[#55462C]' }
+                : { bar: 'bg-[#1688D4]', text: 'text-[#0284C7]', bg: 'bg-[#E0F2FE]', border: 'border-[#BAE6FD]' }
+            );
+
+            return (
+              <motion.div
+                key={country}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={() => { setSelectedCountry(country); setSelectedFolder(null); }}
+                className={`rounded-2xl p-5 transition-all cursor-pointer group border flex flex-col justify-between ${
+                  isDark 
+                    ? 'bg-[#151517] border-[#262629] hover:bg-[#1B1B1F] hover:border-[#3A3A40]' 
+                    : 'bg-white border-[#DCE5EE] hover:border-[#CBD5E1] hover:shadow-md'
+                }`}
+              >
                 <div>
-                  <p className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-                    PORTFOLIO BY COUNTRY · DECK SCROLL
-                  </p>
-                  <h3 className={`text-lg font-extrabold tracking-tight ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>
-                    Country Project Deck
-                  </h3>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-3.5 h-3.5 rounded-full ${cTheme.bar}`} />
+                      <h4 className={`text-lg font-extrabold ${isDark ? 'text-white' : 'text-[#0F172A]'}`}>
+                        {country}
+                      </h4>
+                    </div>
+                    <span className={`text-xs font-extrabold ${cTheme.text} ${cTheme.bg} border ${cTheme.border} px-3 py-1 rounded-full`}>
+                      {data.count} Projects
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between text-xs font-medium text-slate-500">
+                      <span>Footprint Progress</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-200">{percentage}%</span>
+                    </div>
+                    <div className={`w-full rounded-full h-2.5 overflow-hidden ${isDark ? 'bg-[#111113]' : 'bg-slate-100'}`}>
+                      <div className={`${cTheme.bar} h-full rounded-full transition-all duration-500`} style={{ width: `${percentage}%` }} />
+                    </div>
+                  </div>
                 </div>
-                <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${
-                  isDark ? 'text-[#E8D6AE] bg-[#2A2419] border border-[#55462C]' : 'text-[#0284C7] bg-[#E0F2FE] border border-[#BAE6FD]'
-                }`}>
-                  {countryEntries.length} Country Layers
-                </span>
-              </div>
 
-              {/* Stacking Cards Deck Container */}
-              <div className="relative space-y-4 pb-8 min-h-[320px]">
-                {countryEntries.map(([country, data], i) => {
-                  const percentage = Math.round((data.count / maxCount) * 100);
-                  const cTheme = countryMap[country.toLowerCase()] || (
-                    isDark
-                      ? { bar: 'bg-[#C9A86A]', text: 'text-[#E8D6AE]', bg: 'bg-[#2A2419]', border: 'border-[#55462C]' }
-                      : { bar: 'bg-[#1688D4]', text: 'text-[#0284C7]', bg: 'bg-[#E0F2FE]', border: 'border-[#BAE6FD]' }
-                  );
-                  
-                  // Sticky top offset & z-index layering for stacking deck effect
-                  const stickyTop = 80 + Math.min(i, 6) * 16;
+                <div className={`flex items-center justify-between pt-3 border-t text-xs font-semibold ${isDark ? 'border-[#262629] text-slate-400' : 'border-slate-100 text-slate-600'}`}>
+                  <span>{data.customers.size} Client Folder{data.customers.size > 1 ? 's' : ''}</span>
+                  <span className={`flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform ${cTheme.text}`}>
+                    Explore Folders <ArrowRight size={13} />
+                  </span>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
-                  return (
-                    <motion.div
-                      key={country}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05, duration: 0.3 }}
-                      onClick={() => { setSelectedCountry(country); setSelectedFolder(null); }}
-                      style={{
-                        position: 'sticky',
-                        top: `${stickyTop}px`,
-                        zIndex: 10 + i,
-                      }}
-                      className={`
-                        rounded-xl p-5 lg:p-6 transition-all cursor-pointer group relative overflow-hidden flex flex-col justify-between
-                        ${isDark 
-                          ? 'bg-[#151517] border border-[#262629] shadow-card hover:bg-[#1B1B1F] hover:border-[#3A3A40]' 
-                          : 'bg-[#FFFFFF] border border-[#DCE5EE] shadow-sm hover:border-[#CBD5E1] hover:shadow-md'
-                        }
-                      `}
-                      title={`Click to view all project folders for ${country}`}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-3 h-3 rounded-full ${cTheme.bar}`} />
-                          <h4 className={`text-base font-extrabold transition-colors ${
-                            isDark ? 'text-[#FFFFFF] group-hover:text-[#C9A86A]' : 'text-[#0F172A] group-hover:text-[#1688D4]'
-                          }`}>
-                            {country}
-                          </h4>
-                          <span className={`text-xs font-extrabold ${cTheme.text} ${cTheme.bg} border ${cTheme.border} px-2.5 py-0.5 rounded-full`}>
-                            {data.count} Projects
-                          </span>
-                        </div>
-
-                        <span className={`text-xs font-semibold ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>
-                          Area: <strong className={isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}>{data.areaM2.toLocaleString(undefined, { maximumFractionDigits: 1 })} m²</strong>
-                        </span>
-                      </div>
-
-                      <div className="space-y-1.5 mb-4">
-                        <div className={`flex items-center justify-between text-xs font-semibold ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>
-                          <span>Portfolio Share</span>
-                          <span className={cTheme.text}>{percentage}% of max footprint</span>
-                        </div>
-                        <div className={`w-full rounded-full h-3 overflow-hidden p-0.5 ${
-                          isDark ? 'bg-[#111113] border border-[#262629]' : 'bg-[#F1F5F9] border border-[#CBD5E1]'
-                        }`}>
-                          <div
-                            className={`${cTheme.bar} h-full rounded-full transition-all duration-500`}
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className={`flex items-center justify-between pt-3 border-t ${isDark ? 'border-[#262629]' : 'border-[#E2E8F0]'}`}>
-                        <span className={`text-xs font-semibold ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-                          Click to view all {country} project folders
-                        </span>
-                        <span className={`text-xs font-extrabold ${cTheme.text} flex items-center gap-1 group-hover:translate-x-1 transition-transform`}>
-                          Open {country} <ArrowRight size={13} />
-                        </span>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 2. PORTFOLIO DRAWING PROGRESS (Sticky aligned) */}
-            <div className={`sticky top-20 rounded-xl p-5 lg:p-6 flex flex-col justify-between transition-all ${
-              isDark ? 'bg-[#151517] border border-[#262629] shadow-card' : 'bg-[#FFFFFF] border border-[#DCE5EE] shadow-sm'
-            }`}>
+      {/* LEVEL 2: COUNTRY FOLDERS (e.g. Client / Customer folders) */}
+      {selectedCountry && !selectedFolder && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {folderEntries.map(([folderName, folderProjects]) => (
+            <div
+              key={folderName}
+              onClick={() => setSelectedFolder(folderName)}
+              className={`rounded-2xl p-5 border cursor-pointer transition-all hover:shadow-md flex flex-col justify-between ${
+                isDark ? 'bg-[#151517] border-[#262629] hover:bg-[#1B1B1F]' : 'bg-white border-slate-200 hover:border-slate-300'
+              }`}
+            >
               <div>
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-                    DRAWING STATUS
-                  </span>
-                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                    isDark ? 'text-[#E5C47A] bg-[#322917] border border-[#5B4724]' : 'text-[#B06000] bg-[#FEF7E0] border border-[#FDE293]'
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                    isDark ? 'bg-[#2A2419] text-[#C9A86A] border-[#55462C]' : 'bg-sky-50 text-[#1688D4] border-sky-100'
                   }`}>
-                    1 active
-                  </span>
-                </div>
-                <h3 className={`text-lg font-extrabold mb-4 tracking-tight ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>
-                  Portfolio Drawing Progress
-                </h3>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className={`rounded-xl p-4 border ${isDark ? 'bg-[#111113] border-[#262629]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
-                    <p className={`text-3xl font-extrabold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>47</p>
-                    <p className={`text-xs font-bold mt-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Completed projects</p>
+                    <FolderKanban size={20} />
                   </div>
-                  <div className={`rounded-xl p-4 border ${isDark ? 'bg-[#322917]/40 border-[#5B4724]' : 'bg-[#FEF7E0]/60 border-[#FDE293]'}`}>
-                    <p className={`text-3xl font-extrabold ${isDark ? 'text-[#E5C47A]' : 'text-[#B06000]'}`}>1</p>
-                    <p className={`text-xs font-bold mt-1 ${isDark ? 'text-[#E5C47A]' : 'text-[#B06000]'}`}>Projects requiring follow-up</p>
+                  <div>
+                    <h4 className={`text-base font-extrabold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {folderName}
+                    </h4>
+                    <p className={`text-xs font-medium mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {selectedCountry} Folder
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-1.5 mb-6">
-                  <div className={`w-full rounded-full h-3 overflow-hidden p-0.5 ${
-                    isDark ? 'bg-[#111113] border border-[#262629]' : 'bg-[#F1F5F9] border border-[#CBD5E1]'
-                  }`}>
-                    <div className={`${isDark ? 'bg-[#C9A86A]' : 'bg-[#1688D4]'} h-full rounded-full`} style={{ width: '96%' }} />
-                  </div>
-                </div>
+                <p className={`text-xs font-semibold mb-4 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Contains {folderProjects.length} active project record{folderProjects.length > 1 ? 's' : ''}
+                </p>
               </div>
 
-              <div className={`pt-4 border-t ${isDark ? 'border-[#262629]' : 'border-[#E2E8F0]'}`}>
-                <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${
-                  isDark ? 'text-[#E5C47A] bg-[#322917] border border-[#5B4724]' : 'text-[#B06000] bg-[#FEF7E0] border border-[#FDE293]'
-                }`}>
-                  Kitisuru Grove • Under drawing verification
-                </span>
+              <div className={`flex items-center justify-between pt-3 border-t text-xs font-bold ${
+                isDark ? 'border-[#262629] text-[#C9A86A]' : 'border-slate-100 text-[#1688D4]'
+              }`}>
+                <span>View {folderProjects.length} Projects</span>
+                <ChevronRight size={15} />
               </div>
             </div>
+          ))}
+        </div>
+      )}
+
+      {/* LEVEL 3: PROJECTS INSIDE SELECTED FOLDER */}
+      {selectedCountry && selectedFolder && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(folderData[selectedFolder] || []).map(project => (
+              <div
+                key={project.projectId}
+                onClick={() => navigate('project-detail', project.projectId)}
+                className={`rounded-2xl p-5 border cursor-pointer transition-all hover:shadow-md ${
+                  isDark ? 'bg-[#151517] border-[#262629] hover:bg-[#1B1B1F]' : 'bg-white border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded border ${
+                    isDark ? 'bg-[#18181B] text-slate-200 border-[#303035]' : 'bg-slate-100 text-slate-800 border-slate-200'
+                  }`}>
+                    {project.projectId}
+                  </span>
+                  <StatusBadge status={project.contractStatus} />
+                </div>
+
+                <h4 className={`text-base font-extrabold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  {project.project}
+                </h4>
+
+                <p className={`text-xs font-medium mb-3 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Client: <strong className={isDark ? 'text-white' : 'text-slate-800'}>{project.customer}</strong>
+                  {project.block ? ` • Block: ${project.block}` : ''}
+                </p>
+
+                <div className={`pt-3 border-t flex items-center justify-between text-xs font-bold ${
+                  isDark ? 'border-[#262629] text-[#C9A86A]' : 'border-slate-100 text-[#1688D4]'
+                }`}>
+                  <span>Open Details</span>
+                  <ArrowRight size={14} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      ) : null}
-    </>
+      )}
+    </div>
   );
 }
 
@@ -332,117 +379,10 @@ export function Dashboard() {
         <KPICard label="Outstanding" value={formatCurrency(outstandingBalance)} description="Total balance due" icon={DollarSign} variant={outstandingBalance > 0 ? 'attention' : 'highlight'} index={4} onClick={() => navigate('payments')} />
       </div>
 
-      {/* 2. ATTENTION REQUIRED SUMMARY (Operational Issue Summary) */}
-      <div className={`border border-l-4 rounded-xl shadow-card p-5 ${
-        isDark 
-          ? 'bg-[#151517] border-[#262629] border-l-[#E05A5A]' 
-          : 'bg-[#FFFFFF] border-[#DCE5EE] border-l-[#EF4444]'
-      }`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2">
-            <AlertTriangle size={18} className={isDark ? 'text-[#E05A5A]' : 'text-[#DC2626]'} />
-            <h2 className={`text-sm font-extrabold uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>
-              Attention Required Summary
-            </h2>
-            <span className="text-xs font-extrabold text-white bg-[#E05A5A] rounded-full px-2.5 py-0.5">
-              {attentionProjects.length}
-            </span>
-          </div>
-          <button
-            onClick={() => navigate('delays')}
-            className={`text-xs font-extrabold hover:underline flex items-center gap-1 cursor-pointer ${
-              isDark ? 'text-[#F08A8A] hover:text-[#FFFFFF]' : 'text-[#DC2626] hover:text-[#0F172A]'
-            }`}
-          >
-            View all risks <ArrowRight size={13} />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <div className={`flex items-center gap-3 p-3 rounded-lg border ${
-            isDark ? 'bg-[#34191B]/60 border-[#5A292B]' : 'bg-[#FEF2F2] border-[#FCA5A5]'
-          }`}>
-            <span className={`w-3 h-3 rounded-full flex-shrink-0 animate-pulse ${isDark ? 'bg-[#E05A5A]' : 'bg-[#EF4444]'}`} />
-            <div>
-              <p className={`text-base font-extrabold ${isDark ? 'text-[#F08A8A]' : 'text-[#991B1B]'}`}>{delayedProjects.length} Delayed</p>
-              <p className={`text-[11px] font-semibold ${isDark ? 'text-[#F08A8A]/80' : 'text-[#B91C1C]'}`}>Critical schedule delay</p>
-            </div>
-          </div>
-
-          <div className={`flex items-center gap-3 p-3 rounded-lg border ${
-            isDark ? 'bg-[#322917]/60 border-[#5B4724]' : 'bg-[#FEF7E0] border-[#FDE293]'
-          }`}>
-            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${isDark ? 'bg-[#D6A84F]' : 'bg-[#F59E0B]'}`} />
-            <div>
-              <p className={`text-base font-extrabold ${isDark ? 'text-[#E5C47A]' : 'text-[#B06000]'}`}>{paymentPendingCount} Payment Pending</p>
-              <p className={`text-[11px] font-semibold ${isDark ? 'text-[#E5C47A]/80' : 'text-[#B06000]'}`}>Outstanding balance due</p>
-            </div>
-          </div>
-
-          <div className={`flex items-center gap-3 p-3 rounded-lg border ${
-            isDark ? 'bg-[#251F32]/60 border-[#42375A]' : 'bg-[#F3E8FF] border-[#E9D5FF]'
-          }`}>
-            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${isDark ? 'bg-[#9A82D4]' : 'bg-[#8B5CF6]'}`} />
-            <div>
-              <p className={`text-base font-extrabold ${isDark ? 'text-[#BBA8E8]' : 'text-[#6D28D9]'}`}>{drawingActionCount} Active Drawing</p>
-              <p className={`text-[11px] font-semibold ${isDark ? 'text-[#BBA8E8]/80' : 'text-[#6D28D9]'}`}>Under verification/submission</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Top 3 Urgent Attention List Preview */}
-        {attentionProjects.length > 0 && (
-          <div className={`space-y-2 pt-2 border-t ${isDark ? 'border-[#262629]' : 'border-[#E2E8F0]'}`}>
-            <p className={`text-[10px] font-extrabold uppercase tracking-widest mb-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-              Top Priority Attention Items:
-            </p>
-            <div className="space-y-2">
-              {attentionProjects.slice(0, 3).map(p => (
-                <AttentionAlert key={p.projectId} project={p} />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 3. COUNTRY DISTRIBUTION & DRAWING STATUS */}
+      {/* 2. PORTFOLIO FOOTPRINT */}
       <ExecutiveMetricsSection />
 
-      {/* Shipment snapshots */}
-      {(inTransitShipments > 0 || deliveredShipments > 0) && (
-        <div className="flex flex-wrap gap-3">
-          {inTransitShipments > 0 && (
-            <div
-              className={`flex items-center gap-2 px-4 py-2 border rounded-xl cursor-pointer transition-colors shadow-2xs ${
-                isDark ? 'bg-[#17272E] border-[#294651] hover:border-[#56A9C7]' : 'bg-[#E7F7F9] border-[#159AAB]/30 hover:border-[#159AAB]'
-              }`}
-              onClick={() => navigate('shipment')}
-            >
-              <Truck size={14} className={isDark ? 'text-[#89C9DF]' : 'text-[#087583]'} />
-              <span className={`text-sm font-semibold ${isDark ? 'text-[#89C9DF]' : 'text-[#087583]'}`}>
-                {inTransitShipments} shipment{inTransitShipments > 1 ? 's' : ''} in transit
-              </span>
-              <ChevronRight size={13} className={isDark ? 'text-[#89C9DF]' : 'text-[#159AAB]'} />
-            </div>
-          )}
-          {deliveredShipments > 0 && (
-            <div
-              className={`flex items-center gap-2 px-4 py-2 border rounded-xl cursor-pointer transition-colors shadow-2xs ${
-                isDark ? 'bg-[#163127] border-[#28523F] hover:border-[#3FB984]' : 'bg-[#E8F7F0] border-[#16A36A]/30 hover:border-[#16A36A]'
-              }`}
-              onClick={() => navigate('shipment')}
-            >
-              <Truck size={14} className={isDark ? 'text-[#70D0A8]' : 'text-[#087A4D]'} />
-              <span className={`text-sm font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-[#16A36A]'}`}>
-                {deliveredShipments} delivered
-              </span>
-              <ChevronRight size={13} className={isDark ? 'text-[#70D0A8]' : 'text-[#3FB984]'} />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 4. PROJECT STATUS REGISTER & SCANNING REPORT TABLE */}
+      {/* 3. PROJECT STATUS REGISTER & SCANNING REPORT TABLE */}
       <section className={`rounded-xl p-5 lg:p-6 shadow-2xs border ${
         isDark ? 'bg-[#151517] border-[#262629]' : 'bg-[#FFFFFF] border-[#DCE5EE]'
       }`}>
@@ -565,6 +505,113 @@ export function Dashboard() {
           viewMode={viewMode}
         />
       </section>
+
+      {/* 4. ATTENTION REQUIRED SUMMARY (Operational Issue Summary) */}
+      <div className={`border border-l-4 rounded-xl shadow-card p-5 ${
+        isDark 
+          ? 'bg-[#151517] border-[#262629] border-l-[#E05A5A]' 
+          : 'bg-[#FFFFFF] border-[#DCE5EE] border-l-[#EF4444]'
+      }`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={18} className={isDark ? 'text-[#E05A5A]' : 'text-[#DC2626]'} />
+            <h2 className={`text-sm font-extrabold uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>
+              Attention Required Summary
+            </h2>
+            <span className="text-xs font-extrabold text-white bg-[#E05A5A] rounded-full px-2.5 py-0.5">
+              {attentionProjects.length}
+            </span>
+          </div>
+          <button
+            onClick={() => navigate('delays')}
+            className={`text-xs font-extrabold hover:underline flex items-center gap-1 cursor-pointer ${
+              isDark ? 'text-[#F08A8A] hover:text-[#FFFFFF]' : 'text-[#DC2626] hover:text-[#0F172A]'
+            }`}
+          >
+            View all risks <ArrowRight size={13} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+            isDark ? 'bg-[#34191B]/60 border-[#5A292B]' : 'bg-[#FEF2F2] border-[#FCA5A5]'
+          }`}>
+            <span className={`w-3 h-3 rounded-full flex-shrink-0 animate-pulse ${isDark ? 'bg-[#E05A5A]' : 'bg-[#EF4444]'}`} />
+            <div>
+              <p className={`text-base font-extrabold ${isDark ? 'text-[#F08A8A]' : 'text-[#991B1B]'}`}>{delayedProjects.length} Delayed</p>
+              <p className={`text-[11px] font-semibold ${isDark ? 'text-[#F08A8A]/80' : 'text-[#B91C1C]'}`}>Critical schedule delay</p>
+            </div>
+          </div>
+
+          <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+            isDark ? 'bg-[#322917]/60 border-[#5B4724]' : 'bg-[#FEF7E0] border-[#FDE293]'
+          }`}>
+            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${isDark ? 'bg-[#D6A84F]' : 'bg-[#F59E0B]'}`} />
+            <div>
+              <p className={`text-base font-extrabold ${isDark ? 'text-[#E5C47A]' : 'text-[#B06000]'}`}>{paymentPendingCount} Payment Pending</p>
+              <p className={`text-[11px] font-semibold ${isDark ? 'text-[#E5C47A]/80' : 'text-[#B06000]'}`}>Outstanding balance due</p>
+            </div>
+          </div>
+
+          <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+            isDark ? 'bg-[#251F32]/60 border-[#42375A]' : 'bg-[#F3E8FF] border-[#E9D5FF]'
+          }`}>
+            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${isDark ? 'bg-[#9A82D4]' : 'bg-[#8B5CF6]'}`} />
+            <div>
+              <p className={`text-base font-extrabold ${isDark ? 'text-[#BBA8E8]' : 'text-[#6D28D9]'}`}>{drawingActionCount} Active Drawing</p>
+              <p className={`text-[11px] font-semibold ${isDark ? 'text-[#BBA8E8]/80' : 'text-[#6D28D9]'}`}>Under verification/submission</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Top 3 Urgent Attention List Preview */}
+        {attentionProjects.length > 0 && (
+          <div className={`space-y-2 pt-2 border-t ${isDark ? 'border-[#262629]' : 'border-[#E2E8F0]'}`}>
+            <p className={`text-[10px] font-extrabold uppercase tracking-widest mb-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
+              Top Priority Attention Items:
+            </p>
+            <div className="space-y-2">
+              {attentionProjects.slice(0, 3).map(p => (
+                <AttentionAlert key={p.projectId} project={p} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Shipment snapshots */}
+      {(inTransitShipments > 0 || deliveredShipments > 0) && (
+        <div className="flex flex-wrap gap-3">
+          {inTransitShipments > 0 && (
+            <div
+              className={`flex items-center gap-2 px-4 py-2 border rounded-xl cursor-pointer transition-colors shadow-2xs ${
+                isDark ? 'bg-[#17272E] border-[#294651] hover:border-[#56A9C7]' : 'bg-[#E7F7F9] border-[#159AAB]/30 hover:border-[#159AAB]'
+              }`}
+              onClick={() => navigate('shipment')}
+            >
+              <Truck size={14} className={isDark ? 'text-[#89C9DF]' : 'text-[#087583]'} />
+              <span className={`text-sm font-semibold ${isDark ? 'text-[#89C9DF]' : 'text-[#087583]'}`}>
+                {inTransitShipments} shipment{inTransitShipments > 1 ? 's' : ''} in transit
+              </span>
+              <ChevronRight size={13} className={isDark ? 'text-[#89C9DF]' : 'text-[#159AAB]'} />
+            </div>
+          )}
+          {deliveredShipments > 0 && (
+            <div
+              className={`flex items-center gap-2 px-4 py-2 border rounded-xl cursor-pointer transition-colors shadow-2xs ${
+                isDark ? 'bg-[#163127] border-[#28523F] hover:border-[#3FB984]' : 'bg-[#E8F7F0] border-[#16A36A]/30 hover:border-[#16A36A]'
+              }`}
+              onClick={() => navigate('shipment')}
+            >
+              <Truck size={14} className={isDark ? 'text-[#70D0A8]' : 'text-[#087A4D]'} />
+              <span className={`text-sm font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-[#16A36A]'}`}>
+                {deliveredShipments} delivered
+              </span>
+              <ChevronRight size={13} className={isDark ? 'text-[#70D0A8]' : 'text-[#3FB984]'} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

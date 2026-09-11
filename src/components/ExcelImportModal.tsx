@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useData } from '../context/DataContext';
+import { useApp } from '../context/AppContext';
 import { parseAndPreviewExcel, type ExcelParseResult } from '../utils/excelParser';
 import {
   FileSpreadsheet, Upload, CheckCircle2, AlertTriangle, X,
@@ -13,6 +14,8 @@ interface ExcelImportModalProps {
 }
 
 export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) {
+  const { theme } = useApp();
+  const isDark = theme === 'dark';
   const { projects, commitExcelImport } = useData();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,25 +96,31 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
   }) || [];
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 z-50 overflow-y-auto">
-      <div className="bg-[#151517] border border-[#303035] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 text-[#F5F5F3]">
+    <div className={`fixed inset-0 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 z-50 overflow-y-auto ${isDark ? 'bg-black/80' : 'bg-slate-900/50'}`}>
+      <div className={`border rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 ${
+        isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-200 text-slate-800'
+      }`}>
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between bg-[#090909] text-white px-6 py-4 rounded-t-2xl border-b border-[#1E1E20]">
+        <div className={`flex items-center justify-between px-6 py-4 rounded-t-2xl border-b ${
+          isDark ? 'bg-[#090909] text-white border-[#1E1E20]' : 'bg-slate-900 text-white border-slate-800'
+        }`}>
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#C9A86A]/10 text-[#C9A86A] rounded-xl border border-[#C9A86A]/20">
+            <div className={`p-2 rounded-xl border ${
+              isDark ? 'bg-[#C9A86A]/10 text-[#C9A86A] border-[#C9A86A]/20' : 'bg-emerald-500/20 text-emerald-400 border-emerald-400/30'
+            }`}>
               <FileSpreadsheet size={20} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-[#FFFFFF]">EXCEL DATA UPDATE & SYNCHRONIZATION</h3>
-              <p className="text-xs text-[#85858B] font-medium">
+              <h3 className="font-extrabold text-base tracking-wide text-white">EXCEL DATA UPDATE & SYNCHRONIZATION</h3>
+              <p className="text-xs text-slate-400 font-medium">
                 Import updated Excel workbook to synchronize canonical project data
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#85858B] hover:text-white hover:bg-[#18181B] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X size={20} />
@@ -119,24 +128,40 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0A0A0A]">
+        <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${isDark ? 'bg-[#0A0A0A]' : 'bg-slate-50'}`}>
 
           {/* Excel Synchronization Journey Stepper */}
-          <div className="bg-[#151517] border border-[#262629] rounded-xl p-3 shadow-2xs">
+          <div className={`border rounded-xl p-3 shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
             <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold">
-              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${step === 'upload' ? 'bg-[#C9A86A] text-[#111111] shadow-2xs font-extrabold' : 'bg-[#111113] text-[#85858B]'}`}>
+              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                step === 'upload' 
+                  ? (isDark ? 'bg-[#C9A86A] text-[#111111]' : 'bg-[#1688D4] text-white')
+                  : (isDark ? 'bg-[#111113] text-[#85858B]' : 'bg-slate-100 text-slate-500')
+              }`}>
                 <span className="w-4 h-4 rounded-full bg-black/20 text-[10px] flex items-center justify-center font-mono">1</span>
                 <span>UPLOAD</span>
               </div>
-              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${step === 'preview' ? 'bg-[#C9A86A] text-[#111111] shadow-2xs font-extrabold' : 'bg-[#111113] text-[#85858B]'}`}>
+              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                step === 'preview' 
+                  ? (isDark ? 'bg-[#C9A86A] text-[#111111]' : 'bg-[#1688D4] text-white')
+                  : (isDark ? 'bg-[#111113] text-[#85858B]' : 'bg-slate-100 text-slate-500')
+              }`}>
                 <span className="w-4 h-4 rounded-full bg-black/20 text-[10px] flex items-center justify-center font-mono">2</span>
                 <span>PREVIEW</span>
               </div>
-              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${loading && step === 'preview' ? 'bg-[#D6A84F] text-[#111111] shadow-2xs animate-pulse font-extrabold' : 'bg-[#111113] text-[#85858B]'}`}>
+              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                loading && step === 'preview' 
+                  ? (isDark ? 'bg-[#D6A84F] text-[#111111] animate-pulse' : 'bg-amber-500 text-white animate-pulse')
+                  : (isDark ? 'bg-[#111113] text-[#85858B]' : 'bg-slate-100 text-slate-500')
+              }`}>
                 <span className="w-4 h-4 rounded-full bg-black/20 text-[10px] flex items-center justify-center font-mono">3</span>
                 <span>RECALCULATE</span>
               </div>
-              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${step === 'result' ? 'bg-[#3FB984] text-[#111111] shadow-2xs font-extrabold' : 'bg-[#111113] text-[#85858B]'}`}>
+              <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                step === 'result' 
+                  ? (isDark ? 'bg-[#3FB984] text-[#111111]' : 'bg-emerald-600 text-white')
+                  : (isDark ? 'bg-[#111113] text-[#85858B]' : 'bg-slate-100 text-slate-500')
+              }`}>
                 <span className="w-4 h-4 rounded-full bg-black/20 text-[10px] flex items-center justify-center font-mono">4</span>
                 <span>SYNCED</span>
               </div>
@@ -159,22 +184,30 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <div className="bg-[#151517] border border-[#262629] rounded-2xl p-6 lg:p-8 text-center space-y-4 shadow-sm">
+              <div className={`border rounded-2xl p-6 lg:p-8 text-center space-y-4 shadow-xs ${
+                isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'
+              }`}>
                 <div
                   onDragOver={e => e.preventDefault()}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-[#303035] hover:border-[#C9A86A] bg-[#111113] hover:bg-[#18181B] p-8 lg:p-12 rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-center space-y-3 group"
+                  className={`border-2 border-dashed p-8 lg:p-12 rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-center space-y-3 group ${
+                    isDark 
+                      ? 'border-[#303035] hover:border-[#C9A86A] bg-[#111113] hover:bg-[#18181B]'
+                      : 'border-slate-300 hover:border-[#1688D4] bg-slate-50 hover:bg-sky-50/50'
+                  }`}
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-[#2A2419] text-[#C9A86A] border border-[#55462C] flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs ${
+                    isDark ? 'bg-[#2A2419] text-[#C9A86A] border border-[#55462C]' : 'bg-sky-100 text-[#1688D4] border border-sky-200'
+                  }`}>
                     <Upload size={28} />
                   </div>
                   <div>
-                    <p className="font-extrabold text-[#FFFFFF] text-base">
+                    <p className={`font-extrabold text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       Click to upload or drag & drop Excel workbook
                     </p>
-                    <p className="text-xs text-[#85858B] font-medium mt-1">
-                      Supports <span className="font-mono text-[#F5F5F3] font-bold">.xlsx</span> and <span className="font-mono text-[#F5F5F3] font-bold">.xls</span> files (e.g. <em>260908 KKI PROJECT FOLLOW UP.xlsx</em>)
+                    <p className={`text-xs font-medium mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
+                      Supports <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xlsx</span> and <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xls</span> files (e.g. <em>260908 KKI PROJECT FOLLOW UP.xlsx</em>)
                     </p>
                   </div>
                   <input
@@ -187,15 +220,19 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                 </div>
 
                 {loading && (
-                  <div className="flex items-center justify-center gap-2 text-xs font-extrabold text-[#C9A86A]">
+                  <div className={`flex items-center justify-center gap-2 text-xs font-extrabold ${
+                    isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'
+                  }`}>
                     <RefreshCw size={14} className="animate-spin" />
                     Parsing workbook sheets and validating schema...
                   </div>
                 )}
               </div>
 
-              <div className="bg-[#111113] border border-[#262629] rounded-xl p-4 text-xs text-[#B4B4B8] space-y-1">
-                <h4 className="font-extrabold text-[#FFFFFF] uppercase tracking-wider text-[10px]">Import Pipeline Process</h4>
+              <div className={`border rounded-xl p-4 text-xs space-y-1 ${
+                isDark ? 'bg-[#111113] border-[#262629] text-[#B4B4B8]' : 'bg-white border-slate-200 text-slate-600'
+              }`}>
+                <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-white' : 'text-slate-900'}`}>Import Pipeline Process</h4>
                 <p>1. <strong>Validation</strong>: Validates headers, data types, numbers, and dates before applying any change.</p>
                 <p>2. <strong>Preview</strong>: Displays a field-by-field diff comparison table for administrative review.</p>
                 <p>3. <strong>Canonical Update</strong>: Updates existing projects by Project ID and registers new projects without duplicates.</p>
@@ -214,66 +251,96 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
 
               {/* Summary KPIs */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <div className="bg-[#151517] border border-[#262629] rounded-xl p-3.5 shadow-2xs">
-                  <p className="text-[10px] font-bold text-[#85858B] uppercase tracking-wider">Processed</p>
-                  <p className="text-2xl font-extrabold text-[#FFFFFF]">{parseResult.totalRowsProcessed}</p>
-                  <p className="text-[10px] text-[#85858B] font-medium">Rows detected</p>
+                <div className={`border rounded-xl p-3.5 shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Processed</p>
+                  <p className={`text-2xl font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{parseResult.totalRowsProcessed}</p>
+                  <p className={`text-[10px] font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Rows detected</p>
                 </div>
-                <div className="bg-[#172531] border border-[#2B455A] rounded-xl p-3.5 shadow-2xs">
-                  <p className="text-[10px] font-bold text-[#9BC5E8] uppercase tracking-wider">Updates</p>
-                  <p className="text-2xl font-extrabold text-[#6EA8D9]">{parseResult.updatedCount}</p>
-                  <p className="text-[10px] text-[#9BC5E8] font-medium">Modified projects</p>
+                <div className={`border rounded-xl p-3.5 shadow-2xs ${isDark ? 'bg-[#172531] border-[#2B455A]' : 'bg-sky-50 border-sky-200'}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-[#9BC5E8]' : 'text-sky-700'}`}>Updates</p>
+                  <p className={`text-2xl font-extrabold ${isDark ? 'text-[#6EA8D9]' : 'text-sky-800'}`}>{parseResult.updatedCount}</p>
+                  <p className={`text-[10px] font-medium ${isDark ? 'text-[#9BC5E8]' : 'text-sky-600'}`}>Modified projects</p>
                 </div>
-                <div className="bg-[#163127] border border-[#28523F] rounded-xl p-3.5 shadow-2xs">
-                  <p className="text-[10px] font-bold text-[#70D0A8] uppercase tracking-wider">New</p>
-                  <p className="text-2xl font-extrabold text-[#3FB984]">{parseResult.newCount}</p>
-                  <p className="text-[10px] text-[#70D0A8] font-medium">New records</p>
+                <div className={`border rounded-xl p-3.5 shadow-2xs ${isDark ? 'bg-[#163127] border-[#28523F]' : 'bg-emerald-50 border-emerald-200'}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>New</p>
+                  <p className={`text-2xl font-extrabold ${isDark ? 'text-[#3FB984]' : 'text-emerald-800'}`}>{parseResult.newCount}</p>
+                  <p className={`text-[10px] font-medium ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>New records</p>
                 </div>
-                <div className="bg-[#151517] border border-[#262629] rounded-xl p-3.5 shadow-2xs">
-                  <p className="text-[10px] font-bold text-[#85858B] uppercase tracking-wider">Unchanged</p>
-                  <p className="text-2xl font-extrabold text-[#B4B4B8]">{parseResult.unchangedCount}</p>
-                  <p className="text-[10px] text-[#85858B] font-medium">Identical records</p>
+                <div className={`border rounded-xl p-3.5 shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Unchanged</p>
+                  <p className={`text-2xl font-extrabold ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>{parseResult.unchangedCount}</p>
+                  <p className={`text-[10px] font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Identical records</p>
                 </div>
-                <div className={`border rounded-xl p-3.5 shadow-2xs ${parseResult.errorCount > 0 ? 'bg-[#322917] border-[#5B4724]' : 'bg-[#151517] border-[#262629]'}`}>
-                  <p className={`text-[10px] font-bold uppercase tracking-wider ${parseResult.errorCount > 0 ? 'text-[#E5C47A]' : 'text-[#85858B]'}`}>Errors</p>
-                  <p className={`text-2xl font-extrabold ${parseResult.errorCount > 0 ? 'text-[#D6A84F]' : 'text-[#85858B]'}`}>{parseResult.errorCount}</p>
-                  <p className={`text-[10px] font-medium ${parseResult.errorCount > 0 ? 'text-[#E5C47A]' : 'text-[#85858B]'}`}>Invalid rows</p>
+                <div className={`border rounded-xl p-3.5 shadow-2xs ${
+                  parseResult.errorCount > 0 
+                    ? (isDark ? 'bg-[#322917] border-[#5B4724]' : 'bg-amber-50 border-amber-200') 
+                    : (isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200')
+                }`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                    parseResult.errorCount > 0 ? (isDark ? 'text-[#E5C47A]' : 'text-amber-800') : (isDark ? 'text-[#85858B]' : 'text-slate-500')
+                  }`}>Errors</p>
+                  <p className={`text-2xl font-extrabold ${
+                    parseResult.errorCount > 0 ? (isDark ? 'text-[#D6A84F]' : 'text-amber-900') : (isDark ? 'text-[#85858B]' : 'text-slate-700')
+                  }`}>{parseResult.errorCount}</p>
+                  <p className={`text-[10px] font-medium ${
+                    parseResult.errorCount > 0 ? (isDark ? 'text-[#E5C47A]' : 'text-amber-700') : (isDark ? 'text-[#85858B]' : 'text-slate-500')
+                  }`}>Invalid rows</p>
                 </div>
               </div>
 
               {/* Sheet & Filter Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-[#151517] border border-[#262629] rounded-xl p-3 shadow-2xs">
+              <div className={`flex flex-wrap items-center justify-between gap-3 border rounded-xl p-3 shadow-2xs ${
+                isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-[#85858B]">Active Sheet:</span>
-                  <span className="text-xs font-mono font-bold bg-[#2A2419] text-[#E8D6AE] border border-[#55462C] px-2.5 py-1 rounded-md">
+                  <span className={`text-xs font-bold ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Active Sheet:</span>
+                  <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-md border ${
+                    isDark ? 'bg-[#2A2419] text-[#E8D6AE] border-[#55462C]' : 'bg-amber-50 text-amber-900 border-amber-200'
+                  }`}>
                     {parseResult.selectedSheet}
                   </span>
-                  <span className="text-xs text-[#85858B]">({parseResult.fileName})</span>
+                  <span className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>({parseResult.fileName})</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setActiveTab('all')}
-                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${activeTab === 'all' ? 'bg-[#C9A86A] text-[#111111]' : 'bg-[#18181B] text-[#B4B4B8] hover:bg-[#222226]'}`}
+                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${
+                      activeTab === 'all' 
+                        ? (isDark ? 'bg-[#C9A86A] text-[#111111]' : 'bg-[#1688D4] text-white')
+                        : (isDark ? 'bg-[#18181B] text-[#B4B4B8] hover:bg-[#222226]' : 'bg-slate-100 text-slate-700 hover:bg-slate-200')
+                    }`}
                   >
                     All Changes ({parseResult.diffItems.length})
                   </button>
                   <button
                     onClick={() => setActiveTab('updated')}
-                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${activeTab === 'updated' ? 'bg-[#6EA8D9] text-[#111111]' : 'bg-[#172531] text-[#9BC5E8] hover:bg-[#2B455A]'}`}
+                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${
+                      activeTab === 'updated' 
+                        ? (isDark ? 'bg-[#6EA8D9] text-[#111111]' : 'bg-sky-600 text-white')
+                        : (isDark ? 'bg-[#172531] text-[#9BC5E8] hover:bg-[#2B455A]' : 'bg-sky-100 text-sky-800 hover:bg-sky-200')
+                    }`}
                   >
                     Updated ({parseResult.diffItems.filter(i => i.status === 'Updated').length})
                   </button>
                   <button
                     onClick={() => setActiveTab('new')}
-                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${activeTab === 'new' ? 'bg-[#3FB984] text-[#111111]' : 'bg-[#163127] text-[#70D0A8] hover:bg-[#28523F]'}`}
+                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${
+                      activeTab === 'new' 
+                        ? (isDark ? 'bg-[#3FB984] text-[#111111]' : 'bg-emerald-600 text-white')
+                        : (isDark ? 'bg-[#163127] text-[#70D0A8] hover:bg-[#28523F]' : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200')
+                    }`}
                   >
                     New ({parseResult.newCount})
                   </button>
                   {parseResult.errorCount > 0 && (
                     <button
                       onClick={() => setActiveTab('errors')}
-                      className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${activeTab === 'errors' ? 'bg-[#D6A84F] text-[#111111]' : 'bg-[#322917] text-[#E5C47A] hover:bg-[#5B4724]'}`}
+                      className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${
+                        activeTab === 'errors' 
+                          ? (isDark ? 'bg-[#D6A84F] text-[#111111]' : 'bg-amber-600 text-white')
+                          : (isDark ? 'bg-[#322917] text-[#E5C47A] hover:bg-[#5B4724]' : 'bg-amber-100 text-amber-800 hover:bg-amber-200')
+                      }`}
                     >
                       Errors ({parseResult.errorCount})
                     </button>
@@ -283,41 +350,49 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
 
               {/* Diffs Table or Errors List */}
               {activeTab === 'errors' ? (
-                <div className="bg-[#151517] border border-[#262629] rounded-xl overflow-hidden shadow-2xs">
-                  <div className="p-4 bg-[#322917] border-b border-[#5B4724] font-extrabold text-xs text-[#E5C47A]">
+                <div className={`border rounded-xl overflow-hidden shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
+                  <div className={`p-4 font-extrabold text-xs border-b ${
+                    isDark ? 'bg-[#322917] border-[#5B4724] text-[#E5C47A]' : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}>
                     Invalid Rows Excluded From Import ({parseResult.invalidRows.length})
                   </div>
-                  <div className="divide-y divide-[#262629] max-h-60 overflow-y-auto text-xs">
+                  <div className={`divide-y max-h-60 overflow-y-auto text-xs ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
                     {parseResult.invalidRows.map((inv, idx) => (
                       <div key={idx} className="p-3 flex items-center justify-between">
-                        <span className="font-mono font-bold text-[#F5F5F3]">Row {inv.rowNumber}</span>
-                        <span className="text-[#E5C47A] font-medium">{inv.reason}</span>
+                        <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Row {inv.rowNumber}</span>
+                        <span className={`font-medium ${isDark ? 'text-[#E5C47A]' : 'text-amber-800'}`}>{inv.reason}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#151517] border border-[#262629] rounded-xl overflow-hidden shadow-2xs">
-                  <div className="p-3 border-b border-[#262629] flex items-center gap-2">
-                    <Filter size={14} className="text-[#85858B]" />
+                <div className={`border rounded-xl overflow-hidden shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
+                  <div className={`p-3 border-b flex items-center gap-2 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                    <Filter size={14} className={isDark ? 'text-[#85858B]' : 'text-slate-400'} />
                     <input
                       type="text"
                       placeholder="Search preview by Project ID, Client or Field..."
                       value={filterSearch}
                       onChange={e => setFilterSearch(e.target.value)}
-                      className="text-xs w-full max-w-sm border border-[#303035] rounded-lg px-3 py-1.5 bg-[#111113] text-[#F5F5F3] placeholder-[#66666C] focus:outline-none focus:border-[#C9A86A]"
+                      className={`text-xs w-full max-w-sm border rounded-lg px-3 py-1.5 outline-none transition-all ${
+                        isDark 
+                          ? 'border-[#303035] bg-[#111113] text-[#F5F5F3] placeholder-[#66666C] focus:border-[#C9A86A]'
+                          : 'border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-[#1688D4]'
+                      }`}
                     />
                   </div>
 
                   {filteredDiffs.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-[#85858B] font-medium">
+                    <div className={`p-8 text-center text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
                       No matching record differences found. The uploaded Excel workbook data matches current project data.
                     </div>
                   ) : (
                     <div className="overflow-x-auto max-h-72">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="bg-[#111113] text-[#85858B] font-bold border-b border-[#262629] uppercase">
+                          <tr className={`font-bold border-b uppercase ${
+                            isDark ? 'bg-[#111113] text-[#85858B] border-[#262629]' : 'bg-slate-50 text-slate-500 border-slate-200'
+                          }`}>
                             <th className="p-2.5">Project ID</th>
                             <th className="p-2.5">Project Name</th>
                             <th className="p-2.5">Field Changed</th>
@@ -326,16 +401,24 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                             <th className="p-2.5">Type</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#262629]">
+                        <tbody className={`divide-y ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
                           {filteredDiffs.map((diff, i) => (
-                            <tr key={i} className="hover:bg-[#1B1B1F]">
-                              <td className="p-2.5 font-mono font-bold text-[#C9A86A]">{diff.projectId}</td>
-                              <td className="p-2.5 font-semibold text-[#F5F5F3]">{diff.projectName}</td>
-                              <td className="p-2.5 font-medium text-[#9BC5E8]">{diff.fieldLabel}</td>
-                              <td className="p-2.5 text-[#F08A8A] line-through bg-[#34191B] px-2 py-1 rounded">{String(diff.existingValue)}</td>
-                              <td className="p-2.5 font-bold text-[#70D0A8] bg-[#163127] px-2 py-1 rounded">{String(diff.newValue)}</td>
+                            <tr key={i} className={isDark ? 'hover:bg-[#1B1B1F]' : 'hover:bg-slate-50'}>
+                              <td className={`p-2.5 font-mono font-bold ${isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'}`}>{diff.projectId}</td>
+                              <td className={`p-2.5 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{diff.projectName}</td>
+                              <td className={`p-2.5 font-medium ${isDark ? 'text-[#9BC5E8]' : 'text-sky-700'}`}>{diff.fieldLabel}</td>
+                              <td className={`p-2.5 line-through px-2 py-1 rounded ${
+                                isDark ? 'text-[#F08A8A] bg-[#34191B]' : 'text-red-700 bg-red-50'
+                              }`}>{String(diff.existingValue)}</td>
+                              <td className={`p-2.5 font-bold px-2 py-1 rounded ${
+                                isDark ? 'text-[#70D0A8] bg-[#163127]' : 'text-emerald-700 bg-emerald-50'
+                              }`}>{String(diff.newValue)}</td>
                               <td className="p-2.5">
-                                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${diff.status === 'New' ? 'bg-[#163127] text-[#70D0A8]' : 'bg-[#172531] text-[#9BC5E8]'}`}>
+                                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
+                                  diff.status === 'New' 
+                                    ? (isDark ? 'bg-[#163127] text-[#70D0A8]' : 'bg-emerald-100 text-emerald-800') 
+                                    : (isDark ? 'bg-[#172531] text-[#9BC5E8]' : 'bg-sky-100 text-sky-800')
+                                }`}>
                                   {diff.status}
                                 </span>
                               </td>
@@ -349,8 +432,10 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
               )}
 
               {/* Administrative Notice */}
-              <div className="bg-[#322917] border border-[#5B4724] rounded-xl p-4 flex items-start gap-3 text-xs text-[#E5C47A]">
-                <AlertTriangle size={16} className="text-[#D6A84F] flex-shrink-0 mt-0.5" />
+              <div className={`border rounded-xl p-4 flex items-start gap-3 text-xs ${
+                isDark ? 'bg-[#322917] border-[#5B4724] text-[#E5C47A]' : 'bg-amber-50 border-amber-200 text-amber-900'
+              }`}>
+                <AlertTriangle size={16} className={`flex-shrink-0 mt-0.5 ${isDark ? 'text-[#D6A84F]' : 'text-amber-600'}`} />
                 <div>
                   <h4 className="font-extrabold">Confirmation Required</h4>
                   <p className="mt-0.5 leading-relaxed">
@@ -369,24 +454,28 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
               transition={{ duration: 0.25 }}
               className="space-y-6 text-center py-6"
             >
-              <div className="w-16 h-16 bg-[#163127] border border-[#28523F] text-[#70D0A8] rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto shadow-sm border ${
+                isDark ? 'bg-[#163127] border-[#28523F] text-[#70D0A8]' : 'bg-emerald-100 border-emerald-300 text-emerald-700'
+              }`}>
                 <CheckCircle2 size={36} />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[#FFFFFF]">Excel Import Completed</h3>
-                <p className="text-sm text-[#85858B] font-medium max-w-md mx-auto">
+                <h3 className={`text-2xl font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>Excel Import Completed</h3>
+                <p className={`text-sm font-medium max-w-md mx-auto ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>
                   Canonical project data updated and derived KPIs recalculated in real time.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 max-w-sm mx-auto gap-4 bg-[#151517] border border-[#262629] rounded-2xl p-4 shadow-2xs">
-                <div className="p-3 bg-[#172531] border border-[#2B455A] rounded-xl">
-                  <p className="text-[10px] font-bold uppercase text-[#9BC5E8]">Updated</p>
-                  <p className="text-2xl font-extrabold text-[#6EA8D9]">{commitResult.updated}</p>
+              <div className={`grid grid-cols-2 max-w-sm mx-auto gap-4 border rounded-2xl p-4 shadow-2xs ${
+                isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'
+              }`}>
+                <div className={`p-3 border rounded-xl ${isDark ? 'bg-[#172531] border-[#2B455A]' : 'bg-sky-50 border-sky-200'}`}>
+                  <p className={`text-[10px] font-bold uppercase ${isDark ? 'text-[#9BC5E8]' : 'text-sky-700'}`}>Updated</p>
+                  <p className={`text-2xl font-extrabold ${isDark ? 'text-[#6EA8D9]' : 'text-sky-800'}`}>{commitResult.updated}</p>
                 </div>
-                <div className="p-3 bg-[#163127] border border-[#28523F] rounded-xl">
-                  <p className="text-[10px] font-bold uppercase text-[#70D0A8]">New Projects</p>
-                  <p className="text-2xl font-extrabold text-[#3FB984]">{commitResult.newCount}</p>
+                <div className={`p-3 border rounded-xl ${isDark ? 'bg-[#163127] border-[#28523F]' : 'bg-emerald-50 border-emerald-200'}`}>
+                  <p className={`text-[10px] font-bold uppercase ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>New Projects</p>
+                  <p className={`text-2xl font-extrabold ${isDark ? 'text-[#3FB984]' : 'text-emerald-800'}`}>{commitResult.newCount}</p>
                 </div>
               </div>
             </motion.div>
@@ -395,26 +484,28 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="flex items-center justify-between bg-[#090909] px-6 py-4 rounded-b-2xl border-t border-[#1E1E20]">
+        <div className={`flex items-center justify-between px-6 py-4 rounded-b-2xl border-t ${
+          isDark ? 'bg-[#090909] border-[#1E1E20]' : 'bg-slate-900 border-slate-800'
+        }`}>
           {step === 'preview' ? (
             <>
               <button
                 onClick={() => setStep('upload')}
-                className="text-xs font-bold text-[#B4B4B8] hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                className="text-xs font-bold text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
               >
                 Back to Upload
               </button>
               <div className="flex items-center gap-3">
                 <button
                   onClick={onClose}
-                  className="text-xs font-bold text-[#B4B4B8] hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                  className="text-xs font-bold text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmCommit}
                   disabled={loading}
-                  className="flex items-center gap-2 bg-[#C9A86A] hover:bg-[#D7B97C] text-[#111111] font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+                  className="btn-primary"
                 >
                   {loading ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={15} />}
                   CONFIRM & COMMIT IMPORT
@@ -424,14 +515,14 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
           ) : step === 'result' ? (
             <button
               onClick={onClose}
-              className="ml-auto flex items-center gap-2 bg-[#C9A86A] hover:bg-[#D7B97C] text-[#111111] font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
+              className="ml-auto btn-primary"
             >
               Close & View Dashboard
             </button>
           ) : (
             <button
               onClick={onClose}
-              className="ml-auto text-xs font-bold text-[#B4B4B8] hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
+              className="ml-auto text-xs font-bold text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
             >
               Close
             </button>

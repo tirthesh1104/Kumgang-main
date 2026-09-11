@@ -112,7 +112,7 @@ export function EditProjectManagerModal() {
           </div>
 
           {/* Modal Form Body */}
-          <form onSubmit={handleSubmit} className={`flex-1 overflow-y-auto p-6 space-y-5 ${isDark ? 'bg-[#0A0A0A]' : 'bg-slate-50'}`}>
+          <form onSubmit={handleSubmit} className={`flex-1 overflow-y-auto p-6 space-y-5 ${isDark ? 'bg-[#0A0A0A]' : 'bg-white'}`}>
             {errorMsg && (
               <div className={`p-3 border text-xs font-semibold rounded-lg ${
                 isDark ? 'bg-[#34191B] border-[#5A292B] text-[#F08A8A]' : 'bg-red-50 border-red-200 text-red-700'
@@ -124,35 +124,43 @@ export function EditProjectManagerModal() {
             {/* 2-Column Fields Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide mb-1.5">
-                  Project Manager Name <span className="text-[#E05A5A]">*</span>
+                <label className={`block text-xs font-bold uppercase tracking-wide mb-1.5 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
+                  Project Manager Name <span className="text-[#EF4444]">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={e => handleChange('name', e.target.value)}
                   placeholder="e.g. Prakash Shinde"
-                  className="w-full px-3.5 py-2 border border-[#303035] bg-[#151517] rounded-lg text-sm text-[#F5F5F3] focus:ring-2 focus:ring-[#C9A86A] focus:border-[#C9A86A] outline-none transition-all"
+                  className={`w-full px-3.5 py-2 border rounded-lg text-sm font-medium focus:ring-2 outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3] focus:ring-[#C9A86A] focus:border-[#C9A86A]' 
+                      : 'border-slate-300 bg-white text-slate-900 focus:ring-[#1688D4] focus:border-[#1688D4]'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide mb-1.5">
-                  Role / Designation <span className="text-[#E05A5A]">*</span>
+                <label className={`block text-xs font-bold uppercase tracking-wide mb-1.5 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
+                  Role / Designation <span className="text-[#EF4444]">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.designation}
                   onChange={e => handleChange('designation', e.target.value)}
                   placeholder="e.g. Project Manager KKI"
-                  className="w-full px-3.5 py-2 border border-[#303035] bg-[#151517] rounded-lg text-sm text-[#F5F5F3] focus:ring-2 focus:ring-[#C9A86A] focus:border-[#C9A86A] outline-none transition-all"
+                  className={`w-full px-3.5 py-2 border rounded-lg text-sm font-medium focus:ring-2 outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3] focus:ring-[#C9A86A] focus:border-[#C9A86A]' 
+                      : 'border-slate-300 bg-white text-slate-900 focus:ring-[#1688D4] focus:border-[#1688D4]'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide mb-1.5">
+                <label className={`block text-xs font-bold uppercase tracking-wide mb-1.5 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
                   Email Address
                 </label>
                 <input
@@ -160,12 +168,16 @@ export function EditProjectManagerModal() {
                   value={formData.email}
                   onChange={e => handleChange('email', e.target.value)}
                   placeholder="e.g. prakash.shinde@kumkang.com"
-                  className="w-full px-3.5 py-2 border border-[#303035] bg-[#151517] rounded-lg text-sm text-[#F5F5F3] focus:ring-2 focus:ring-[#C9A86A] focus:border-[#C9A86A] outline-none transition-all"
+                  className={`w-full px-3.5 py-2 border rounded-lg text-sm font-medium focus:ring-2 outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3] focus:ring-[#C9A86A] focus:border-[#C9A86A]' 
+                      : 'border-slate-300 bg-white text-slate-900 focus:ring-[#1688D4] focus:border-[#1688D4]'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide mb-1.5">
+                <label className={`block text-xs font-bold uppercase tracking-wide mb-1.5 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
                   Phone Number
                 </label>
                 <input
@@ -173,12 +185,16 @@ export function EditProjectManagerModal() {
                   value={formData.phone}
                   onChange={e => handleChange('phone', e.target.value)}
                   placeholder="e.g. +91 98765 43210"
-                  className="w-full px-3.5 py-2 border border-[#303035] bg-[#151517] rounded-lg text-sm text-[#F5F5F3] focus:ring-2 focus:ring-[#C9A86A] focus:border-[#C9A86A] outline-none transition-all"
+                  className={`w-full px-3.5 py-2 border rounded-lg text-sm font-medium focus:ring-2 outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3] focus:ring-[#C9A86A] focus:border-[#C9A86A]' 
+                      : 'border-slate-300 bg-white text-slate-900 focus:ring-[#1688D4] focus:border-[#1688D4]'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide mb-1.5">
+                <label className={`block text-xs font-bold uppercase tracking-wide mb-1.5 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
                   Department / Team
                 </label>
                 <input
@@ -186,12 +202,16 @@ export function EditProjectManagerModal() {
                   value={formData.department}
                   onChange={e => handleChange('department', e.target.value)}
                   placeholder="e.g. KKI Project Management"
-                  className="w-full px-3.5 py-2 border border-[#303035] bg-[#151517] rounded-lg text-sm text-[#F5F5F3] focus:ring-2 focus:ring-[#C9A86A] focus:border-[#C9A86A] outline-none transition-all"
+                  className={`w-full px-3.5 py-2 border rounded-lg text-sm font-medium focus:ring-2 outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3] focus:ring-[#C9A86A] focus:border-[#C9A86A]' 
+                      : 'border-slate-300 bg-white text-slate-900 focus:ring-[#1688D4] focus:border-[#1688D4]'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide mb-1.5">
+                <label className={`block text-xs font-bold uppercase tracking-wide mb-1.5 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
                   Project Name
                 </label>
                 <input
@@ -199,14 +219,20 @@ export function EditProjectManagerModal() {
                   value={formData.project}
                   onChange={e => handleChange('project', e.target.value)}
                   placeholder="e.g. Kumkang Live Monitoring"
-                  className="w-full px-3.5 py-2 border border-[#303035] bg-[#151517] rounded-lg text-sm text-[#F5F5F3] focus:ring-2 focus:ring-[#C9A86A] focus:border-[#C9A86A] outline-none transition-all"
+                  className={`w-full px-3.5 py-2 border rounded-lg text-sm font-medium focus:ring-2 outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3] focus:ring-[#C9A86A] focus:border-[#C9A86A]' 
+                      : 'border-slate-300 bg-white text-slate-900 focus:ring-[#1688D4] focus:border-[#1688D4]'
+                  }`}
                 />
               </div>
             </div>
 
             {/* Profile Photo Upload Box */}
-            <div className="bg-[#111113] border border-[#262629] rounded-xl p-4 space-y-3">
-              <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide">
+            <div className={`border rounded-xl p-4 space-y-3 ${
+              isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <label className={`block text-xs font-bold uppercase tracking-wide ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
                 Profile Photo
               </label>
 
@@ -221,7 +247,11 @@ export function EditProjectManagerModal() {
                 />
                 <label
                   htmlFor="profile-photo-upload"
-                  className="bg-[#2A2419] hover:bg-[#322917] text-[#C9A86A] border border-[#55462C] px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                    isDark 
+                      ? 'bg-[#2A2419] hover:bg-[#322917] text-[#C9A86A] border-[#55462C]' 
+                      : 'bg-[#1688D4] hover:bg-[#0284C7] text-white border-[#1688D4]'
+                  }`}
                 >
                   <Upload size={14} />
                   <span>Select / Upload Photo(s)</span>
@@ -230,13 +260,17 @@ export function EditProjectManagerModal() {
                 <button
                   type="button"
                   onClick={handleRemovePhoto}
-                  className="bg-[#18181B] hover:bg-[#34191B] text-[#F08A8A] border border-[#5A292B] px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${
+                    isDark 
+                      ? 'bg-[#18181B] hover:bg-[#34191B] text-[#F08A8A] border-[#5A292B]' 
+                      : 'bg-red-50 hover:bg-red-100 text-red-600 border-red-200'
+                  }`}
                 >
                   Remove
                 </button>
               </div>
 
-              <p className="text-[11px] text-[#85858B]">
+              <p className={`text-[11px] font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
                 Click to choose any image file(s) from your computer. First selected photo will set as profile image.
               </p>
 
@@ -245,23 +279,27 @@ export function EditProjectManagerModal() {
                 <img
                   src={formData.photoUrl}
                   alt="Preview"
-                  className="w-12 h-12 rounded-full object-cover border-2 border-[#C9A86A] shadow-sm bg-[#18181B] flex-shrink-0"
+                  className={`w-12 h-12 rounded-full object-cover border-2 shadow-sm flex-shrink-0 ${
+                    isDark ? 'border-[#C9A86A] bg-[#18181B]' : 'border-[#1688D4] bg-white'
+                  }`}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formData.name || 'PM') + '&background=1B1B1F&color=C9A86A';
+                    (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formData.name || 'PM') + '&background=1688D4&color=fff';
                   }}
                 />
 
                 <div>
-                  <span className="text-[10px] font-bold text-[#B4B4B8] uppercase tracking-wide block mb-1">
+                  <span className={`text-[10px] font-bold uppercase tracking-wide block mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
                     SELECTED PHOTOS (1): {selectedFileName ? `(${selectedFileName})` : ''}
                   </span>
-                  <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-[#C9A86A] shadow-sm relative group bg-[#18181B]">
+                  <div className={`w-10 h-10 rounded-lg overflow-hidden border-2 shadow-sm relative group ${
+                    isDark ? 'border-[#C9A86A] bg-[#18181B]' : 'border-[#1688D4] bg-white'
+                  }`}>
                     <img
                       src={formData.photoUrl}
                       alt="Thumbnail"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formData.name || 'PM') + '&background=1B1B1F&color=C9A86A';
+                        (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formData.name || 'PM') + '&background=1688D4&color=fff';
                       }}
                     />
                   </div>
@@ -271,13 +309,17 @@ export function EditProjectManagerModal() {
 
             {/* Status Dropdown */}
             <div>
-              <label className="block text-xs font-bold text-[#B4B4B8] uppercase tracking-wide mb-1.5">
+              <label className={`block text-xs font-bold uppercase tracking-wide mb-1.5 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
                 Status
               </label>
               <select
                 value={formData.status}
                 onChange={e => handleChange('status', e.target.value as 'Active' | 'Inactive')}
-                className="w-full px-3.5 py-2 border border-[#303035] bg-[#151517] rounded-lg text-sm text-[#F5F5F3] focus:ring-2 focus:ring-[#C9A86A] focus:border-[#C9A86A] outline-none cursor-pointer"
+                className={`w-full px-3.5 py-2 border rounded-lg text-sm font-medium focus:ring-2 outline-none cursor-pointer ${
+                  isDark 
+                    ? 'border-[#303035] bg-[#151517] text-[#F5F5F3] focus:ring-[#C9A86A] focus:border-[#C9A86A]' 
+                    : 'border-slate-300 bg-white text-slate-900 focus:ring-[#1688D4] focus:border-[#1688D4]'
+                }`}
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
@@ -289,11 +331,17 @@ export function EditProjectManagerModal() {
           </form>
 
           {/* Modal Footer */}
-          <div className="border-t border-[#202023] px-6 py-4 flex items-center justify-end gap-3 bg-[#090909] flex-shrink-0">
+          <div className={`border-t px-6 py-4 flex items-center justify-end gap-3 flex-shrink-0 ${
+            isDark ? 'border-[#202023] bg-[#090909]' : 'border-slate-200 bg-slate-100'
+          }`}>
             <button
               type="button"
               onClick={() => setIsEditModalOpen(false)}
-              className="px-4 py-2 text-sm font-semibold text-[#B4B4B8] bg-[#18181B] border border-[#303035] hover:bg-[#222226] rounded-lg transition-colors cursor-pointer"
+              className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors cursor-pointer border ${
+                isDark 
+                  ? 'text-[#B4B4B8] bg-[#18181B] border-[#303035] hover:bg-[#222226]' 
+                  : 'text-slate-700 bg-white border-slate-300 hover:bg-slate-50'
+              }`}
             >
               Cancel
             </button>
