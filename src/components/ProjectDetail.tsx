@@ -600,20 +600,20 @@ export function ProjectDetail() {
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-5">
                   <div>
-                    <p className="text-xs text-[#85858B]">Contract Qty</p>
-                    <p className="text-base font-bold text-[#F5F5F3]">{project.contractQtyM2?.toLocaleString() ?? '—'} m²</p>
+                    <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Qty</p>
+                    <p className={`text-base font-extrabold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{project.contractQtyM2?.toLocaleString() ?? '—'} m²</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[#85858B]">Actual Design Qty</p>
-                    <p className="text-base font-bold text-[#F5F5F3]">{project.actualDesignQtyM2?.toLocaleString() ?? '—'} m²</p>
+                    <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Actual Design Qty</p>
+                    <p className={`text-base font-extrabold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{project.actualDesignQtyM2?.toLocaleString() ?? '—'} m²</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[#85858B]">Contract Wt</p>
-                    <p className="text-base font-bold text-[#F5F5F3]">{project.contractWeightTons?.toLocaleString() ?? '—'} t</p>
+                    <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Wt</p>
+                    <p className={`text-base font-extrabold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{project.contractWeightTons?.toLocaleString() ?? '—'} t</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[#85858B]">Actual Design Wt</p>
-                    <p className="text-base font-bold text-[#F5F5F3]">{project.actualDesignWeightTons?.toLocaleString() ?? '—'} t</p>
+                    <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Actual Design Wt</p>
+                    <p className={`text-base font-extrabold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{project.actualDesignWeightTons?.toLocaleString() ?? '—'} t</p>
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -628,7 +628,7 @@ export function ProjectDetail() {
             )}
             
             {project.remark && (
-              <p className="mt-4 text-sm text-[#85858B] italic border-t border-[#262629] pt-3">
+              <p className={`mt-4 text-sm italic border-t pt-3 ${isDark ? 'text-[#85858B] border-[#262629]' : 'text-slate-600 border-slate-200'}`}>
                 Remark: {project.remark}
               </p>
             )}
@@ -640,19 +640,19 @@ export function ProjectDetail() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm" aria-label="Design schedule table">
                   <thead>
-                    <tr className="border-b border-[#262629] text-[#85858B] text-xs uppercase">
+                    <tr className={`border-b text-xs uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
                       <th className="text-left py-2 pr-4 font-semibold">Element</th>
                       <th className="text-left py-2 pr-4 font-semibold">Planned</th>
                       <th className="text-left py-2 pr-4 font-semibold">Actual</th>
                       <th className="text-left py-2 pr-4 font-semibold">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#262629]">
+                  <tbody className={`divide-y ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
                     {design.map(d => (
-                      <tr key={d.designId} className="hover:bg-[#1B1B1F] transition-colors">
-                        <td className="py-2.5 pr-4 font-medium text-[#F5F5F3]">{d.element}</td>
-                        <td className="py-2.5 pr-4 text-[#B4B4B8]">{d.plannedDate ?? '—'}</td>
-                        <td className="py-2.5 pr-4 text-[#B4B4B8]">{d.actualDate ?? '—'}</td>
+                      <tr key={d.designId} className={`transition-colors ${isDark ? 'hover:bg-[#1B1B1F]' : 'hover:bg-slate-50'}`}>
+                        <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{d.element}</td>
+                        <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.plannedDate ?? '—'}</td>
+                        <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.actualDate ?? '—'}</td>
                         <td className="py-2.5 pr-4"><StatusBadge status={d.status} /></td>
                       </tr>
                     ))}
@@ -668,26 +668,26 @@ export function ProjectDetail() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm" aria-label="Production table">
                   <thead>
-                    <tr className="border-b border-[#262629] text-[#85858B] text-xs uppercase">
+                    <tr className={`border-b text-xs uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
                       <th className="text-left py-2 pr-4 font-semibold">Part / Block</th>
                       <th className="text-left py-2 pr-4 font-semibold">Order Qty</th>
                       <th className="text-left py-2 pr-4 font-semibold">Finished Qty</th>
                       <th className="text-left py-2 pr-4 font-semibold">Completion</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#262629]">
+                  <tbody className={`divide-y ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
                     {productionList.map((prod, i) => (
-                      <tr key={i} className="hover:bg-[#1B1B1F] transition-colors">
-                        <td className="py-2.5 pr-4 font-medium text-[#F5F5F3]">{prod.part}</td>
-                        <td className="py-2.5 pr-4 text-[#B4B4B8]">
+                      <tr key={i} className={`transition-colors ${isDark ? 'hover:bg-[#1B1B1F]' : 'hover:bg-slate-50'}`}>
+                        <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{prod.part}</td>
+                        <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
                           {prod.orderQtyM2 ? `${prod.orderQtyM2} m²` : prod.orderQtyKg ? `${prod.orderQtyKg} kg` : '—'}
                         </td>
-                        <td className="py-2.5 pr-4 text-[#B4B4B8]">
+                        <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
                           {prod.finishedQtyM2 ? `${prod.finishedQtyM2} m²` : prod.finishedQtyKg ? `${prod.finishedQtyKg} kg` : '—'}
                         </td>
                         <td className="py-2.5 pr-4">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-[#70D0A8] w-8">{Math.round(prod.completionPercent || 0)}%</span>
+                            <span className={`font-semibold w-8 ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>{Math.round(prod.completionPercent || 0)}%</span>
                             <div className="w-16"><ProgressBar value={prod.completionPercent || 0} color="forest" size="sm" /></div>
                           </div>
                         </td>
@@ -720,15 +720,17 @@ export function ProjectDetail() {
                   const done = doneMap[step];
                   return (
                     <span key={step} className="flex items-center flex-shrink-0 gap-2">
-                      <div className={`flex flex-col items-center gap-1 ${done ? 'text-[#70D0A8]' : 'text-[#85858B]'}`}>
+                      <div className={`flex flex-col items-center gap-1 ${done ? (isDark ? 'text-[#70D0A8]' : 'text-emerald-700') : (isDark ? 'text-[#85858B]' : 'text-slate-400')}`}>
                         <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold
-                          ${done ? 'border-[#3FB984] bg-[#163127] text-[#70D0A8]' : 'border-[#303035] bg-[#111113] text-[#85858B]'}`}>
+                          ${done 
+                            ? (isDark ? 'border-[#3FB984] bg-[#163127] text-[#70D0A8]' : 'border-emerald-500 bg-emerald-50 text-emerald-700') 
+                            : (isDark ? 'border-[#303035] bg-[#111113] text-[#85858B]' : 'border-slate-300 bg-slate-100 text-slate-500')}`}>
                           {done ? '✓' : i + 1}
                         </div>
                         <span className="text-[10px] font-medium">{step}</span>
                       </div>
                       {i < arr.length - 1 && (
-                        <div className={`h-0.5 w-8 ${done ? 'bg-[#3FB984]' : 'bg-[#303035]'}`} />
+                        <div className={`h-0.5 w-8 ${done ? (isDark ? 'bg-[#3FB984]' : 'bg-emerald-500') : (isDark ? 'bg-[#303035]' : 'bg-slate-200')}`} />
                       )}
                     </span>
                   );
@@ -737,7 +739,7 @@ export function ProjectDetail() {
             </SectionCard>
           ) : (
             <SectionCard title="Shipment Details" label="Shipment Monitoring">
-              <p className="text-sm text-[#85858B]">No active shipment records mapped for this project.</p>
+              <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No active shipment records mapped for this project.</p>
             </SectionCard>
           )}
 
@@ -746,16 +748,16 @@ export function ProjectDetail() {
             <SectionCard title="Commercial & Payments" label="Financial Monitoring">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
                 <div>
-                  <p className="text-xs text-[#85858B]">Contract Amount</p>
-                  <p className="text-lg font-bold text-[#F5F5F3]">{project.totalAmountUSD ? `$${project.totalAmountUSD.toLocaleString()}` : '—'}</p>
+                  <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Amount</p>
+                  <p className={`text-lg font-extrabold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{project.totalAmountUSD ? `$${project.totalAmountUSD.toLocaleString()}` : '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-[#85858B]">Advance Paid</p>
-                  <p className="text-lg font-bold text-[#70D0A8]">{project.advanceUSD ? `$${project.advanceUSD.toLocaleString()}` : '—'}</p>
+                  <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Advance Paid</p>
+                  <p className={`text-lg font-extrabold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>{project.advanceUSD ? `$${project.advanceUSD.toLocaleString()}` : '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-[#85858B]">Balance Due</p>
-                  <p className={`text-lg font-bold ${project.balanceUSD && project.balanceUSD > 0 ? 'text-[#E5C47A]' : 'text-[#70D0A8]'}`}>
+                  <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Balance Due</p>
+                  <p className={`text-lg font-extrabold ${project.balanceUSD && project.balanceUSD > 0 ? (isDark ? 'text-[#E5C47A]' : 'text-amber-700') : (isDark ? 'text-[#70D0A8]' : 'text-emerald-700')}`}>
                     {project.balanceUSD ? `$${project.balanceUSD.toLocaleString()}` : '$0'}
                   </p>
                 </div>
@@ -763,25 +765,25 @@ export function ProjectDetail() {
               <PaymentBadge status={project.paymentStatus} />
               
               {payments.length > 0 && (
-                <div className="mt-6 border-t border-[#262629] pt-4">
-                  <p className="text-sm font-bold text-[#F5F5F3] mb-3">Payment Schedule Breakdown</p>
+                <div className={`mt-6 border-t pt-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+                  <p className={`text-sm font-extrabold mb-3 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>Payment Schedule Breakdown</p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-[#262629] text-[#85858B] text-xs uppercase">
+                        <tr className={`border-b text-xs uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
                           <th className="text-left py-2 pr-4 font-semibold">Description</th>
                           <th className="text-left py-2 pr-4 font-semibold">Value</th>
                           <th className="text-left py-2 pr-4 font-semibold">Advance</th>
                           <th className="text-left py-2 pr-4 font-semibold">Balance</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#262629]">
+                      <tbody className={`divide-y ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
                         {payments.map((pay, i) => (
-                          <tr key={i} className="hover:bg-[#1B1B1F] transition-colors">
-                            <td className="py-2.5 pr-4 font-medium text-[#F5F5F3]">{pay.description || 'Installment'}</td>
-                            <td className="py-2.5 pr-4 text-[#B4B4B8]">{pay.amountUSD ? `$${pay.amountUSD.toLocaleString()}` : '—'}</td>
-                            <td className="py-2.5 pr-4 text-[#70D0A8]">{pay.advancePaidUSD ? `$${pay.advancePaidUSD.toLocaleString()}` : '—'}</td>
-                            <td className="py-2.5 pr-4 text-[#E5C47A]">{pay.balanceUSD ? `$${pay.balanceUSD.toLocaleString()}` : '—'}</td>
+                          <tr key={i} className={`transition-colors ${isDark ? 'hover:bg-[#1B1B1F]' : 'hover:bg-slate-50'}`}>
+                            <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{pay.description || 'Installment'}</td>
+                            <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{pay.amountUSD ? `$${pay.amountUSD.toLocaleString()}` : '—'}</td>
+                            <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>{pay.advancePaidUSD ? `$${pay.advancePaidUSD.toLocaleString()}` : '—'}</td>
+                            <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#E5C47A]' : 'text-amber-700'}`}>{pay.balanceUSD ? `$${pay.balanceUSD.toLocaleString()}` : '—'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -792,7 +794,7 @@ export function ProjectDetail() {
             </SectionCard>
           ) : (
             <SectionCard title="Commercial & Payments" label="Financial Monitoring">
-              <p className="text-sm text-[#85858B]">No payment data available for this project.</p>
+              <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No payment data available for this project.</p>
             </SectionCard>
           )}
 

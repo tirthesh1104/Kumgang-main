@@ -143,17 +143,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const liveDateTime = formatLiveDateTime(now);
   const lastUpdated = liveDateTime;
 
-  // Project Manager State pre-filled with Prakash Shinde details
-  const [projectManager, setProjectManager] = useState<ProjectManagerInfo>({
-    name: 'Prakash Shinde',
-    designation: 'Project Manager KKI',
-    email: 'prakash.shinde@kumkang.com',
-    phone: '+91 98765 43210',
-    department: 'KKI Project Management',
-    project: 'Kumkang Live Monitoring',
-    status: 'Active',
-    photoUrl: '/prakash_shinde.png',
+  // Project Manager State pre-filled with Prakash Shinde details and persisted in localStorage
+  const STORAGE_PM_KEY = 'kumkang_project_manager_v1';
+
+  const [projectManager, setProjectManager] = useState<ProjectManagerInfo>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_PM_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && parsed.name) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to read projectManager from localStorage', e);
+    }
+    return {
+      name: 'Prakash Shinde',
+      designation: 'Project Manager KKI',
+      email: 'prakash.shinde@kumkang.com',
+      phone: '+91 98765 43210',
+      department: 'KKI Project Management',
+      project: 'Kumkang Live Monitoring',
+      status: 'Active',
+      photoUrl: '/prakash_shinde.png',
+    };
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_PM_KEY, JSON.stringify(projectManager));
+    } catch (e) {
+      console.warn('Failed to save projectManager to localStorage', e);
+    }
+  }, [projectManager]);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
