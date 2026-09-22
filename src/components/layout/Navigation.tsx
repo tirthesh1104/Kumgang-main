@@ -70,29 +70,61 @@ function SidebarContent() {
       isDark ? 'bg-[#090909] text-[#F5F5F3]' : 'bg-[#0B2239] text-white'
     }`}>
       {/* Brand */}
-      <div className={`px-5 py-4 border-b ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
-        <div 
+      <div className={`px-4 py-3.5 border-b ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
+        <motion.div 
           onClick={() => navigate('dashboard')}
-          className="flex flex-col gap-1 cursor-pointer group"
+          className="cursor-pointer group select-none"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && navigate('dashboard')}
           title="Kumkang Kind Management Dashboard"
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="flex items-center">
-            <img
-              src="/kumkang_logo_white_text.png"
-              alt="Kumkang Kind"
-              className="h-8 w-auto object-contain transition-opacity group-hover:opacity-90"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/kumkang_logo.png";
+          {/* Elegant Logo Card Container preserving exact original colors */}
+          <motion.div 
+            className="relative overflow-hidden bg-white rounded-xl px-3 py-2 shadow-sm border border-slate-100 flex items-center justify-center transition-all"
+            whileHover={{ 
+              scale: 1.02, 
+              boxShadow: isDark 
+                ? '0 10px 25px -5px rgba(56, 189, 248, 0.3), 0 0 15px rgba(255,255,255,0.1)' 
+                : '0 10px 25px -5px rgba(2, 132, 199, 0.3)' 
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            {/* Ambient Shimmer / Light Sweep */}
+            <motion.div
+              className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-20"
+              animate={{
+                translateX: ['-100%', '200%'],
+              }}
+              transition={{
+                repeat: Infinity,
+                repeatDelay: 4,
+                duration: 1.8,
+                ease: "easeInOut"
               }}
             />
+            
+            {/* Exact original Kumkang logo as uploaded */}
+            <motion.img
+              src="/kumkang_logo.png"
+              alt="Kumkang Kind"
+              className="h-7 w-auto object-contain relative z-10"
+              whileHover={{ scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 350, damping: 20 }}
+            />
+          </motion.div>
+
+          <div className="flex items-center justify-between px-1 mt-1.5">
+            <span className={`text-[10.5px] font-medium tracking-tight ${isDark ? 'text-[#8E8E93]' : 'text-slate-300'}`}>
+              Management Dashboard
+            </span>
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="System Live" />
           </div>
-          <p className={`text-[11px] font-medium tracking-tight ${isDark ? 'text-[#8E8E93]' : 'text-slate-300'}`}>
-            Management Dashboard
-          </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Nav */}
