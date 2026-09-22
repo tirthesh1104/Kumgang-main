@@ -70,59 +70,63 @@ function SidebarContent() {
       isDark ? 'bg-[#090909] text-[#F5F5F3]' : 'bg-[#0B2239] text-white'
     }`}>
       {/* Brand */}
-      <div className={`px-4 py-3.5 border-b ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
+      <div className={`px-3.5 pt-4 pb-3 border-b ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
         <motion.div 
           onClick={() => navigate('dashboard')}
-          className="cursor-pointer group select-none"
+          className="cursor-pointer group select-none block"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && navigate('dashboard')}
           title="Kumkang Kind Management Dashboard"
-          initial={{ opacity: 0, y: -6 }}
+          initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
         >
-          {/* Elegant Logo Card Container preserving exact original colors */}
+          {/* Logo Card with tight, balanced whitespace and no empty blank gaps */}
           <motion.div 
-            className="relative overflow-hidden bg-white rounded-xl px-3 py-2 shadow-sm border border-slate-100 flex items-center justify-center transition-all"
+            className="relative overflow-hidden bg-white rounded-xl py-1.5 px-3 shadow-xs border border-slate-200/90 flex items-center justify-center transition-all"
             whileHover={{ 
               scale: 1.02, 
+              y: -1,
               boxShadow: isDark 
-                ? '0 10px 25px -5px rgba(56, 189, 248, 0.3), 0 0 15px rgba(255,255,255,0.1)' 
-                : '0 10px 25px -5px rgba(2, 132, 199, 0.3)' 
+                ? '0 8px 25px -4px rgba(56, 189, 248, 0.35), 0 0 12px rgba(255,255,255,0.1)' 
+                : '0 8px 25px -4px rgba(2, 132, 199, 0.3)' 
             }}
             whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            transition={{ type: "spring", stiffness: 450, damping: 25 }}
           >
-            {/* Ambient Shimmer / Light Sweep */}
+            {/* Ambient Shimmer / Light Sheen */}
             <motion.div
-              className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-20"
+              className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 to-transparent pointer-events-none z-20"
               animate={{
                 translateX: ['-100%', '200%'],
               }}
               transition={{
                 repeat: Infinity,
-                repeatDelay: 4,
-                duration: 1.8,
+                repeatDelay: 3,
+                duration: 1.4,
                 ease: "easeInOut"
               }}
             />
             
-            {/* Exact original Kumkang logo as uploaded */}
+            {/* Exact original Kumkang logo - proportional fit with balanced margins */}
             <motion.img
               src="/kumkang_logo.png"
               alt="Kumkang Kind"
-              className="h-7 w-auto object-contain relative z-10"
-              whileHover={{ scale: 1.03 }}
+              className="w-full max-w-[178px] h-auto object-contain block relative z-10"
+              whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 350, damping: 20 }}
             />
           </motion.div>
 
-          <div className="flex items-center justify-between px-1 mt-1.5">
-            <span className={`text-[10.5px] font-medium tracking-tight ${isDark ? 'text-[#8E8E93]' : 'text-slate-300'}`}>
+          {/* Subtitle & Live Status - with ample vertical clearance */}
+          <div className="flex items-center justify-between px-1 pt-2 pb-0.5">
+            <span className={`text-[11px] font-medium tracking-tight ${isDark ? 'text-[#9E9EA4]' : 'text-slate-300'}`}>
               Management Dashboard
             </span>
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="System Live" />
+            <div className="flex items-center gap-1.5" title="System Connected & Live">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+            </div>
           </div>
         </motion.div>
       </div>
