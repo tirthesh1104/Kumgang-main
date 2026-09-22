@@ -70,17 +70,28 @@ function SidebarContent() {
       isDark ? 'bg-[#090909] text-[#F5F5F3]' : 'bg-[#0B2239] text-white'
     }`}>
       {/* Brand */}
-      <div className={`px-5 py-5 border-b ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
-        <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 border ${
-            isDark ? 'bg-[#18181B] border-[#303035] text-[#C9A86A]' : 'bg-[#142E4C] border-[#1E406B] text-[#38BDF8]'
-          }`}>
-            <Building2 size={18} />
+      <div className={`px-5 py-4 border-b ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
+        <div 
+          onClick={() => navigate('dashboard')}
+          className="flex flex-col gap-1 cursor-pointer group"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigate('dashboard')}
+          title="Kumkang Kind Management Dashboard"
+        >
+          <div className="flex items-center">
+            <img
+              src="/kumkang_logo_white_text.png"
+              alt="Kumkang Kind"
+              className="h-8 w-auto object-contain transition-opacity group-hover:opacity-90"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/kumkang_logo.png";
+              }}
+            />
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold leading-tight truncate text-white">Kumkang Kind East Africa Ltd</p>
-            <p className={`text-[11px] mt-0.5 font-normal tracking-tight ${isDark ? 'text-[#B4B4B8]' : 'text-slate-300'}`}>Management Dashboard</p>
-          </div>
+          <p className={`text-[11px] font-medium tracking-tight ${isDark ? 'text-[#8E8E93]' : 'text-slate-300'}`}>
+            Management Dashboard
+          </p>
         </div>
       </div>
 
