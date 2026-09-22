@@ -119,12 +119,12 @@ function SidebarContent() {
             />
           </motion.div>
 
-          {/* Subtitle & Live Status - aligned with logo */}
-          <div className="flex items-center gap-1.5 mt-1.5 pl-0.5">
-            <span className={`text-[10.5px] font-medium tracking-tight ${isDark ? 'text-[#8E8E93]' : 'text-slate-300'}`}>
+          {/* Subtitle & Live Status - matching navigation font */}
+          <div className="flex items-center gap-2 mt-2 pl-0.5">
+            <span className={`text-sm font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-white'}`}>
               Management Dashboard
             </span>
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_rgba(16,185,129,0.8)]" title="System Connected & Live" />
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_rgba(16,185,129,0.8)]" title="System Connected & Live" />
           </div>
         </motion.div>
       </div>
