@@ -70,10 +70,10 @@ function SidebarContent() {
       isDark ? 'bg-[#090909] text-[#F5F5F3]' : 'bg-[#0B2239] text-white'
     }`}>
       {/* Brand */}
-      <div className={`px-4 py-3 border-b transition-colors ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
+      <div className={`px-4 py-3.5 border-b transition-colors ${isDark ? 'border-[#1E1E20]' : 'border-[#142E4C]'}`}>
         <motion.div 
           onClick={() => navigate('dashboard')}
-          className="cursor-pointer group select-none flex flex-col items-center"
+          className="cursor-pointer group select-none flex flex-col items-start pl-1"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && navigate('dashboard')}
@@ -82,7 +82,7 @@ function SidebarContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
-          {/* Prominent Logo Container with increased logo size */}
+          {/* Prominent Logo Container aligned slightly to left */}
           <motion.div 
             className="relative overflow-hidden bg-white rounded-lg w-[152px] h-[38px] shadow-xs border border-white/40 flex items-center justify-center transition-all"
             whileHover={{ 
@@ -119,8 +119,8 @@ function SidebarContent() {
             />
           </motion.div>
 
-          {/* Subtitle & Live Status */}
-          <div className="flex items-center justify-center gap-1.5 mt-2">
+          {/* Subtitle & Live Status - aligned with logo */}
+          <div className="flex items-center gap-1.5 mt-1.5 pl-0.5">
             <span className={`text-[10.5px] font-medium tracking-tight ${isDark ? 'text-[#8E8E93]' : 'text-slate-300'}`}>
               Management Dashboard
             </span>
