@@ -82,15 +82,15 @@ function SidebarContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
-          {/* Exact dimension Logo Container - exactly 137px x 34px */}
+          {/* Prominent Logo Container with increased logo size */}
           <motion.div 
-            className="relative overflow-hidden bg-white rounded-lg w-[137px] h-[34px] shadow-xs border border-white/40 flex items-center justify-center transition-all"
+            className="relative overflow-hidden bg-white rounded-lg w-[152px] h-[38px] shadow-xs border border-white/40 flex items-center justify-center transition-all"
             whileHover={{ 
               scale: 1.03, 
               y: -1,
               boxShadow: isDark 
-                ? '0 6px 20px -3px rgba(56, 189, 248, 0.35), 0 0 10px rgba(255,255,255,0.1)' 
-                : '0 6px 20px -3px rgba(2, 132, 199, 0.25)' 
+                ? '0 6px 22px -3px rgba(56, 189, 248, 0.35), 0 0 10px rgba(255,255,255,0.1)' 
+                : '0 6px 22px -3px rgba(2, 132, 199, 0.25)' 
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 450, damping: 25 }}
@@ -109,11 +109,11 @@ function SidebarContent() {
               }}
             />
             
-            {/* Exact original Kumkang logo */}
+            {/* Exact original Kumkang logo - increased size for clarity and prominence */}
             <motion.img
               src="/kumkang_logo.png"
               alt="Kumkang Kind"
-              className="h-[22px] w-auto object-contain block relative z-10"
+              className="h-[28px] w-auto object-contain block relative z-10"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 350, damping: 20 }}
             />
