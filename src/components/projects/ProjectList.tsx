@@ -176,88 +176,94 @@ export function ProjectList({
             key={project.projectId}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04, duration: 0.35 }}
-            onClick={() => navigate('project-detail', project.projectId)}
-            className={[
-              'rounded-xl border shadow-card transition-all duration-200 cursor-pointer p-5 group relative overflow-hidden',
-              isDark 
-                ? 'bg-[#151517] border-[#262629] hover:border-[#303035] hover:bg-[#1B1B1F]' 
-                : 'bg-[#FFFFFF] border-[#DCE5EE] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]',
-              needsAttention ? (isDark ? 'border-l-4 border-l-[#E05A5A] bg-[#34191B]/20' : 'border-l-4 border-l-[#EF4444] bg-[#FEF2F2]/60') : '',
-              project.contractStatus === 'Cancelled' ? (isDark ? 'opacity-60 bg-[#111113]' : 'opacity-60 bg-[#F1F5F9]') : '',
-            ].join(' ')}
+            transition={{ delay: Math.min(i * 0.02, 0.2), duration: 0.25 }}
+            className="transform-gpu will-change-transform"
           >
-            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded font-mono border ${
-                    isDark ? 'text-[#C9A86A] bg-[#18181B] border-[#303035]' : 'text-[#1688D4] bg-[#F1F5F9] border-[#CBD5E1]'
-                  }`}>
-                    {project.projectId}
-                  </span>
-                  <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
-                    isDark ? 'text-[#D9DCE0] bg-[#18181B] border-[#303035]' : 'text-[#334155] bg-[#F8FAFC] border-[#CBD5E1]'
-                  }`}>
-                    <Globe size={11} className={isDark ? 'text-[#BFC3C8]' : 'text-[#64748B]'} />
-                    {project.country}
-                  </span>
-                  {needsAttention && (
-                    <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${
-                      isDark ? 'text-[#F08A8A] bg-[#34191B] border-[#5A292B]' : 'text-[#DC2626] bg-[#FEF2F2] border-[#FCA5A5]'
+            <div
+              onClick={() => navigate('project-detail', project.projectId)}
+              className={[
+                'rounded-xl border shadow-card cursor-pointer p-5 group relative overflow-hidden',
+                'transform-gpu transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out',
+                'hover:-translate-y-[3px] hover:scale-x-[1.012] hover:z-10 hover:shadow-md',
+                "before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-[#1688D4] dark:before:bg-[#38BDF8] before:opacity-0 group-hover:before:opacity-100 before:transition-opacity before:duration-200",
+                isDark 
+                  ? 'bg-[#151517] border-[#262629] hover:border-[#2A3A4D] hover:bg-[#181D26]' 
+                  : 'bg-[#FFFFFF] border-[#DCE5EE] hover:border-[#BAE6FD] hover:bg-[#F0F7FF]',
+                project.contractStatus === 'Cancelled' ? (isDark ? 'opacity-60 bg-[#111113]' : 'opacity-60 bg-[#F1F5F9]') : '',
+              ].join(' ')}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded font-mono border ${
+                      isDark ? 'text-[#C9A86A] bg-[#18181B] border-[#303035]' : 'text-[#1688D4] bg-[#F1F5F9] border-[#CBD5E1]'
                     }`}>
-                      <AlertTriangle size={11} />
-                      Balance Due
+                      {project.projectId}
                     </span>
-                  )}
+                    <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
+                      isDark ? 'text-[#D9DCE0] bg-[#18181B] border-[#303035]' : 'text-[#334155] bg-[#F8FAFC] border-[#CBD5E1]'
+                    }`}>
+                      <Globe size={11} className={isDark ? 'text-[#BFC3C8]' : 'text-[#64748B]'} />
+                      {project.country}
+                    </span>
+                    {needsAttention && (
+                      <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${
+                        isDark ? 'text-[#F08A8A] bg-[#34191B] border-[#5A292B]' : 'text-[#DC2626] bg-[#FEF2F2] border-[#FCA5A5]'
+                      }`}>
+                        <AlertTriangle size={11} />
+                        Balance Due
+                      </span>
+                    )}
+                  </div>
+                  <h3 className={`font-extrabold text-base leading-tight transition-colors ${
+                    isDark ? 'text-[#FFFFFF] group-hover:text-[#C9A86A]' : 'text-[#0F172A] group-hover:text-[#1688D4]'
+                  }`}>{project.project}</h3>
+                  <p className={`text-xs mt-1 font-medium ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
+                    {project.customer}{project.block ? ` · ${project.block}` : ''}
+                  </p>
                 </div>
-                <h3 className={`font-extrabold text-base leading-tight transition-colors ${
-                  isDark ? 'text-[#FFFFFF] group-hover:text-[#C9A86A]' : 'text-[#0F172A] group-hover:text-[#1688D4]'
-                }`}>{project.project}</h3>
-                <p className={`text-xs mt-1 font-medium ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-                  {project.customer}{project.block ? ` · ${project.block}` : ''}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-1.5 items-center">
-                <StatusBadge status={project.contractStatus} />
-                <PaymentBadge status={project.paymentStatus} />
-              </div>
-            </div>
-
-            {progress != null && (
-              <div className={`mb-4 p-3 rounded-lg border ${isDark ? 'bg-[#111113] border-[#202023]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
-                <div className="flex justify-between text-xs mb-1.5 font-semibold">
-                  <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>Design Progress <span className={`text-[10px] font-normal ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>(DERIVED)</span></span>
-                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</span>
+                <div className="flex flex-wrap gap-1.5 items-center">
+                  <StatusBadge status={project.contractStatus} />
+                  <PaymentBadge status={project.paymentStatus} />
                 </div>
-                <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="md" />
               </div>
-            )}
 
-            <div className={`flex flex-wrap gap-x-5 gap-y-1.5 text-xs font-medium border-t pt-3 mt-2 ${
-              isDark ? 'text-[#85858B] border-[#202023]' : 'text-[#64748B] border-[#E2E8F0]'
-            }`}>
-              {project.totalAmountUSD != null && (
-                <span>Value: <strong className={isDark ? 'text-[#F5F5F3]' : 'text-[#0F172A]'}>${project.totalAmountUSD.toLocaleString()}</strong></span>
+              {progress != null && (
+                <div className={`mb-4 p-3 rounded-lg border ${isDark ? 'bg-[#111113] border-[#202023]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                  <div className="flex justify-between text-xs mb-1.5 font-semibold">
+                    <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>Design Progress <span className={`text-[10px] font-normal ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>(DERIVED)</span></span>
+                    <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</span>
+                  </div>
+                  <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="md" />
+                </div>
               )}
-              {project.deliveryRequest && (
-                <span className="flex items-center gap-1">
-                  <Clock size={12} className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'} />
-                  Delivery: {project.deliveryRequest}
-                </span>
-              )}
-              {shipment && (
-                <span>Shipment: <strong className={isDark ? 'text-[#83CACA]' : 'text-[#0F766E]'}>{shipment.status}</strong></span>
-              )}
-              {project.remark && (
-                <span className={`italic truncate max-w-[200px] ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>{project.remark}</span>
-              )}
-            </div>
 
-            <div className={`mt-3 flex items-center text-xs font-bold group-hover:translate-x-1 transition-transform ${
-              isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'
-            }`}>
-              Open Project Workspace
-              <ArrowRight size={13} className="ml-1" />
+              <div className={`flex flex-wrap gap-x-5 gap-y-1.5 text-xs font-medium border-t pt-3 mt-2 ${
+                isDark ? 'text-[#85858B] border-[#202023]' : 'text-[#64748B] border-[#E2E8F0]'
+              }`}>
+                {project.totalAmountUSD != null && (
+                  <span>Value: <strong className={isDark ? 'text-[#F5F5F3]' : 'text-[#0F172A]'}>${project.totalAmountUSD.toLocaleString()}</strong></span>
+                )}
+                {project.deliveryRequest && (
+                  <span className="flex items-center gap-1">
+                    <Clock size={12} className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'} />
+                    Delivery: {project.deliveryRequest}
+                  </span>
+                )}
+                {shipment && (
+                  <span>Shipment: <strong className={isDark ? 'text-[#83CACA]' : 'text-[#0F766E]'}>{shipment.status}</strong></span>
+                )}
+                {project.remark && (
+                  <span className={`italic truncate max-w-[200px] ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>{project.remark}</span>
+                )}
+              </div>
+
+              <div className={`mt-3 flex items-center text-xs font-bold group-hover:translate-x-1 transition-transform ${
+                isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'
+              }`}>
+                Open Project Workspace
+                <ArrowRight size={13} className="ml-1" />
+              </div>
             </div>
           </motion.div>
         );

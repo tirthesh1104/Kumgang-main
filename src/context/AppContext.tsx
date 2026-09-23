@@ -11,7 +11,8 @@ type NavPage =
   | 'payments'
   | 'delays'
   | 'reports'
-  | 'crm';
+  | 'crm'
+  | 'pipeline';
 
 export type ThemeMode = 'light' | 'dark';
 

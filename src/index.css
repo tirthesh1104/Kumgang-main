@@ -13,11 +13,12 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
   
   html.light, html:not(.dark) {
-    background-color: #F5F8FB;
+    background-color: #F4F7FB;
     color: #0F172A;
   }
 
@@ -31,7 +32,7 @@
   }
 
   html.light body, html:not(.dark) body {
-    @apply bg-[#F5F8FB] text-[#0F172A];
+    @apply bg-[#F4F7FB] text-[#0F172A];
   }
 
   html.dark body {
@@ -205,6 +206,12 @@
   }
   html.dark .table-navheader {
     @apply bg-[#141416] text-[#F5F5F3] border-[#262629];
+  }
+
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
 

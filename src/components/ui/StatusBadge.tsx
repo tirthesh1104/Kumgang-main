@@ -6,15 +6,21 @@ type StatusType = 'Signed' | 'Not Signed' | 'Cancelled' | 'Completed' | 'In Prog
 
 const darkStatusStyles: Record<string, string> = {
   signed: 'bg-[#163127] text-[#70D0A8] border border-[#28523F]',
+  'signed po': 'bg-[#163127] text-[#70D0A8] border border-[#28523F]',
   completed: 'bg-[#163127] text-[#70D0A8] border border-[#28523F]',
   active: 'bg-[#163127] text-[#70D0A8] border border-[#28523F]',
   delivered: 'bg-[#163127] text-[#70D0A8] border border-[#28523F]',
   'delivery completed': 'bg-[#163127] text-[#70D0A8] border border-[#28523F]',
 
-  'not signed': 'bg-[#322917] text-[#E5C47A] border border-[#5B4724]',
+  'not signed': 'bg-[#1D2B44] text-[#7DB3FC] border border-[#2B436D]',
+  'not signed po': 'bg-[#1D2B44] text-[#7DB3FC] border border-[#2B436D]',
   pending: 'bg-[#322917] text-[#E5C47A] border border-[#5B4724]',
   attention: 'bg-[#322917] text-[#E5C47A] border border-[#5B4724]',
+  'under review': 'bg-[#322917] text-[#E5C47A] border border-[#5B4724]',
+  'under review po': 'bg-[#322917] text-[#E5C47A] border border-[#5B4724]',
 
+  upcoming: 'bg-[#34191B] text-[#F08A8A] border border-[#5A292B]',
+  'upcoming po': 'bg-[#34191B] text-[#F08A8A] border border-[#5A292B]',
   cancelled: 'bg-[#34191B] text-[#F08A8A] border border-[#5A292B]',
   delayed: 'bg-[#34191B] text-[#F08A8A] border border-[#5A292B]',
   'at risk': 'bg-[#34191B] text-[#F08A8A] border border-[#5A292B]',
@@ -31,15 +37,21 @@ const darkStatusStyles: Record<string, string> = {
 
 const lightStatusStyles: Record<string, string> = {
   signed: 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
+  'signed po': 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
   completed: 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
   active: 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
   delivered: 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
   'delivery completed': 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
 
-  'not signed': 'bg-[#FEF7E0] text-[#B06000] border border-[#FDE293]',
+  'not signed': 'bg-[#E0F2FE] text-[#0284C7] border border-[#BAE6FD]',
+  'not signed po': 'bg-[#E0F2FE] text-[#0284C7] border border-[#BAE6FD]',
   pending: 'bg-[#FEF7E0] text-[#B06000] border border-[#FDE293]',
   attention: 'bg-[#FEF7E0] text-[#B06000] border border-[#FDE293]',
+  'under review': 'bg-[#FEF7E0] text-[#B06000] border border-[#FDE293]',
+  'under review po': 'bg-[#FEF7E0] text-[#B06000] border border-[#FDE293]',
 
+  upcoming: 'bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA]',
+  'upcoming po': 'bg-[#FEE2E2] text-[#DC2626] border border-[#FECACA]',
   cancelled: 'bg-[#FCE8E6] text-[#C5221F] border border-[#FAD2CF]',
   delayed: 'bg-[#FCE8E6] text-[#C5221F] border border-[#FAD2CF]',
   'at risk': 'bg-[#FCE8E6] text-[#C5221F] border border-[#FAD2CF]',

@@ -2,15 +2,27 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FolderKanban, Paintbrush, Factory,
-  Truck, CreditCard, AlertTriangle, FileBarChart2,
-  User, ChevronRight, Menu, X, Building2, History,
-  Sun, Moon, ShieldCheck
+  Truck, AlertTriangle, User, ChevronRight, Menu, X, 
+  Building2, History, Sun, Moon, Database
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { SyncExcelButton } from '../ui/SyncExcelButton';
 import { UpdateHistoryModal } from '../UpdateHistoryModal';
 
-const navGroups = [
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  isAction?: boolean;
+}
+
+interface NavGroup {
+  title: string;
+  isOperations?: boolean;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
     title: 'OVERVIEW',
     items: [
@@ -21,34 +33,40 @@ const navGroups = [
     title: 'PORTFOLIO',
     items: [
       { id: 'projects', label: 'Projects', icon: FolderKanban },
-      { id: 'delays', label: 'Delays & Risk', icon: AlertTriangle },
     ]
   },
   {
     title: 'OPERATIONS',
+    isOperations: true,
     items: [
       { id: 'design', label: 'Design', icon: Paintbrush },
       { id: 'production', label: 'Production', icon: Factory },
       { id: 'shipment', label: 'Shipment', icon: Truck },
-      { id: 'payments', label: 'Payments', icon: CreditCard },
     ]
   },
   {
-    title: 'INSIGHTS',
+    title: 'RISK',
     items: [
-      { id: 'reports', label: 'Reports', icon: FileBarChart2 },
+      { id: 'delays', label: 'Delays & Risk', icon: AlertTriangle },
     ]
   },
   {
-    title: 'CRM',
+    title: 'DATA',
     items: [
-      { id: 'crm', label: 'Client Register', icon: ShieldCheck },
+      { id: 'pipeline', label: 'Live Data Pipeline', icon: Database },
+    ]
+  },
+  {
+    title: 'SYSTEM',
+    items: [
+      { id: 'audit-log', label: 'Audit Log History', icon: History, isAction: true },
+      { id: 'admin', label: 'Administrator', icon: User, isAction: true },
     ]
   }
-] as const;
+];
 
 function SidebarContent() {
-  const { currentPage, navigate, theme } = useApp();
+  const { currentPage, navigate, theme, setIsEditModalOpen } = useApp();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const isDark = theme === 'dark';
@@ -56,13 +74,51 @@ function SidebarContent() {
   const categoryColors: Record<string, string> = {
     dashboard: isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]',
     projects: isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]',
-    delays: isDark ? 'text-[#E05A5A]' : 'text-[#F87171]',
-    reports: isDark ? 'text-[#9A82D4]' : 'text-[#C084FC]',
     design: isDark ? 'text-[#9A82D4]' : 'text-[#C084FC]',
     production: isDark ? 'text-[#4BA7A7]' : 'text-[#2DD4BF]',
     shipment: isDark ? 'text-[#56A9C7]' : 'text-[#38BDF8]',
-    payments: isDark ? 'text-[#D6A84F]' : 'text-[#FBBF24]',
-    crm: isDark ? 'text-[#3FB984]' : 'text-[#16A36A]',
+    delays: isDark ? 'text-[#E05A5A]' : 'text-[#F87171]',
+    pipeline: isDark ? 'text-[#3FB984]' : 'text-[#34D399]',
+    'audit-log': isDark ? 'text-[#85858B]' : 'text-slate-400',
+    admin: isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]',
+  };
+
+  const handleItemClick = (item: NavItem) => {
+    if (item.id === 'audit-log') {
+      setIsHistoryOpen(true);
+    } else if (item.id === 'admin') {
+      setIsEditModalOpen(true);
+    } else {
+      navigate(item.id as Parameters<typeof navigate>[0]);
+    }
+  };
+
+  const renderNavItem = (item: NavItem) => {
+    const active = currentPage === item.id || (item.id === 'projects' && currentPage === 'project-detail');
+    const iconColor = categoryColors[item.id] || (isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]');
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleItemClick(item)}
+        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group text-left cursor-pointer ${
+          active
+            ? isDark
+              ? 'bg-[#1B1B1F] text-[#FFFFFF] font-semibold border-l-2 border-l-[#C9A86A] shadow-xs'
+              : 'bg-[#142E4C] text-white font-semibold border-l-2 border-l-[#1688D4] shadow-xs'
+            : isDark
+            ? 'text-[#A0A0A5] hover:bg-[#141416] hover:text-[#FFFFFF]'
+            : 'text-slate-300 hover:bg-[#142E4C]/60 hover:text-white'
+        }`}
+        aria-current={active ? 'page' : undefined}
+      >
+        <item.icon size={16} className={`flex-shrink-0 transition-colors ${active ? (isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]') : iconColor}`} />
+        <span className="truncate">{item.label}</span>
+        {active && (
+          <ChevronRight size={13} className={`ml-auto flex-shrink-0 ${isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]'}`} />
+        )}
+      </button>
+    );
   };
 
   return (
@@ -109,7 +165,7 @@ function SidebarContent() {
               }}
             />
             
-            {/* Exact original Kumkang logo - increased size for clarity and prominence */}
+            {/* Exact original Kumkang logo */}
             <motion.img
               src="/kumkang_logo.png"
               alt="Kumkang Kind"
@@ -119,7 +175,7 @@ function SidebarContent() {
             />
           </motion.div>
 
-          {/* Subtitle & Live Status - matching navigation font */}
+          {/* Subtitle & Live Status */}
           <div className="flex items-center gap-2 mt-2 pl-0.5">
             <span className={`text-sm font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-white'}`}>
               Management Dashboard
@@ -130,90 +186,28 @@ function SidebarContent() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-3 space-y-4 overflow-y-auto" aria-label="Main navigation">
+      <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto" aria-label="Main navigation">
         {navGroups.map((group) => (
           <div key={group.title} className="space-y-1">
             <div className="px-2 pb-1">
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-400'}`}>
+              <p className={`text-[10px] font-bold uppercase tracking-wider select-none ${
+                isDark ? 'text-[#65656B]' : 'text-slate-400/80'
+              }`}>
                 {group.title}
               </p>
             </div>
-            {group.items.map(({ id, label, icon: Icon }) => {
-              const active = currentPage === id || (id === 'projects' && currentPage === 'project-detail');
-              const iconColor = categoryColors[id] || (isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]');
-              return (
-                <button
-                  key={id}
-                  onClick={() => navigate(id as Parameters<typeof navigate>[0])}
-                  className={`sidebar-link w-full text-left transition-all ${
-                    active
-                      ? isDark
-                        ? 'bg-[#1B1B1F] text-[#FFFFFF] font-bold border-l-2 border-l-[#C9A86A] shadow-sm'
-                        : 'bg-[#142E4C] text-white font-bold border-l-2 border-l-[#1688D4] shadow-sm'
-                      : isDark
-                      ? 'text-[#B4B4B8] hover:bg-[#141416] hover:text-[#FFFFFF]'
-                      : 'text-slate-300 hover:bg-[#142E4C]/60 hover:text-white'
-                  }`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  <Icon size={16} className={iconColor} />
-                  <span className="text-sm">{label}</span>
-                  {active && <ChevronRight size={14} className={`ml-auto ${isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]'}`} />}
-                </button>
-              );
-            })}
+            {group.isOperations ? (
+              <div className={`ml-1.5 pl-2 space-y-1 border-l ${isDark ? 'border-[#262629]/60' : 'border-white/10'}`}>
+                {group.items.map((item) => renderNavItem(item))}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {group.items.map((item) => renderNavItem(item))}
+              </div>
+            )}
           </div>
         ))}
       </nav>
-
-      {/* Live Data Sync Box */}
-      <div className={`mx-3 my-3 p-3 rounded-xl border space-y-2 ${
-        isDark ? 'bg-[#111113] border-[#262629]' : 'bg-[#142E4C]/50 border-[#1E406B]'
-      }`}>
-        <div className="flex items-center justify-between">
-          <p className={`text-xs font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-white'}`}>Live Data Pipeline</p>
-          <button
-            onClick={() => setIsHistoryOpen(true)}
-            className={`text-[10px] hover:underline flex items-center gap-1 font-semibold cursor-pointer ${
-              isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]'
-            }`}
-            title="View update audit trail history"
-          >
-            <History size={11} /> History
-          </button>
-        </div>
-
-        <SyncExcelButton variant="sidebar" />
-
-        <p className={`text-[10px] leading-tight ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
-          Upload Excel workbook to synchronize canonical project data in real time
-        </p>
-      </div>
-
-      {/* Footer */}
-      <div className={`px-3 py-3 border-t space-y-0.5 ${
-        isDark ? 'border-[#1E1E20] bg-[#090909]' : 'border-[#142E4C] bg-[#0B2239]'
-      }`}>
-        <button
-          onClick={() => setIsHistoryOpen(true)}
-          className={`sidebar-link w-full text-left flex items-center gap-2 ${
-            isDark ? 'text-[#B4B4B8] hover:text-[#FFFFFF] hover:bg-[#141416]' : 'text-slate-300 hover:text-white hover:bg-[#142E4C]'
-          }`}
-        >
-          <History size={16} className={isDark ? 'text-[#85858B]' : 'text-slate-400'} />
-          <span>Audit Log History</span>
-        </button>
-        <button className={`sidebar-link w-full text-left flex items-center gap-2 ${
-          isDark ? 'text-[#B4B4B8] hover:text-[#FFFFFF] hover:bg-[#141416]' : 'text-slate-300 hover:text-white hover:bg-[#142E4C]'
-        }`}>
-          <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-            isDark ? 'bg-[#18181B] border-[#303035] text-[#C9A86A]' : 'bg-[#142E4C] border-[#1E406B] text-[#38BDF8]'
-          }`}>
-            <User size={11} />
-          </div>
-          <span>Administrator</span>
-        </button>
-      </div>
 
       {isHistoryOpen && <UpdateHistoryModal onClose={() => setIsHistoryOpen(false)} />}
     </div>

@@ -170,7 +170,7 @@ export function ProjectsPage() {
           <p className="font-medium text-sm">No projects match the current filters.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 px-1 py-1">
           {projects.map((project, i) => {
             const shipment = getShipmentForProject(project.projectId);
             const hasBalance = (project.balanceUSD || 0) > 0;
@@ -183,86 +183,94 @@ export function ProjectsPage() {
                 key={project.projectId}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
-                onClick={() => navigate('project-detail', project.projectId)}
-                className={`
-                  rounded-xl shadow-card transition-all duration-200 cursor-pointer p-4 sm:p-5 group relative overflow-hidden border
-                  ${isDark 
-                    ? 'bg-[#151517] border-[#262629] hover:bg-[#1B1B1F]' 
-                    : 'bg-[#FFFFFF] border-[#DCE5EE] hover:bg-[#F8FAFC] hover:border-[#CBD5E1]'
-                  }
-                  ${needsAttention ? (isDark ? 'border-l-4 border-l-[#E05A5A] bg-[#34191B]/30' : 'border-l-4 border-l-[#EF4444] bg-[#FEF2F2]/60') : ''} 
-                  ${project.contractStatus === 'Cancelled' ? (isDark ? 'opacity-50 bg-[#141416]' : 'opacity-50 bg-[#F1F5F9]') : ''}
-                `}
+                transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.2) }}
+                className="transform-gpu will-change-transform"
               >
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className={`text-xs font-bold px-2 py-1 rounded font-mono border ${
-                    isDark ? 'text-[#F5F5F3] bg-[#18181B] border-[#303035]' : 'text-[#0F172A] bg-[#F1F5F9] border-[#CBD5E1]'
-                  }`}>
-                    {project.projectId}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
-                        isDark ? 'text-[#E8D6AE] bg-[#2A2419] border-[#55462C]' : 'text-[#0284C7] bg-[#E0F2FE] border-[#BAE6FD]'
-                      }`}>
-                        <Globe size={11} className={isDark ? 'text-[#C9A86A]' : 'text-[#0284C7]'} />
-                        {project.country}
-                      </span>
-                      <span className={`font-extrabold text-base ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{project.project}</span>
-                      <span className={`font-bold ${isDark ? 'text-[#303035]' : 'text-[#CBD5E1]'}`}>·</span>
-                      <span className={`text-sm font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>{project.customer}</span>
-                      {project.block && (
-                        <>
-                          <span className={isDark ? 'text-[#303035]' : 'text-[#CBD5E1]'}>·</span>
-                          <span className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Block {project.block}</span>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2.5 mt-2">
-                      <StatusBadge status={project.contractStatus} />
-                      <PaymentBadge status={project.paymentStatus} />
-                      {needsAttention && (
-                        <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${
-                          isDark ? 'text-[#F08A8A] bg-[#34191B] border-[#5A292B]' : 'text-[#DC2626] bg-[#FEF2F2] border-[#FCA5A5]'
+                <div
+                  onClick={() => navigate('project-detail', project.projectId)}
+                  className={`
+                    rounded-xl shadow-card cursor-pointer p-4 sm:p-5 group relative overflow-hidden border
+                    transform-gpu transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out
+                    hover:-translate-y-[3px] hover:scale-x-[1.012] hover:z-10 hover:shadow-md
+                    before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-[#1688D4] dark:before:bg-[#38BDF8] before:opacity-0 group-hover:before:opacity-100 before:transition-opacity before:duration-200
+                    ${isDark 
+                      ? 'bg-[#151517] border-[#262629] hover:bg-[#181D26] hover:border-[#2A3A4D]' 
+                      : 'bg-[#FFFFFF] border-[#DCE5EE] hover:bg-[#F0F7FF] hover:border-[#BAE6FD]'
+                    }
+                    ${project.contractStatus === 'Cancelled' ? (isDark ? 'opacity-50 bg-[#141416]' : 'opacity-50 bg-[#F1F5F9]') : ''}
+                  `}
+                >
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className={`text-xs font-bold px-2 py-1 rounded font-mono border ${
+                      isDark ? 'text-[#F5F5F3] bg-[#18181B] border-[#303035]' : 'text-[#0F172A] bg-[#F1F5F9] border-[#CBD5E1]'
+                    }`}>
+                      {project.projectId}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
+                          isDark ? 'text-[#E8D6AE] bg-[#2A2419] border-[#55462C]' : 'text-[#0284C7] bg-[#E0F2FE] border-[#BAE6FD]'
                         }`}>
-                          <AlertTriangle size={11} />
-                          Balance Due: ${project.balanceUSD?.toLocaleString()}
+                          <Globe size={11} className={isDark ? 'text-[#C9A86A]' : 'text-[#0284C7]'} />
+                          {project.country}
                         </span>
-                      )}
-                      {shipment && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
-                          isDark ? 'text-[#89C9DF] bg-[#17272E] border-[#294651]' : 'text-[#0369A1] bg-[#E0F2FE] border-[#BAE6FD]'
-                        }`}>
-                          Shipment: {shipment.status}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    {progress != null && (
-                      <div className="text-right hidden sm:block">
-                        <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Design Progress</p>
-                        <p className={`text-base font-extrabold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</p>
-                        <div className="w-24 mt-1">
-                          <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="sm" />
-                        </div>
+                        <span className={`font-extrabold text-base ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{project.project}</span>
+                        <span className={`font-bold ${isDark ? 'text-[#303035]' : 'text-[#CBD5E1]'}`}>·</span>
+                        <span className={`text-sm font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>{project.customer}</span>
+                        {project.block && (
+                          <>
+                            <span className={isDark ? 'text-[#303035]' : 'text-[#CBD5E1]'}>·</span>
+                            <span className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Block {project.block}</span>
+                          </>
+                        )}
                       </div>
-                    )}
+                      <div className="flex flex-wrap items-center gap-2.5 mt-2">
+                        <StatusBadge status={project.contractStatus} />
+                        <PaymentBadge status={project.paymentStatus} />
+                        {needsAttention && (
+                          <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${
+                            isDark ? 'text-[#F08A8A] bg-[#34191B] border-[#5A292B]' : 'text-[#DC2626] bg-[#FEF2F2] border-[#FCA5A5]'
+                          }`}>
+                            <AlertTriangle size={11} />
+                            Balance Due: ${project.balanceUSD?.toLocaleString()}
+                          </span>
+                        )}
+                        {shipment && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
+                            isDark ? 'text-[#89C9DF] bg-[#17272E] border-[#294651]' : 'text-[#0369A1] bg-[#E0F2FE] border-[#BAE6FD]'
+                          }`}>
+                            Shipment: {shipment.status}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {progress != null && (
+                        <div className="text-right hidden sm:block">
+                          <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Design Progress</p>
+                          <p className={`text-base font-extrabold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</p>
+                          <div className="w-24 mt-1">
+                            <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="sm" />
+                          </div>
+                        </div>
+                      )}
 
-                    <button
-                      onClick={(e) => handleOpenEditModal(e, project.projectId)}
-                      className={`p-2 rounded-lg transition-colors border cursor-pointer ${
-                        isDark ? 'bg-[#18181B] hover:bg-[#222226] text-[#B4B4B8] hover:text-[#FFFFFF] border-[#303035]' : 'bg-[#F8FAFC] hover:bg-[#F1F5F9] text-[#64748B] hover:text-[#0F172A] border-[#CBD5E1]'
-                      }`}
-                      title="Edit project data"
-                    >
-                      <Edit3 size={15} />
-                    </button>
+                      <button
+                        onClick={(e) => handleOpenEditModal(e, project.projectId)}
+                        className={`p-2 rounded-lg transition-colors border cursor-pointer ${
+                          isDark ? 'bg-[#18181B] hover:bg-[#222226] text-[#B4B4B8] hover:text-[#FFFFFF] border-[#303035]' : 'bg-[#F8FAFC] hover:bg-[#F1F5F9] text-[#64748B] hover:text-[#0F172A] border-[#CBD5E1]'
+                        }`}
+                        title="Edit project data"
+                      >
+                        <Edit3 size={15} />
+                      </button>
 
-                    <ArrowRight size={16} className={`transition-all ${
-                      isDark ? 'text-[#85858B] group-hover:text-[#C9A86A] group-hover:translate-x-1' : 'text-[#64748B] group-hover:text-[#1688D4] group-hover:translate-x-1'
-                    }`} />
+                      <ArrowRight size={16} className={`transition-all duration-200 ease-in-out ${
+                        isDark 
+                          ? 'text-[#85858B] group-hover:text-[#38BDF8] group-hover:translate-x-1 group-hover:scale-110' 
+                          : 'text-[#64748B] group-hover:text-[#1688D4] group-hover:translate-x-1 group-hover:scale-110'
+                      }`} />
+                    </div>
                   </div>
                 </div>
               </motion.div>
