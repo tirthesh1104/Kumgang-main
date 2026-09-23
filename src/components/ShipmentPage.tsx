@@ -52,6 +52,22 @@ export function ShipmentPage() {
   const delivered = shipments.filter(s => s.status === 'Delivered').length;
   const pending = shipments.filter(s => s.status === 'Planned').length;
 
+  // Calculate Overall Total Dispatch Qty (m²)
+  const totalDispatchQty = shipments.reduce((sum, s) => sum + (s.dispatchQtyM2 || 0), 0);
+
+  // Group Financial Year-wise Dispatch Qty
+  const fyDispatchMap: Record<string, number> = {};
+  shipments.forEach(s => {
+    const dateStr = s.etd || s.loadingDate;
+    let fy = 'F.Y. 2025-26';
+    if (dateStr) {
+      if (dateStr.includes('2024') || dateStr.includes('24')) fy = 'F.Y. 2024-25';
+      else if (dateStr.includes('2026') || dateStr.includes('26')) fy = 'F.Y. 2026-27';
+    }
+    const qty = s.dispatchQtyM2 || 0;
+    fyDispatchMap[fy] = (fyDispatchMap[fy] || 0) + qty;
+  });
+
   return (
     <div className={`space-y-6 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
       <div>
@@ -63,12 +79,13 @@ export function ShipmentPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         {[
           { label: 'Total Shipments', value: shipments.length, color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]' },
           { label: 'Delivered', value: delivered, color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600' },
           { label: 'In Transit', value: inTransit, color: isDark ? 'text-[#89C9DF]' : 'text-sky-600' },
           { label: 'Planned / Pending', value: pending, color: isDark ? 'text-[#E5C47A]' : 'text-amber-600' },
+          { label: 'Total Dispatch Qty', value: totalDispatchQty > 0 ? `${totalDispatchQty.toLocaleString()} m²` : '—', color: isDark ? 'text-[#C9A86A]' : 'text-indigo-600' },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -78,10 +95,27 @@ export function ShipmentPage() {
             className={`rounded-xl shadow-card p-4 border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}
           >
             <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{item.label}</p>
-            <p className={`text-3xl font-bold ${item.color}`}>{item.value}</p>
+            <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
           </motion.div>
         ))}
       </div>
+
+      {/* F.Y.-wise Dispatch Qty Section */}
+      {Object.keys(fyDispatchMap).length > 0 && (
+        <div className={`p-4 rounded-xl border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
+          <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-[#C9A86A]' : 'text-sky-700'}`}>
+            Financial Year (F.Y.)-wise Dispatch Summary
+          </h4>
+          <div className="flex flex-wrap gap-4 text-xs font-medium">
+            {Object.entries(fyDispatchMap).map(([fy, qty]) => (
+              <div key={fy} className={`px-3 py-1.5 rounded-lg border ${isDark ? 'bg-[#18181B] border-[#303035]' : 'bg-slate-50 border-slate-200'}`}>
+                <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{fy}: </span>
+                <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{qty > 0 ? `${qty.toLocaleString()} m²` : '0 m²'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Per shipment */}
       {shipments.map((shipment, i) => {
@@ -106,6 +140,13 @@ export function ShipmentPage() {
                   }`}>
                     {shipment.projectId}
                   </span>
+                  {shipment.invoiceNumber && (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                      isDark ? 'bg-[#2A2419] text-[#E8D6AE] border-[#55462C]' : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}>
+                      Inv: {shipment.invoiceNumber}
+                    </span>
+                  )}
                 </div>
                 <h3 className={`font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{project?.project ?? shipment.projectId}</h3>
                 <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{project?.customer ?? '—'}</p>
@@ -113,7 +154,7 @@ export function ShipmentPage() {
               <StatusBadge status={shipment.status} />
             </div>
 
-            <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-4 border-y py-3 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+            <div className={`grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 text-sm mb-4 border-y py-3 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
               <div>
                 <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>FWD (Forwarder)</p>
                 <p className={`font-mono font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.fwd ?? '—'}</p>
@@ -127,12 +168,37 @@ export function ShipmentPage() {
                 <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.eta ?? '—'}</p>
               </div>
               <div>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Container Size / Total</p>
+                <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>
+                  {shipment.containerSize || '—'} {shipment.containerTotal ? `(${shipment.containerTotal} units)` : ''}
+                </p>
+              </div>
+              <div>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Invoice Amount</p>
+                <p className={`font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>
+                  {shipment.invoiceAmount ? `$${shipment.invoiceAmount.toLocaleString()}` : '—'}
+                </p>
+              </div>
+              <div>
                 <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Delivery Timeline</p>
                 <p className={`font-medium ${!shipment.deliveryTimeline ? (isDark ? 'text-[#85858B]' : 'text-slate-400') : (isDark ? 'text-[#F5F5F3]' : 'text-slate-800')}`}>
                   {shipment.deliveryTimeline || '—'}
                 </p>
               </div>
             </div>
+
+            {/* Material Quantities Breakdown if available */}
+            {(shipment.bcsQty || shipment.acsQty || shipment.kgbhQty || shipment.ksbhQty || shipment.aluformQty) && (
+              <div className={`p-3 rounded-lg mb-4 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs border ${
+                isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <div><span className="text-slate-400 block">BCS Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.bcsQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">ACS Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.acsQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">KGBH Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.kgbhQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">KSBH Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.ksbhQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">Aluform Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.aluformQty ?? '—'}</strong></div>
+              </div>
+            )}
 
             <ShipmentJourneyBar shipment={shipment} isDark={isDark} />
           </motion.div>

@@ -134,7 +134,22 @@ export interface ScopeMetrics {
  * Calculate full scope-wise metrics dynamically from project records.
  */
 export function calculateScopeMetrics(projects: ProjectMaster[]): Record<string, ScopeMetrics> {
+  const canonicalScopes = ['KKV', 'KKI', 'KKHQ'];
   const result: Record<string, ScopeMetrics> = {};
+
+  canonicalScopes.forEach(s => {
+    result[s] = {
+      scope: s,
+      totalProjects: 0,
+      statuses: {
+        'Signed PO': { count: 0, areaM2: 0, amount: 0 },
+        'Not Signed PO': { count: 0, areaM2: 0, amount: 0 },
+        'Under Review PO': { count: 0, areaM2: 0, amount: 0 },
+        'Upcoming PO': { count: 0, areaM2: 0, amount: 0 },
+      },
+      projects: [],
+    };
+  });
 
   projects.forEach(project => {
     const scope = getProjectScope(project);

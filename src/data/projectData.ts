@@ -76,6 +76,31 @@ export interface ProjectMaster {
   bgExpiryDate?: string | null;
   lcOpenDate?: string | null;
   lcExpiryDate?: string | null;
+
+  // Section 4: SCHEDULE & MILESTONE DATES fields
+  paymentReceivedShellPlanDate?: string | null;
+  etaLocation?: string | null;
+  deliveryTimeline?: string | null;
+  actualTotalWeeks?: number | string | null;
+  factoryVisitType?: string | null; // e.g. 'NA' | 'Mock Up'
+  factoryVisitPersons?: number | null;
+  factoryVisitPlannedDate?: string | null;
+  factoryVisitCompletedDate?: string | null;
+
+  // Section 5: DESIGN ELEMENTS fields
+  typicalFloorArea?: number | null;
+  typicalFloorAreaUom?: string | null; // 'Sqm' | 'PCS' | 'Nos'
+  basementFloorArea?: number | null;
+  basementFloorAreaUom?: string | null;
+  changeFloorArea?: number | null;
+  changeFloorAreaUom?: string | null;
+  plumbingGrooveArea?: number | null;
+  plumbingGrooveAreaUom?: string | null;
+  elevationGrooveArea?: number | null;
+  elevationGrooveAreaUom?: string | null;
+  totalPayableArea?: number | null;
+  totalPayableAreaUom?: string | null;
+  areaApprovedDate?: string | null;
 }
 
 export interface DesignSchedule {
@@ -112,7 +137,49 @@ export interface ShipmentRecord {
   incoterm: string;
   deliveryTimeline: string;
   status: string;
+
+  // Additional Shipment Tracking Fields
+  invoiceNumber?: string | null;
+  invoiceDate?: string | null;
+  unitPrice?: number | null;
+  invoiceAmount?: number | null;
+  containerTotal?: number | null;
+  containerSize?: string | null;
+  bcsQty?: number | null;
+  acsQty?: number | null;
+  kgbhQty?: number | null;
+  ksbhQty?: number | null;
+  aluformQty?: number | null;
+  dispatchQtyM2?: number | null;
 }
+
+export function addWeeksToDate(dateStr: string | null | undefined, weeks = 13): string | null {
+  if (!dateStr || dateStr.trim() === '' || dateStr.toLowerCase() === 'done' || dateStr.toLowerCase() === 'n/a') return null;
+  try {
+    let d: Date;
+    if (dateStr.includes('-')) {
+      const parts = dateStr.split('-');
+      if (parts[0].length === 4) {
+        d = new Date(dateStr);
+      } else if (parts[2].length === 4) {
+        d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      } else {
+        d = new Date(dateStr);
+      }
+    } else {
+      d = new Date(dateStr);
+    }
+    if (isNaN(d.getTime())) return null;
+    d.setDate(d.getDate() + weeks * 7);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  } catch (e) {
+    return null;
+  }
+}
+
 
 export interface PaymentRecord {
   paymentId: string;

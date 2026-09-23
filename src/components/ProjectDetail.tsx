@@ -5,6 +5,7 @@ import { StatusBadge, PaymentBadge } from './ui/StatusBadge';
 import { ProgressBar, PlannedActualBar } from './ui/ProgressBar';
 import { ProjectJourney, buildProjectStages } from './projects/ProjectJourney';
 import { exportProjectPDF } from '../utils/pdfExport';
+import { addWeeksToDate } from '../data/projectData';
 import { EditProjectModal } from './EditProjectModal';
 import { useState } from 'react';
 import {
@@ -634,10 +635,56 @@ export function ProjectDetail() {
             )}
           </SectionCard>
 
-          {/* Design */}
-          {design.length > 0 && (
-            <SectionCard title="Design Elements" label="Design Monitoring">
-              <div className="overflow-x-auto">
+          {/* Schedule & Milestone Dates */}
+          <SectionCard title="Schedule & Milestone Dates" label="Milestone Tracking">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
+              <FieldRow label="Shell Plan Confirmation Date" value={project.shellPlanConfirmation} />
+              <FieldRow label="Payment Received Date (Shell Plan)" value={project.paymentReceivedShellPlanDate} />
+              <FieldRow label="Shell Confirm + 13 Weeks" value={addWeeksToDate(project.shellPlanConfirmation, 13)} />
+              <FieldRow label="Payment Received + 13 Weeks" value={addWeeksToDate(project.paymentReceivedShellPlanDate, 13)} />
+              <FieldRow label="MD Completion Date (Mfg. Dwg)" value={project.mdCompletion} />
+              <FieldRow label="Production Start Date" value={project.productionStart} />
+              <FieldRow label="Production Completion Date" value={project.productionComplete} />
+              <FieldRow label="Loading Date" value={project.loadingDate} />
+              <FieldRow label="ETD Date" value={project.etd} />
+              <FieldRow label="ETA Date" value={project.eta} />
+              <FieldRow label="ETA Location / Port" value={project.etaLocation || project.country} />
+              <FieldRow label="Incoterms" value={project.incoterm} />
+              <FieldRow label="Delivery Timeline" value={project.deliveryTimeline} />
+              <FieldRow label="Actual Total Weeks" value={project.actualTotalWeeks ? `${project.actualTotalWeeks} Weeks` : null} />
+              <FieldRow label="Current Project Status" value={project.currentSiteStatus || project.contractStatus} />
+            </div>
+
+            {/* Factory Visit Sub-Block */}
+            <div className={`border rounded-xl p-4 text-xs space-y-2 ${
+              isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#C9A86A]' : 'text-slate-700'}`}>
+                Factory Visit Details (After Production / Before Packaging)
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
+                <FieldRow label="Visit Type" value={project.factoryVisitType || 'NA'} />
+                <FieldRow label="Total Visit Persons" value={project.factoryVisitPersons} />
+                <FieldRow label="Planned Date" value={project.factoryVisitPlannedDate} />
+                <FieldRow label="Completed Date" value={project.factoryVisitCompletedDate} />
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* Design Elements & Area Breakdown */}
+          <SectionCard title="Design Elements & Area Breakdown" label="Area Specifications">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
+              <FieldRow label="Typical Floor Area" value={project.typicalFloorArea ? `${project.typicalFloorArea.toLocaleString()} ${project.typicalFloorAreaUom || 'Sqm'}` : null} />
+              <FieldRow label="Basement Floor Area" value={project.basementFloorArea ? `${project.basementFloorArea.toLocaleString()} ${project.basementFloorAreaUom || 'Sqm'}` : null} />
+              <FieldRow label="Change Floor Area" value={project.changeFloorArea ? `${project.changeFloorArea.toLocaleString()} ${project.changeFloorAreaUom || 'Sqm'}` : null} />
+              <FieldRow label="Plumbing Groove Area" value={project.plumbingGrooveArea ? `${project.plumbingGrooveArea.toLocaleString()} ${project.plumbingGrooveAreaUom || 'Sqm'}` : null} />
+              <FieldRow label="Elevation Groove Area" value={project.elevationGrooveArea ? `${project.elevationGrooveArea.toLocaleString()} ${project.elevationGrooveAreaUom || 'Sqm'}` : null} />
+              <FieldRow label="Total Payable Area" value={project.totalPayableArea ? `${project.totalPayableArea.toLocaleString()} ${project.totalPayableAreaUom || 'Sqm'}` : (project.actualDesignQtyM2 ? `${project.actualDesignQtyM2.toLocaleString()} Sqm` : null)} />
+              <FieldRow label="Area Approved Date" value={project.areaApprovedDate} />
+            </div>
+
+            {design.length > 0 && (
+              <div className="overflow-x-auto border-t pt-3">
                 <table className="w-full text-sm" aria-label="Design schedule table">
                   <thead>
                     <tr className={`border-b text-xs uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
@@ -659,8 +706,8 @@ export function ProjectDetail() {
                   </tbody>
                 </table>
               </div>
-            </SectionCard>
-          )}
+            )}
+          </SectionCard>
 
           {/* Production */}
           {productionList.length > 0 && (
@@ -699,49 +746,109 @@ export function ProjectDetail() {
             </SectionCard>
           )}
 
-          {/* Shipment */}
-          {shipment ? (
-            <SectionCard title="Shipment Details" label="Shipment Monitoring">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
-                <FieldRow label="ETD" value={shipment.etd} />
-                <FieldRow label="ETA" value={shipment.eta} />
-                <FieldRow label="FWD" value={shipment.fwd} />
-                <FieldRow label="Status" value={shipment.status} />
-                <FieldRow label="Delivery Timeline" value={shipment.deliveryTimeline} />
-              </div>
-              <div className="flex items-center gap-2 overflow-x-auto py-3">
-                {['Prepared', 'ETD', 'ETA', 'Delivered'].map((step, i, arr) => {
-                  const doneMap: Record<string, boolean> = {
-                    'Prepared': true, // Assume prepared if record exists
-                    'ETD': !!shipment.etd,
-                    'ETA': !!shipment.eta,
-                    'Delivered': shipment.status === 'Delivered',
-                  };
-                  const done = doneMap[step];
-                  return (
-                    <span key={step} className="flex items-center flex-shrink-0 gap-2">
-                      <div className={`flex flex-col items-center gap-1 ${done ? (isDark ? 'text-[#70D0A8]' : 'text-emerald-700') : (isDark ? 'text-[#85858B]' : 'text-slate-400')}`}>
-                        <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold
-                          ${done 
-                            ? (isDark ? 'border-[#3FB984] bg-[#163127] text-[#70D0A8]' : 'border-emerald-500 bg-emerald-50 text-emerald-700') 
-                            : (isDark ? 'border-[#303035] bg-[#111113] text-[#85858B]' : 'border-slate-300 bg-slate-100 text-slate-500')}`}>
-                          {done ? '✓' : i + 1}
+          {/* Shipment Details */}
+          <SectionCard title="Shipment Tracking & Logistics" label="Shipment Monitoring">
+            {shipment ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
+                  <FieldRow label="Overall Total Dispatch Qty" value={shipment.dispatchQtyM2 ? `${shipment.dispatchQtyM2.toLocaleString()} m²` : (project.actualDesignQtyM2 ? `${project.actualDesignQtyM2.toLocaleString()} m²` : null)} />
+                  <FieldRow label="ETD" value={shipment.etd} />
+                  <FieldRow label="ETA" value={shipment.eta} />
+                  <FieldRow label="Status" value={shipment.status} />
+                  <FieldRow label="Delivery Timeline" value={shipment.deliveryTimeline} />
+                  <FieldRow label="Incoterms" value={shipment.incoterm || project.incoterm} />
+                </div>
+
+                {/* Material-Wise Quantities */}
+                <div className={`border rounded-xl p-4 text-xs space-y-2 ${
+                  isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#7DB3FC]' : 'text-sky-800'}`}>
+                    Material-Wise Separate Quantities
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
+                    <FieldRow label="BCS Qty" value={shipment.bcsQty ? `${shipment.bcsQty} m²` : '—'} />
+                    <FieldRow label="ACS Qty" value={shipment.acsQty ? `${shipment.acsQty} m²` : '—'} />
+                    <FieldRow label="KGBH Qty" value={shipment.kgbhQty ? `${shipment.kgbhQty} m²` : '—'} />
+                    <FieldRow label="KSBH Qty" value={shipment.ksbhQty ? `${shipment.ksbhQty} m²` : '—'} />
+                    <FieldRow label="Aluform Qty" value={shipment.aluformQty ? `${shipment.aluformQty} m²` : '—'} />
+                  </div>
+                </div>
+
+                {/* Invoice & Container Details */}
+                <div className={`border rounded-xl p-4 text-xs space-y-2 ${
+                  isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#70D0A8]' : 'text-emerald-800'}`}>
+                    Invoice & Container Details
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-1">
+                    <FieldRow label="Invoice Number" value={shipment.invoiceNumber || `INV-${project.projectId}`} />
+                    <FieldRow label="Invoice Date" value={shipment.invoiceDate || project.poDate} />
+                    <FieldRow label="Unit Price" value={shipment.unitPrice ? `$${shipment.unitPrice}` : (project.pricePerM2USD ? `$${project.pricePerM2USD}` : null)} />
+                    <FieldRow label="Invoice Amount" value={shipment.invoiceAmount ? `$${shipment.invoiceAmount.toLocaleString()}` : (project.totalAmountUSD ? `$${project.totalAmountUSD.toLocaleString()}` : null)} />
+                    <FieldRow label="Container Total" value={shipment.containerTotal || 1} />
+                    <FieldRow label="Container Size" value={shipment.containerSize || '40 High Cube'} />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto py-3">
+                  {['Prepared', 'ETD', 'ETA', 'Delivered'].map((step, i, arr) => {
+                    const doneMap: Record<string, boolean> = {
+                      'Prepared': true,
+                      'ETD': !!shipment.etd,
+                      'ETA': !!shipment.eta,
+                      'Delivered': shipment.status === 'Delivered',
+                    };
+                    const done = doneMap[step];
+                    return (
+                      <span key={step} className="flex items-center flex-shrink-0 gap-2">
+                        <div className={`flex flex-col items-center gap-1 ${done ? (isDark ? 'text-[#70D0A8]' : 'text-emerald-700') : (isDark ? 'text-[#85858B]' : 'text-slate-400')}`}>
+                          <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold
+                            ${done 
+                              ? (isDark ? 'border-[#3FB984] bg-[#163127] text-[#70D0A8]' : 'border-emerald-500 bg-emerald-50 text-emerald-700') 
+                              : (isDark ? 'border-[#303035] bg-[#111113] text-[#85858B]' : 'border-slate-300 bg-slate-100 text-slate-500')}`}>
+                            {done ? '✓' : i + 1}
+                          </div>
+                          <span className="text-[10px] font-medium">{step}</span>
                         </div>
-                        <span className="text-[10px] font-medium">{step}</span>
-                      </div>
-                      {i < arr.length - 1 && (
-                        <div className={`h-0.5 w-8 ${done ? (isDark ? 'bg-[#3FB984]' : 'bg-emerald-500') : (isDark ? 'bg-[#303035]' : 'bg-slate-200')}`} />
-                      )}
-                    </span>
-                  );
-                })}
+                        {i < arr.length - 1 && (
+                          <div className={`h-0.5 w-8 ${done ? (isDark ? 'bg-[#3FB984]' : 'bg-emerald-500') : (isDark ? 'bg-[#303035]' : 'bg-slate-200')}`} />
+                        )}
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
-            </SectionCard>
-          ) : (
-            <SectionCard title="Shipment Details" label="Shipment Monitoring">
-              <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No active shipment records mapped for this project.</p>
-            </SectionCard>
-          )}
+            ) : (
+              <div className="space-y-4">
+                <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Standard shipment tracking defaults enabled for project {project.projectId}.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <FieldRow label="Overall Total Dispatch Qty" value={project.actualDesignQtyM2 ? `${project.actualDesignQtyM2.toLocaleString()} m²` : null} />
+                  <FieldRow label="ETD Date" value={project.etd} />
+                  <FieldRow label="ETA Date" value={project.eta} />
+                  <FieldRow label="ETA Location" value={project.etaLocation || project.country} />
+                  <FieldRow label="Incoterms" value={project.incoterm} />
+                  <FieldRow label="Delivery Timeline" value={project.deliveryRequest || project.contractDate} />
+                </div>
+                <div className={`border rounded-xl p-4 text-xs space-y-2 ${
+                  isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#70D0A8]' : 'text-emerald-800'}`}>
+                    Invoice & Container Overview
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-1">
+                    <FieldRow label="Invoice Number" value={`INV-${project.projectId}`} />
+                    <FieldRow label="Invoice Date" value={project.poDate || project.contractDate} />
+                    <FieldRow label="Unit Price" value={project.pricePerM2USD ? `$${project.pricePerM2USD}` : null} />
+                    <FieldRow label="Invoice Amount" value={project.totalAmountUSD ? `$${project.totalAmountUSD.toLocaleString()}` : null} />
+                    <FieldRow label="Container Total" value={1} />
+                    <FieldRow label="Container Size" value="40 High Cube" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </SectionCard>
 
           {/* Payment */}
           {(project.totalAmountUSD || payments.length > 0) ? (

@@ -1161,6 +1161,126 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                   }`}
                 />
               </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Payment Received Date against Shell Plan</label>
+                <input
+                  type="text"
+                  value={formData.paymentReceivedShellPlanDate || ''}
+                  onChange={e => handleChange('paymentReceivedShellPlanDate', e.target.value)}
+                  placeholder="DD-MM-YYYY / Date"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>ETA Location / Port</label>
+                <input
+                  type="text"
+                  value={formData.etaLocation || ''}
+                  onChange={e => handleChange('etaLocation', e.target.value)}
+                  placeholder="e.g. Nhava Sheva / ICD Bangalore"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Delivery Timeline</label>
+                <input
+                  type="text"
+                  value={formData.deliveryTimeline || ''}
+                  onChange={e => handleChange('deliveryTimeline', e.target.value)}
+                  placeholder="e.g. 11-12 weeks from Shell Plan"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Actual Total Weeks</label>
+                <input
+                  type="text"
+                  value={formData.actualTotalWeeks ?? ''}
+                  onChange={e => handleChange('actualTotalWeeks', e.target.value)}
+                  placeholder="e.g. 13 Weeks"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Factory Visit Sub-Section */}
+            <div className={`border-t pt-3 mt-2 grid grid-cols-2 sm:grid-cols-4 gap-4 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Factory Visit Type</label>
+                <select
+                  value={formData.factoryVisitType || 'NA'}
+                  onChange={e => handleChange('factoryVisitType', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="NA">NA (Not Applicable)</option>
+                  <option value="Mock Up">Mock Up</option>
+                  <option value="Inspection">Factory Inspection</option>
+                  <option value="Client Visit">Client Visit</option>
+                </select>
+              </div>
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Visit Persons Count</label>
+                <input
+                  type="number"
+                  value={formData.factoryVisitPersons ?? ''}
+                  onChange={e => handleChange('factoryVisitPersons', e.target.value ? parseInt(e.target.value, 10) : null)}
+                  placeholder="Total Persons"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Factory Visit Planned Date</label>
+                <input
+                  type="text"
+                  value={formData.factoryVisitPlannedDate || ''}
+                  onChange={e => handleChange('factoryVisitPlannedDate', e.target.value)}
+                  placeholder="DD-MM-YYYY"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Factory Visit Completed Date</label>
+                <input
+                  type="text"
+                  value={formData.factoryVisitCompletedDate || ''}
+                  onChange={e => handleChange('factoryVisitCompletedDate', e.target.value)}
+                  placeholder="DD-MM-YYYY"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark 
+                      ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]'
+                      : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
             </div>
 
             <div>
@@ -1176,6 +1296,202 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                     : 'border-slate-300 bg-white text-slate-900 placeholder-slate-400'
                 }`}
               />
+            </div>
+          </div>
+
+          {/* SECTION 5: DESIGN ELEMENTS */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <Layers size={16} className={isDark ? 'text-[#C9A86A]' : 'text-indigo-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                5. Design Elements Breakdown & Areas
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Typical Floor Area */}
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Typical Floor Area</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.typicalFloorArea ?? ''}
+                    onChange={e => handleChange('typicalFloorArea', e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Value"
+                    className={`flex-1 p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                  <select
+                    value={formData.typicalFloorAreaUom || 'Sqm'}
+                    onChange={e => handleChange('typicalFloorAreaUom', e.target.value)}
+                    className={`p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Sqm">Sqm</option>
+                    <option value="PCS">PCS</option>
+                    <option value="Nos">Nos</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Basement Floor Area */}
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Basement Floor Area</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.basementFloorArea ?? ''}
+                    onChange={e => handleChange('basementFloorArea', e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Value"
+                    className={`flex-1 p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                  <select
+                    value={formData.basementFloorAreaUom || 'Sqm'}
+                    onChange={e => handleChange('basementFloorAreaUom', e.target.value)}
+                    className={`p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Sqm">Sqm</option>
+                    <option value="PCS">PCS</option>
+                    <option value="Nos">Nos</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Change Floor Area */}
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Change Floor Area</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.changeFloorArea ?? ''}
+                    onChange={e => handleChange('changeFloorArea', e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Value"
+                    className={`flex-1 p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                  <select
+                    value={formData.changeFloorAreaUom || 'Sqm'}
+                    onChange={e => handleChange('changeFloorAreaUom', e.target.value)}
+                    className={`p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Sqm">Sqm</option>
+                    <option value="PCS">PCS</option>
+                    <option value="Nos">Nos</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Plumbing Groove Area */}
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Plumbing Groove Area</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.plumbingGrooveArea ?? ''}
+                    onChange={e => handleChange('plumbingGrooveArea', e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Value"
+                    className={`flex-1 p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                  <select
+                    value={formData.plumbingGrooveAreaUom || 'Sqm'}
+                    onChange={e => handleChange('plumbingGrooveAreaUom', e.target.value)}
+                    className={`p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Sqm">Sqm</option>
+                    <option value="PCS">PCS</option>
+                    <option value="Nos">Nos</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Elevation Groove Area */}
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Elevation Groove Area</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.elevationGrooveArea ?? ''}
+                    onChange={e => handleChange('elevationGrooveArea', e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Value"
+                    className={`flex-1 p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                  <select
+                    value={formData.elevationGrooveAreaUom || 'Sqm'}
+                    onChange={e => handleChange('elevationGrooveAreaUom', e.target.value)}
+                    className={`p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Sqm">Sqm</option>
+                    <option value="PCS">PCS</option>
+                    <option value="Nos">Nos</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Total Payable Area */}
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Total Payable Area</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="any"
+                    value={formData.totalPayableArea ?? ''}
+                    onChange={e => handleChange('totalPayableArea', e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Value"
+                    className={`flex-1 p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                  <select
+                    value={formData.totalPayableAreaUom || 'Sqm'}
+                    onChange={e => handleChange('totalPayableAreaUom', e.target.value)}
+                    className={`p-2.5 border rounded-lg outline-none transition-all ${
+                      isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Sqm">Sqm</option>
+                    <option value="PCS">PCS</option>
+                    <option value="Nos">Nos</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Area Approved Date */}
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Area Approved Date</label>
+                <input
+                  type="text"
+                  value={formData.areaApprovedDate || ''}
+                  onChange={e => handleChange('areaApprovedDate', e.target.value)}
+                  placeholder="DD-MM-YYYY"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
             </div>
           </div>
 

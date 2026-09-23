@@ -214,7 +214,7 @@ export function ProjectsPage() {
                           <Globe size={11} className={isDark ? 'text-[#C9A86A]' : 'text-[#0284C7]'} />
                           {project.country}
                         </span>
-                        <span className={`font-extrabold text-base ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{project.project}</span>
+                        <span className={`font-extrabold text-base ${isDark ? 'text-[#FFFFFF]' : 'text-[#000000]'}`} style={{ color: isDark ? undefined : '#000000' }}>{project.project}</span>
                         <span className={`font-bold ${isDark ? 'text-[#303035]' : 'text-[#CBD5E1]'}`}>·</span>
                         <span className={`text-sm font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>{project.customer}</span>
                         {project.block && (

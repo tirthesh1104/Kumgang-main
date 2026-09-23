@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useData } from '../context/DataContext';
 import { useApp } from '../context/AppContext';
@@ -95,8 +96,8 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
     return matchesSearch;
   }) || [];
 
-  return (
-    <div className={`fixed inset-0 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 z-50 overflow-y-auto ${isDark ? 'bg-black/80' : 'bg-slate-900/50'}`}>
+  return createPortal(
+    <div className={`fixed inset-0 backdrop-blur-md flex items-center justify-center p-3 lg:p-6 z-[9999] overflow-y-auto ${isDark ? 'bg-black/80' : 'bg-slate-900/60'}`}>
       <div className={`border rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 ${
         isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-200 text-slate-800'
       }`}>
@@ -529,6 +530,7 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

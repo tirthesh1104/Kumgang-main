@@ -410,52 +410,52 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
     {
       status: 'Signed PO',
       icon: CheckCircle2,
-      accentColor: 'text-[#16A36A] dark:text-[#70D0A8]',
+      accentColor: 'text-[#059669] dark:text-[#70D0A8]',
       iconBg: isDark ? 'bg-[#163127] border-[#28523F]' : 'bg-[#E6F4EA] border-[#CEEAD6]',
       subIconBg: isDark ? 'bg-[#163127]' : 'bg-[#E6F4EA]',
-      accentPill: 'bg-[#16A36A] dark:bg-[#70D0A8]',
-      amountColor: 'text-[#16A36A] dark:text-[#70D0A8]',
-      barClass: 'bg-[#16A36A] dark:bg-[#70D0A8]',
-      activeBorder: isDark ? 'border-[#70D0A8]' : 'border-[#16A36A]',
+      accentPill: 'bg-[#059669] dark:bg-[#70D0A8]',
+      amountColor: 'text-[#059669] dark:text-[#70D0A8]',
+      barClass: 'bg-[#059669] dark:bg-[#70D0A8]',
+      activeBorder: isDark ? 'border-[#70D0A8]' : 'border-[#059669]',
       activeBg: isDark ? 'bg-[#163127]/25' : 'bg-[#F0FDF4]',
       activeShadow: 'shadow-md shadow-emerald-500/10',
     },
     {
       status: 'Not Signed PO',
       icon: FileText,
-      accentColor: 'text-[#0284C7] dark:text-[#7DB3FC]',
+      accentColor: 'text-[#0369A1] dark:text-[#7DB3FC]',
       iconBg: isDark ? 'bg-[#1D2B44] border-[#2B436D]' : 'bg-[#E0F2FE] border-[#BAE6FD]',
       subIconBg: isDark ? 'bg-[#1D2B44]' : 'bg-[#E0F2FE]',
-      accentPill: 'bg-[#0284C7] dark:bg-[#7DB3FC]',
-      amountColor: 'text-[#0284C7] dark:text-[#7DB3FC]',
-      barClass: 'bg-[#0284C7] dark:bg-[#7DB3FC]',
-      activeBorder: isDark ? 'border-[#7DB3FC]' : 'border-[#0284C7]',
+      accentPill: 'bg-[#0369A1] dark:bg-[#7DB3FC]',
+      amountColor: 'text-[#0369A1] dark:text-[#7DB3FC]',
+      barClass: 'bg-[#0369A1] dark:bg-[#7DB3FC]',
+      activeBorder: isDark ? 'border-[#7DB3FC]' : 'border-[#0369A1]',
       activeBg: isDark ? 'bg-[#1D2B44]/25' : 'bg-[#F0F9FF]',
       activeShadow: 'shadow-md shadow-sky-500/10',
     },
     {
       status: 'Under Review PO',
       icon: Clock,
-      accentColor: 'text-[#D97706] dark:text-[#FBBF24]',
+      accentColor: 'text-[#B45309] dark:text-[#FBBF24]',
       iconBg: isDark ? 'bg-[#322917] border-[#5B4724]' : 'bg-[#FEF7E0] border-[#FDE293]',
       subIconBg: isDark ? 'bg-[#322917]' : 'bg-[#FEF7E0]',
-      accentPill: 'bg-[#D97706] dark:bg-[#FBBF24]',
-      amountColor: 'text-[#D97706] dark:text-[#FBBF24]',
-      barClass: 'bg-[#D97706] dark:bg-[#FBBF24]',
-      activeBorder: isDark ? 'border-[#FBBF24]' : 'border-[#F59E0B]',
+      accentPill: 'bg-[#B45309] dark:bg-[#FBBF24]',
+      amountColor: 'text-[#B45309] dark:text-[#FBBF24]',
+      barClass: 'bg-[#B45309] dark:bg-[#FBBF24]',
+      activeBorder: isDark ? 'border-[#FBBF24]' : 'border-[#D97706]',
       activeBg: isDark ? 'bg-[#322917]/25' : 'bg-[#FFFBEB]',
       activeShadow: 'shadow-md shadow-amber-500/10',
     },
     {
       status: 'Upcoming PO',
       icon: AlertTriangle,
-      accentColor: 'text-[#E11D48] dark:text-[#F87171]',
+      accentColor: 'text-[#BE123C] dark:text-[#F87171]',
       iconBg: isDark ? 'bg-[#34191B] border-[#5A292B]' : 'bg-[#FEE2E2] border-[#FECACA]',
       subIconBg: isDark ? 'bg-[#34191B]' : 'bg-[#FEE2E2]',
-      accentPill: 'bg-[#E11D48] dark:bg-[#F87171]',
-      amountColor: 'text-[#E11D48] dark:text-[#F87171]',
-      barClass: 'bg-[#E11D48] dark:bg-[#F87171]',
-      activeBorder: isDark ? 'border-[#F87171]' : 'border-[#E11D48]',
+      accentPill: 'bg-[#BE123C] dark:bg-[#F87171]',
+      amountColor: 'text-[#BE123C] dark:text-[#F87171]',
+      barClass: 'bg-[#BE123C] dark:bg-[#F87171]',
+      activeBorder: isDark ? 'border-[#F87171]' : 'border-[#BE123C]',
       activeBg: isDark ? 'bg-[#34191B]/25' : 'bg-[#FFF1F2]',
       activeShadow: 'shadow-md shadow-rose-500/10',
     },
@@ -465,47 +465,12 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
     key: 'All' | POStatus;
     label: string;
     dotColor?: string;
-    activeStyle: string;
   }[] = [
-    {
-      key: 'All',
-      label: 'All',
-      activeStyle: isDark
-        ? 'bg-white text-slate-900 border-white shadow-xs font-semibold'
-        : 'bg-slate-900 text-white border-slate-900 shadow-xs font-semibold',
-    },
-    {
-      key: 'Signed PO',
-      label: 'Signed PO',
-      dotColor: 'bg-emerald-500',
-      activeStyle: isDark
-        ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500 shadow-xs font-semibold'
-        : 'bg-emerald-50 text-emerald-800 border-emerald-400 shadow-xs font-semibold',
-    },
-    {
-      key: 'Not Signed PO',
-      label: 'Not Signed PO',
-      dotColor: 'bg-sky-500',
-      activeStyle: isDark
-        ? 'bg-sky-950/60 text-sky-300 border-sky-500 shadow-xs font-semibold'
-        : 'bg-sky-50 text-sky-800 border-sky-400 shadow-xs font-semibold',
-    },
-    {
-      key: 'Under Review PO',
-      label: 'Under Review PO',
-      dotColor: 'bg-amber-500',
-      activeStyle: isDark
-        ? 'bg-amber-950/60 text-amber-200 border-amber-500 shadow-xs font-semibold'
-        : 'bg-[#FEF6E7] text-[#92400E] border-[#FCD34D] shadow-xs font-semibold',
-    },
-    {
-      key: 'Upcoming PO',
-      label: 'Upcoming PO',
-      dotColor: 'bg-rose-500',
-      activeStyle: isDark
-        ? 'bg-rose-950/60 text-rose-300 border-rose-500 shadow-xs font-semibold'
-        : 'bg-rose-50 text-rose-800 border-rose-400 shadow-xs font-semibold',
-    },
+    { key: 'All', label: 'All' },
+    { key: 'Signed PO', label: 'Signed PO', dotColor: 'bg-emerald-500' },
+    { key: 'Not Signed PO', label: 'Not Signed PO', dotColor: 'bg-sky-500' },
+    { key: 'Under Review PO', label: 'Under Review PO', dotColor: 'bg-amber-500' },
+    { key: 'Upcoming PO', label: 'Upcoming PO', dotColor: 'bg-rose-500' },
   ];
 
   return (
@@ -544,10 +509,14 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                 <Building2 size={22} />
               </div>
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                <h2 className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}>
                   <span>Project Details</span>
                 </h2>
-                <p className="text-sm mt-0.5 font-normal text-slate-500 dark:text-slate-400">
+                <p className={`text-sm mt-0.5 font-semibold ${
+                  isDark ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   Complete project information for {scope} scope
                 </p>
               </div>
@@ -555,10 +524,10 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
 
             <div className="flex items-center gap-2.5">
               <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-2xs ${
-                isDark ? 'bg-[#18181B] border-[#303035] text-slate-300' : 'bg-white border-slate-200 text-slate-600'
+                isDark ? 'bg-[#18181B] border-[#303035] text-slate-300' : 'bg-white border-slate-200 text-slate-900'
               }`}>
-                <Calendar size={13} className="text-slate-400 dark:text-slate-500 shrink-0" />
-                <span>Last Updated: <strong className="text-slate-800 dark:text-slate-100 font-bold">{liveDateTime}</strong></span>
+                <Calendar size={13} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
+                <span>Last Updated: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{liveDateTime}</strong></span>
               </div>
 
               <button
@@ -566,7 +535,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                 className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors border cursor-pointer shadow-2xs ${
                   isDark
                     ? 'bg-[#18181B] hover:bg-[#26262B] text-slate-400 hover:text-white border-[#303035]'
-                    : 'bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 border-slate-200'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200'
                 }`}
                 aria-label="Close modal"
               >
@@ -613,14 +582,20 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                         <IconComponent size={19} className={item.accentColor} />
                       </div>
                       <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
+                        <span className={`text-[11px] font-black uppercase tracking-wider block ${
+                          isDark ? 'text-white' : 'text-slate-900'
+                        }`}>
                           {item.status}
                         </span>
                         <div className="flex items-baseline mt-0.5">
-                          <span className="text-2xl sm:text-[28px] leading-tight font-extrabold text-slate-900 dark:text-white">
+                          <span className={`text-2xl sm:text-[28px] leading-tight font-black ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}>
                             <AnimatedNumber value={metric.count} />
                           </span>
-                          <span className="text-xs sm:text-sm font-medium text-slate-400 dark:text-slate-500 ml-1.5">
+                          <span className={`text-xs sm:text-sm font-bold ml-1.5 ${
+                            isDark ? 'text-slate-200' : 'text-slate-700'
+                          }`}>
                             Projects
                           </span>
                         </div>
@@ -628,7 +603,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                     </div>
 
                     {/* Divider */}
-                    <div className="my-3.5 border-t border-slate-100 dark:border-[#262629]" />
+                    <div className={`my-3.5 border-t ${isDark ? 'border-[#262629]' : 'border-slate-200'}`} />
 
                     {/* Bottom Row: Area, Amount & Watermark Mini Bars */}
                     <div className="flex items-end justify-between">
@@ -638,11 +613,15 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                             <div className={`w-4 h-4 rounded-sm flex items-center justify-center ${item.subIconBg}`}>
                               <Layers size={10} className={item.accentColor} />
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                              isDark ? 'text-slate-200' : 'text-slate-800'
+                            }`}>
                               TOTAL AREA
                             </span>
                           </div>
-                          <p className="text-[14px] sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 mt-0.5 font-mono">
+                          <p className={`text-[14px] sm:text-[15px] font-black mt-0.5 font-mono ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}>
                             {formatArea(metric.areaM2)}
                           </p>
                         </div>
@@ -652,11 +631,15 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                             <div className={`w-4 h-4 rounded-sm flex items-center justify-center ${item.subIconBg}`}>
                               <DollarSign size={10} className={item.accentColor} />
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                              isDark ? 'text-slate-200' : 'text-slate-800'
+                            }`}>
                               TOTAL AMOUNT
                             </span>
                           </div>
-                          <p className={`text-[14px] sm:text-[15px] font-bold mt-0.5 font-mono ${item.amountColor}`}>
+                          <p className={`text-[14px] sm:text-[15px] font-black mt-0.5 font-mono ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}>
                             {formatScopeCurrency(metric.amount, scope)}
                           </p>
                         </div>
@@ -685,12 +668,14 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                         setActiveFilter(tab.key);
                         setCurrentPage(1);
                       }}
-                      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer border ${
+                      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer border ${
                         isActive
-                          ? tab.activeStyle
+                          ? isDark
+                            ? 'bg-white text-slate-900 border-white font-extrabold shadow-xs'
+                            : 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-xs'
                           : isDark
-                          ? 'bg-[#18181B] text-slate-300 border-[#2D2D32] hover:bg-[#202024] hover:text-white'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
+                          ? 'bg-[#18181B] text-slate-100 border-[#2D2D32] hover:bg-[#202024] hover:text-white'
+                          : 'bg-white text-slate-900 border-slate-300 hover:bg-slate-50 hover:text-black'
                       }`}
                     >
                       {tab.dotColor && (
@@ -717,7 +702,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                     className={`w-full pl-9 pr-7 py-1.5 text-xs sm:text-sm rounded-lg border outline-none font-medium transition-colors ${
                       isDark
                         ? 'bg-[#18181B] border-[#2D2D32] text-white placeholder-slate-500 focus:border-sky-500'
-                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-sky-500'
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-500 focus:border-sky-600 font-semibold'
                     }`}
                   />
                   {searchQuery && (
@@ -732,10 +717,10 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
 
                 <button
                   onClick={handleDownloadCSV}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border shadow-2xs flex-shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border shadow-2xs flex-shrink-0 ${
                     isDark
                       ? 'bg-[#18181B] text-slate-200 border-[#2D2D32] hover:bg-[#202024]'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      : 'bg-white text-slate-800 border-slate-300 hover:bg-slate-50'
                   }`}
                   title="Download CSV"
                 >
@@ -756,15 +741,15 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                 ease: [0.4, 0, 0.2, 1],
               }}
               className={`border rounded-2xl shadow-2xs overflow-hidden ${
-                isDark ? 'border-[#262629] bg-[#151517]' : 'border-slate-200/90 bg-white'
+                isDark ? 'border-[#262629] bg-[#151517]' : 'border-slate-300 bg-white'
               }`}
             >
               <div ref={tableInnerRef}>
                 <div className="overflow-x-auto min-w-full overscroll-contain scroll-smooth">
                   <table className="w-full text-left border-collapse min-w-[1000px]">
                     <thead>
-                      <tr className={`border-b font-semibold uppercase tracking-wider text-[11px] ${
-                        isDark ? 'bg-[#1B1B1F] text-slate-400 border-[#262629]' : 'bg-slate-50/70 text-slate-500 border-slate-200/80'
+                      <tr className={`border-b font-bold uppercase tracking-wider text-[11px] ${
+                        isDark ? 'bg-[#1B1B1F] text-slate-200 border-[#262629]' : 'bg-slate-100/90 text-slate-900 border-slate-300'
                       }`}>
                         <SortHeader
                           label="Project ID"
@@ -810,7 +795,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                         <th className="py-3 px-3 text-center whitespace-nowrap w-10"></th>
                       </tr>
                     </thead>
-                    <tbody className={`divide-y ${isDark ? 'divide-[#202024]' : 'divide-slate-100'}`}>
+                    <tbody className={`divide-y ${isDark ? 'divide-[#202024]' : 'divide-slate-200'}`}>
                       {displayedProjects.length === 0 ? (
                         <motion.tr
                           key="no-projects"
@@ -821,7 +806,9 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                               : { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } }
                           }
                         >
-                          <td colSpan={10} className="py-14 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">
+                          <td colSpan={10} className={`py-14 text-center font-bold text-sm ${
+                            isDark ? 'text-slate-100' : 'text-slate-900'
+                          }`}>
                             No projects found matching the selected filters.
                           </td>
                         </motion.tr>
@@ -851,40 +838,62 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                                 isDark ? 'hover:bg-[#1C1C20]' : 'hover:bg-slate-50/80'
                               }`}
                             >
-                              <td className="py-3.5 px-3.5 font-mono text-[13px] font-bold text-sky-600 dark:text-sky-400 group-hover:text-sky-700 dark:group-hover:text-sky-300 whitespace-nowrap">
+                              <td className={`py-3.5 px-3.5 font-mono text-[13px] font-extrabold whitespace-nowrap ${
+                                isDark ? 'text-sky-400 group-hover:text-sky-300' : 'text-sky-700 group-hover:text-sky-800'
+                              }`}>
                                 {project.projectId}
                               </td>
-                              <td className="py-3.5 px-3.5 font-semibold text-[13px] text-slate-900 dark:text-slate-100 max-w-[200px] truncate" title={project.project}>
-                                <span className="block truncate">{project.project}</span>
+                              <td className="py-3.5 px-3.5 font-semibold text-[13px] max-w-[200px] truncate" title={project.project}>
+                                <span className={`block truncate font-bold ${
+                                  isDark ? 'text-white' : 'text-slate-900'
+                                }`}>
+                                  {project.project}
+                                </span>
                                 {project.block ? (
-                                  <span className="block text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  <span className={`block text-[11px] font-medium truncate mt-0.5 ${
+                                    isDark ? 'text-slate-300' : 'text-slate-600'
+                                  }`}>
                                     {project.block}
                                   </span>
                                 ) : null}
                               </td>
-                              <td className="py-3.5 px-3.5 text-[12px] font-medium tracking-wide uppercase text-slate-600 dark:text-slate-300 max-w-[160px] truncate" title={project.customer}>
+                              <td className={`py-3.5 px-3.5 text-[12px] font-bold tracking-wide uppercase max-w-[160px] truncate ${
+                                isDark ? 'text-slate-200' : 'text-slate-900'
+                              }`} title={project.customer}>
                                 {project.customer}
                               </td>
-                              <td className="py-3.5 px-3.5 font-mono text-[12px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                              <td className={`py-3.5 px-3.5 font-mono text-[12px] font-semibold whitespace-nowrap ${
+                                isDark ? 'text-slate-200' : 'text-slate-900'
+                              }`}>
                                 {poNum}
                               </td>
-                              <td className="py-3.5 px-3.5 font-mono text-[12px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                              <td className={`py-3.5 px-3.5 font-mono text-[12px] font-semibold whitespace-nowrap ${
+                                isDark ? 'text-slate-200' : 'text-slate-900'
+                              }`}>
                                 {poDate}
                               </td>
-                              <td className="py-3.5 px-3.5 text-right font-mono text-[13px] text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                              <td className={`py-3.5 px-3.5 text-right font-mono text-[13px] font-bold whitespace-nowrap ${
+                                isDark ? 'text-white' : 'text-slate-900'
+                              }`}>
                                 {area > 0 ? area.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '-'}
                               </td>
-                              <td className="py-3.5 px-3.5 text-right font-mono text-[13px] font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                              <td className={`py-3.5 px-3.5 text-right font-mono text-[13px] font-extrabold whitespace-nowrap ${
+                                isDark ? 'text-white' : 'text-slate-900'
+                              }`}>
                                 {amt > 0 ? formatScopeCurrency(amt, scope) : '-'}
                               </td>
                               <td className="py-3.5 px-3.5 whitespace-nowrap">
                                 <TablePOStatusBadge status={poStatus} />
                               </td>
-                              <td className="py-3.5 px-3.5 text-[13px] text-slate-600 dark:text-slate-400 max-w-[140px] truncate" title={siteLocation}>
+                              <td className={`py-3.5 px-3.5 text-[13px] font-semibold max-w-[140px] truncate ${
+                                isDark ? 'text-slate-200' : 'text-slate-900'
+                              }`} title={siteLocation}>
                                 {siteLocation}
                               </td>
                               <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                                <span className="inline-flex items-center text-sky-400 group-hover:text-sky-600 group-hover:translate-x-0.5 transition-all">
+                                <span className={`inline-flex items-center group-hover:translate-x-0.5 transition-all ${
+                                  isDark ? 'text-sky-400 group-hover:text-sky-300' : 'text-sky-600 group-hover:text-sky-800'
+                                }`}>
                                   <ChevronRight size={16} />
                                 </span>
                               </td>
@@ -898,7 +907,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
 
                 {/* 5. Pagination controls */}
                 <div className={`py-3 px-4 border-t flex flex-wrap items-center justify-between gap-3 text-xs ${
-                  isDark ? 'border-[#262629] bg-[#18181B] text-slate-400' : 'border-slate-100 bg-white text-slate-600'
+                  isDark ? 'border-[#262629] bg-[#18181B] text-slate-400' : 'border-slate-200 bg-white text-slate-800 font-semibold'
                 }`}>
                   <div>
                     Showing {displayedTotal === 0 ? 0 : (displayPage - 1) * rowsPerPage + 1} –{' '}
