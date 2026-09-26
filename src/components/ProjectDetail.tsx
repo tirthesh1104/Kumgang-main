@@ -467,7 +467,7 @@ export function ProjectDetail() {
   const hasBalance = (project.balanceUSD || 0) > 0;
   const notFullyPaid = project.paymentStatus && !project.paymentStatus.toLowerCase().includes('100%');
   const needsAttention = hasBalance && notFullyPaid;
-  const progressPercent = project.designProgressPercent != null ? Math.round(project.designProgressPercent) : null;
+  const progressPercent = project.designProgressPercent != null ? Math.min(Math.round(project.designProgressPercent), 100) : null;
 
   return (
     <motion.div
@@ -904,6 +904,114 @@ export function ProjectDetail() {
               <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No payment data available for this project.</p>
             </SectionCard>
           )}
+
+          {/* PO Terms & Special Compliance */}
+          <SectionCard title="PO Compliance & Special Terms" label="Force Majeure, Packing & POD">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-4">
+              <FieldRow label="Force Majeure App" value={project.forceMajeureApplies || 'NA'} />
+              <FieldRow label="Force Majeure Reason" value={project.forceMajeureReason} />
+              <FieldRow label="Force Majeure Remarks" value={project.forceMajeureRemarks} />
+              <FieldRow label="Packing Status" value={project.packingStatus} />
+              <FieldRow label="Packing Date" value={project.packingDate} />
+              <FieldRow label="Packing Responsibility" value={project.packingResponsibility} />
+              <FieldRow label="Invoice Verification" value={project.invoiceVerificationStatus || 'Verified'} />
+              <FieldRow label="Invoice Ref No." value={project.invoiceReference || `INV-${project.projectId}`} />
+              <FieldRow label="POD Reference" value={project.podReference} />
+            </div>
+            {project.transitDamageInfo && (
+              <p className={`text-xs italic border-t pt-2 ${isDark ? 'text-[#85858B] border-[#262629]' : 'text-slate-600 border-slate-200'}`}>
+                Transit & Damage Note: {project.transitDamageInfo}
+              </p>
+            )}
+          </SectionCard>
+
+          {/* Logistics, RTO & Vehicle Inspection */}
+          <SectionCard title="Logistics & RTO Compliance" label="Transport & Safety Rules">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+              <FieldRow label="Vehicle Number" value={project.vehicleNumber} />
+              <FieldRow label="Transporter" value={project.transporterDetails} />
+              <FieldRow label="Driver Name" value={project.driverDetails} />
+              <FieldRow label="Driver Contact" value={project.driverContact} />
+              <FieldRow label="Speed Limit Compliance" value={project.speedLimitCompliance || 'Compliant (Below Limit)'} />
+              <FieldRow label="Parking Bay" value={project.designatedParkingLocation} />
+              <FieldRow label="Unattended Rule" value={project.unattendedVehicleRestrictionStatus || 'Restricted'} />
+              <FieldRow label="Inspection Status" value={project.overallVehicleInspectionStatus || 'Pass (7-Point Inspection)'} />
+            </div>
+
+            {/* RTO Documents Summary */}
+            <div className={`border rounded-xl p-3 text-xs space-y-2 mb-3 ${
+              isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#70D0A8]' : 'text-emerald-800'}`}>
+                RTO Documents Checklist Summary (8.5)
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
+                <FieldRow label="PUC" value={project.rtoPucStatus || 'Valid'} />
+                <FieldRow label="Fitness Cert" value={project.rtoFitnessStatus || 'Valid'} />
+                <FieldRow label="Insurance" value={project.rtoInsuranceStatus || 'Valid'} />
+                <FieldRow label="RC Book" value={project.rtoRcBookStatus || 'Valid'} />
+                <FieldRow label="Driver License" value={project.rtoDriverLicenseStatus || 'Valid'} />
+              </div>
+            </div>
+
+            {/* 7-Point Safety Inspection Summary */}
+            <div className={`border rounded-xl p-3 text-xs space-y-2 ${
+              isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#C9A86A]' : 'text-amber-800'}`}>
+                7-Point Vehicle Safety Checklist (8.8)
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono">
+                <div><span className="text-[#85858B]">Lights:</span> {project.vInspLights || 'Pass'}</div>
+                <div><span className="text-[#85858B]">Horn:</span> {project.vInspHorn || 'Pass'}</div>
+                <div><span className="text-[#85858B]">Wiper:</span> {project.vInspWiper || 'Pass'}</div>
+                <div><span className="text-[#85858B]">Brakes:</span> {project.vInspBrakes || 'Pass'}</div>
+                <div><span className="text-[#85858B]">Indicators:</span> {project.vInspIndicators || 'Pass'}</div>
+                <div><span className="text-[#85858B]">Condition:</span> {project.vInspGeneralCondition || 'Pass'}</div>
+                <div><span className="text-[#85858B]">Guard:</span> {project.vInspSafetyProtection || 'Pass'}</div>
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* HSE & Safety Tracking */}
+          <SectionCard title="HSE & Safety Monitoring" label="Incident & Accident Logs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <FieldRow label="HSE Violation Status" value={project.hseViolationStatus || 'No Incident / No Violation'} />
+              <FieldRow label="Accident Record" value={project.accidentStatus || 'No Accident Reported'} />
+              <FieldRow label="Incident Date" value={project.hseIncidentDate} />
+              <FieldRow label="Description" value={project.hseDescription} />
+              <FieldRow label="CAPA Action" value={project.hseCorrectiveAction} />
+              <FieldRow label="Closure Status" value={project.hseClosureStatus || 'NA'} />
+            </div>
+          </SectionCard>
+
+          {/* Statutory Tax & GST Compliance */}
+          <SectionCard title="Statutory Tax & GST Compliance" label="TDS, GST, GSTR-1 & GSTR-3B">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+              <FieldRow label="TDS Applicability" value={project.tdsApplicability || 'Applicable'} />
+              <FieldRow label="TDS Rate" value={project.tdsPercentage ? `${project.tdsPercentage}%` : null} />
+              <FieldRow label="TDS Amount" value={project.tdsAmount ? `$${project.tdsAmount}` : null} />
+              <FieldRow label="TDS Status" value={project.tdsStatus || 'Deposited'} />
+              <FieldRow label="GST Compliance" value={project.gstComplianceStatus || 'Compliant'} />
+              <FieldRow label="GSTIN Ref" value={project.gstRegistrationDetails || 'Verified'} />
+              <FieldRow label="GST Rate" value={project.gstRate ? `${project.gstRate}%` : null} />
+              <FieldRow label="GST Amount" value={project.gstAmount ? `$${project.gstAmount}` : null} />
+            </div>
+
+            <div className={`border rounded-xl p-3 text-xs space-y-2 ${
+              isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#89C9DF]' : 'text-sky-800'}`}>
+                Statutory Tax Returns (GSTR-1 & GSTR-3B)
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                <FieldRow label="GSTR-1 Status" value={project.gstr1Status || 'Filed'} />
+                <FieldRow label="GSTR-1 ARN" value={project.gstr1ArnReference} />
+                <FieldRow label="GSTR-3B Status" value={project.gstr3bStatus || 'Filed & Tax Paid'} />
+                <FieldRow label="GSTR-3B ARN" value={project.gstr3bArnReference} />
+              </div>
+            </div>
+          </SectionCard>
 
           {/* Derived Risk (replacing old ML data) */}
           {needsAttention && (

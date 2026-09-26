@@ -39,8 +39,8 @@ export function validateProjectMaster(data: Partial<ProjectMaster>): ValidationR
   if (data.designProgressPercent !== undefined && data.designProgressPercent !== null) {
     if (typeof data.designProgressPercent !== 'number' || isNaN(data.designProgressPercent)) {
       errors.push({ field: 'designProgressPercent', message: 'Design Progress (%) must be a valid number.' });
-    } else if (data.designProgressPercent < 0 || data.designProgressPercent > 500) {
-      errors.push({ field: 'designProgressPercent', message: 'Design Progress (%) should be a valid percentage.' });
+    } else if (data.designProgressPercent < 0 || data.designProgressPercent > 100) {
+      errors.push({ field: 'designProgressPercent', message: 'Design Progress (%) must be between 0% and 100%.' });
     }
   }
 

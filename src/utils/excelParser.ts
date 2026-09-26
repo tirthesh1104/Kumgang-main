@@ -84,7 +84,8 @@ function mapRowToProjectMaster(row: Record<string, any>, sheetName: string): Par
   const contractWeightTons = parseNumeric(getVal('contract weight tons', 'contractweighttons', 'weight tons', 'weight'));
   const actualDesignQtyM2 = parseNumeric(getVal('actual design qty m2', 'actualdesignqtym2', 'design qty'));
   const actualDesignWeightTons = parseNumeric(getVal('actual design weight tons', 'actualdesignweighttons', 'design weight'));
-  const designProgressPercent = parseNumeric(getVal('design progress percent', 'designprogresspercent', 'progress %', 'progress'));
+  const rawProgress = parseNumeric(getVal('design progress percent', 'designprogresspercent', 'progress %', 'progress'));
+  const designProgressPercent = rawProgress !== null ? Math.min(Math.max(0, rawProgress), 100) : null;
   const pricePerM2USD = parseNumeric(getVal('price per m2 usd', 'priceperm2usd', 'rate usd', 'price usd'));
   const totalAmountUSD = parseNumeric(getVal('total amount usd', 'totalamountusd', 'contract value usd', 'amount usd', 'total usd'));
   const advanceUSD = parseNumeric(getVal('advance usd', 'advanceusd', 'advance paid usd', 'advance paid'));
@@ -162,6 +163,30 @@ const READABLE_LABELS: Record<string, string> = {
   paymentTerm: 'Payment Terms',
   paymentStatus: 'Payment Status',
   remark: 'Remarks',
+  forceMajeureApplies: 'Force Majeure Applicability',
+  forceMajeureStatus: 'Force Majeure Status',
+  packingStatus: 'Packing Status',
+  packingDate: 'Packing Date',
+  invoiceVerificationStatus: 'Invoice Verification Status',
+  podReference: 'POD Reference',
+  vehicleNumber: 'Vehicle Number',
+  transporterDetails: 'Transporter Details',
+  driverDetails: 'Driver Details',
+  rtoPucStatus: 'RTO PUC Status',
+  rtoFitnessStatus: 'RTO Fitness Status',
+  rtoInsuranceStatus: 'RTO Insurance Status',
+  rtoRcBookStatus: 'RTO RC Book Status',
+  rtoDriverLicenseStatus: 'RTO Driver License Status',
+  hseViolationStatus: 'HSE Violation Status',
+  accidentStatus: 'Accident Record',
+  speedLimitCompliance: 'Speed Limit Compliance',
+  overallVehicleInspectionStatus: 'Vehicle Safety Inspection Status',
+  tdsApplicability: 'TDS Applicability',
+  tdsAmount: 'TDS Amount',
+  gstComplianceStatus: 'GST Compliance Status',
+  gstRegistrationDetails: 'GSTIN Registration Details',
+  gstr1Status: 'GSTR-1 Status',
+  gstr3bStatus: 'GSTR-3B Status',
 };
 
 /**

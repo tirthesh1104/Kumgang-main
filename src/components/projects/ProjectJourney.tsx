@@ -212,7 +212,7 @@ export function buildProjectStages(project: ProjectMaster): JourneyStage[] {
   } else if (project.shellPlanConfirmation) {
     designStatus = 'active'; // Some design activity exists
   }
-  const progressPercent = project.designProgressPercent != null ? Math.round(project.designProgressPercent) : null;
+  const progressPercent = project.designProgressPercent != null ? Math.min(Math.round(project.designProgressPercent), 100) : null;
 
   // Production status
   let prodStatus: StageStatus = 'not-started';

@@ -58,7 +58,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
   // Progress Calculations
   const validProgressProjects = projects.filter(p => p.designProgressPercent != null);
   const avgProgressPct = validProgressProjects.length > 0
-    ? Math.round(validProgressProjects.reduce((sum, p) => sum + (p.designProgressPercent || 0), 0) / validProgressProjects.length)
+    ? Math.round(validProgressProjects.reduce((sum, p) => sum + Math.min(p.designProgressPercent || 0, 100), 0) / validProgressProjects.length)
     : 78;
 
   // Project Health Counts
@@ -689,7 +689,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                         isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
                       }`}>
                         <span className={`font-mono font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{p.projectId} ({p.project})</span>
-                        <strong className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}>{p.designProgressPercent}% Done</strong>
+                        <strong className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}>{Math.min(p.designProgressPercent || 0, 100)}% Done</strong>
                       </div>
                     ))}
                   </div>

@@ -44,9 +44,9 @@ function ProjectStatusReport({ isDark }: { isDark: boolean }) {
                   {p.designProgressPercent != null ? (
                     <div className="flex items-center gap-2">
                       <div className="w-16">
-                        <ProgressBar value={p.designProgressPercent} color="forest" size="sm" />
+                        <ProgressBar value={Math.min(p.designProgressPercent, 100)} color="forest" size="sm" />
                       </div>
-                      <span className={`text-xs font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{Math.round(p.designProgressPercent)}%</span>
+                      <span className={`text-xs font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{Math.min(Math.round(p.designProgressPercent), 100)}%</span>
                     </div>
                   ) : '—'}
                 </td>

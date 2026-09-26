@@ -5,7 +5,7 @@ import { validateProjectMaster, type ValidationError } from '../utils/dataValida
 import type { ProjectMaster } from '../data/projectData';
 import {
   Building2, Save, X, AlertTriangle, CheckCircle2, RefreshCw,
-  DollarSign, Calendar, Layers, ShieldAlert
+  DollarSign, Calendar, Layers, ShieldAlert, ShieldCheck, PackageCheck, FileCheck, Truck, FileSpreadsheet, CheckSquare, Shield, Percent
 } from 'lucide-react';
 
 interface EditProjectModalProps {
@@ -85,6 +85,149 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
     bgExpiryDate: existing?.bgExpiryDate || '',
     lcOpenDate: existing?.lcOpenDate || '',
     lcExpiryDate: existing?.lcExpiryDate || '',
+
+    // Force Majeure
+    forceMajeureApplies: existing?.forceMajeureApplies || 'NA',
+    forceMajeureStatus: existing?.forceMajeureStatus || '',
+    forceMajeureStartDate: existing?.forceMajeureStartDate || '',
+    forceMajeureEndDate: existing?.forceMajeureEndDate || '',
+    forceMajeureReason: existing?.forceMajeureReason || '',
+    forceMajeureRemarks: existing?.forceMajeureRemarks || '',
+
+    // Packing & Damage
+    packingStatus: existing?.packingStatus || '',
+    packingDate: existing?.packingDate || '',
+    packingCompletedDate: existing?.packingCompletedDate || '',
+    packingRemarks: existing?.packingRemarks || '',
+    packingResponsibility: existing?.packingResponsibility || '',
+    transitDamageInfo: existing?.transitDamageInfo || '',
+
+    // Invoice Authenticity & POD
+    invoiceVerificationStatus: existing?.invoiceVerificationStatus || '',
+    invoiceAuthenticityStatus: existing?.invoiceAuthenticityStatus || '',
+    invoiceReference: existing?.invoiceReference || '',
+    podReference: existing?.podReference || '',
+    invoiceVerificationDate: existing?.invoiceVerificationDate || '',
+    invoiceVerificationRemarks: existing?.invoiceVerificationRemarks || '',
+
+    // Transport Compliance
+    transportStatus: existing?.transportStatus || '',
+    vehicleNumber: existing?.vehicleNumber || '',
+    transporterDetails: existing?.transporterDetails || '',
+    driverDetails: existing?.driverDetails || '',
+    driverContact: existing?.driverContact || '',
+    transportDate: existing?.transportDate || '',
+    transportRemarks: existing?.transportRemarks || '',
+
+    // RTO Documents Checklist
+    rtoPucStatus: existing?.rtoPucStatus || 'NA',
+    rtoPucNumber: existing?.rtoPucNumber || '',
+    rtoPucExpiry: existing?.rtoPucExpiry || '',
+    rtoPucRemarks: existing?.rtoPucRemarks || '',
+
+    rtoFitnessStatus: existing?.rtoFitnessStatus || 'NA',
+    rtoFitnessNumber: existing?.rtoFitnessNumber || '',
+    rtoFitnessExpiry: existing?.rtoFitnessExpiry || '',
+    rtoFitnessRemarks: existing?.rtoFitnessRemarks || '',
+
+    rtoInsuranceStatus: existing?.rtoInsuranceStatus || 'NA',
+    rtoInsuranceNumber: existing?.rtoInsuranceNumber || '',
+    rtoInsuranceExpiry: existing?.rtoInsuranceExpiry || '',
+    rtoInsuranceRemarks: existing?.rtoInsuranceRemarks || '',
+
+    rtoRcBookStatus: existing?.rtoRcBookStatus || 'NA',
+    rtoRcBookNumber: existing?.rtoRcBookNumber || '',
+    rtoRcBookExpiry: existing?.rtoRcBookExpiry || '',
+    rtoRcBookRemarks: existing?.rtoRcBookRemarks || '',
+
+    rtoDriverLicenseStatus: existing?.rtoDriverLicenseStatus || 'NA',
+    rtoDriverLicenseNumber: existing?.rtoDriverLicenseNumber || '',
+    rtoDriverLicenseExpiry: existing?.rtoDriverLicenseExpiry || '',
+    rtoDriverLicenseRemarks: existing?.rtoDriverLicenseRemarks || '',
+
+    // HSE Violations & Accidents
+    hseViolationStatus: existing?.hseViolationStatus || 'No Incident / No Violation',
+    accidentStatus: existing?.accidentStatus || 'No Accident',
+    hseIncidentDate: existing?.hseIncidentDate || '',
+    hseIncidentType: existing?.hseIncidentType || '',
+    hseDescription: existing?.hseDescription || '',
+    hseSeverity: existing?.hseSeverity || '',
+    hseCorrectiveAction: existing?.hseCorrectiveAction || '',
+    hseClosureStatus: existing?.hseClosureStatus || 'NA',
+    hseClosureDate: existing?.hseClosureDate || '',
+    hseRemarks: existing?.hseRemarks || '',
+
+    // Speed Limit & Site Vehicle
+    speedLimitCompliance: existing?.speedLimitCompliance || 'Compliant',
+    siteSpeedLimit: existing?.siteSpeedLimit || '20 km/h',
+    vehicleComplianceStatus: existing?.vehicleComplianceStatus || 'Compliant',
+    speedViolationStatus: existing?.speedViolationStatus || 'None',
+    speedViolationDate: existing?.speedViolationDate || '',
+
+    // Vehicle Safety Inspection Checklist (7 Points)
+    vInspLights: existing?.vInspLights || 'Pass',
+    vInspLightsRemarks: existing?.vInspLightsRemarks || '',
+    vInspHorn: existing?.vInspHorn || 'Pass',
+    vInspHornRemarks: existing?.vInspHornRemarks || '',
+    vInspWiper: existing?.vInspWiper || 'Pass',
+    vInspWiperRemarks: existing?.vInspWiperRemarks || '',
+    vInspBrakes: existing?.vInspBrakes || 'Pass',
+    vInspBrakesRemarks: existing?.vInspBrakesRemarks || '',
+    vInspIndicators: existing?.vInspIndicators || 'Pass',
+    vInspIndicatorsRemarks: existing?.vInspIndicatorsRemarks || '',
+    vInspGeneralCondition: existing?.vInspGeneralCondition || 'Pass',
+    vInspGeneralConditionRemarks: existing?.vInspGeneralConditionRemarks || '',
+    vInspSafetyProtection: existing?.vInspSafetyProtection || 'Pass',
+    vInspSafetyProtectionRemarks: existing?.vInspSafetyProtectionRemarks || '',
+    vehicleInspectionDate: existing?.vehicleInspectionDate || '',
+    vehicleInspectorName: existing?.vehicleInspectorName || '',
+    overallVehicleInspectionStatus: existing?.overallVehicleInspectionStatus || 'Pass',
+
+    // Vehicle Parking & Site Instructions
+    parkingInstructions: existing?.parkingInstructions || '',
+    designatedParkingLocation: existing?.designatedParkingLocation || '',
+    siteInstructions: existing?.siteInstructions || '',
+    parkingComplianceStatus: existing?.parkingComplianceStatus || 'Compliant',
+
+    // Unattended Vehicle Restriction
+    unattendedVehicleRestrictionStatus: existing?.unattendedVehicleRestrictionStatus || 'Restricted',
+    unattendedComplianceStatus: existing?.unattendedComplianceStatus || 'Compliant',
+    unattendedViolationStatus: existing?.unattendedViolationStatus || 'None',
+    unattendedViolationDate: existing?.unattendedViolationDate || '',
+
+    // Tax & TDS
+    taxComplianceStatus: existing?.taxComplianceStatus || 'Compliant',
+    tdsApplicability: existing?.tdsApplicability || 'Applicable',
+    tdsAmount: existing?.tdsAmount ?? null,
+    tdsPercentage: existing?.tdsPercentage ?? null,
+    tdsStatus: existing?.tdsStatus || '',
+    tdsRemarks: existing?.tdsRemarks || '',
+
+    // GST Compliance & Payment
+    gstComplianceStatus: existing?.gstComplianceStatus || 'Compliant',
+    gstRegistrationDetails: existing?.gstRegistrationDetails || '',
+    gstVerificationStatus: existing?.gstVerificationStatus || 'Verified',
+    gstAmount: existing?.gstAmount ?? null,
+    gstRate: existing?.gstRate ?? null,
+    gstPaymentStatus: existing?.gstPaymentStatus || '',
+    gstPaymentDate: existing?.gstPaymentDate || '',
+    gstPaymentRemarks: existing?.gstPaymentRemarks || '',
+
+    // GSTR-1
+    gstr1Status: existing?.gstr1Status || 'Filed',
+    gstr1FilingPeriod: existing?.gstr1FilingPeriod || '',
+    gstr1FilingDate: existing?.gstr1FilingDate || '',
+    gstr1ArnReference: existing?.gstr1ArnReference || '',
+    gstr1VerificationStatus: existing?.gstr1VerificationStatus || 'Verified',
+
+    // GSTR-3B
+    gstr3bStatus: existing?.gstr3bStatus || 'Filed',
+    gstr3bFilingPeriod: existing?.gstr3bFilingPeriod || '',
+    gstr3bFilingDate: existing?.gstr3bFilingDate || '',
+    gstr3bTaxPaymentStatus: existing?.gstr3bTaxPaymentStatus || 'Paid',
+    gstr3bTaxPaymentDate: existing?.gstr3bTaxPaymentDate || '',
+    gstr3bArnReference: existing?.gstr3bArnReference || '',
+    gstr3bVerificationStatus: existing?.gstr3bVerificationStatus || 'Verified',
   });
 
   const [isDirty, setIsDirty] = useState(false);
@@ -1491,6 +1634,775 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                     isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
                   }`}
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 6: FORCE MAJEURE (8.1) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <ShieldAlert size={16} className={isDark ? 'text-[#E5C47A]' : 'text-amber-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                6. Force Majeure & Contractual Exceptions (8.1)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Force Majeure Applicability</label>
+                <select
+                  value={formData.forceMajeureApplies || 'NA'}
+                  onChange={e => handleChange('forceMajeureApplies', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="NA">NA (Not Applicable)</option>
+                  <option value="Yes">Yes (Invoked)</option>
+                  <option value="No">No (Normal Operations)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Start Date</label>
+                <input
+                  type="date"
+                  value={formData.forceMajeureStartDate || ''}
+                  onChange={e => handleChange('forceMajeureStartDate', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>End Date</label>
+                <input
+                  type="date"
+                  value={formData.forceMajeureEndDate || ''}
+                  onChange={e => handleChange('forceMajeureEndDate', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Reason / Trigger Event</label>
+                <input
+                  type="text"
+                  value={formData.forceMajeureReason || ''}
+                  onChange={e => handleChange('forceMajeureReason', e.target.value)}
+                  placeholder="e.g. Natural Calamity / Unforeseen Interruption"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Force Majeure Remarks</label>
+                <input
+                  type="text"
+                  value={formData.forceMajeureRemarks || ''}
+                  onChange={e => handleChange('forceMajeureRemarks', e.target.value)}
+                  placeholder="Additional contractual notes..."
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 7: PACKING & DAMAGE RESPONSIBILITY (8.2) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <PackageCheck size={16} className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                7. Packing & Damage Responsibility (8.2)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Packing Status</label>
+                <input
+                  type="text"
+                  value={formData.packingStatus || ''}
+                  onChange={e => handleChange('packingStatus', e.target.value)}
+                  placeholder="e.g. Standard Export Packing / Completed"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Packing Date</label>
+                <input
+                  type="date"
+                  value={formData.packingDate || ''}
+                  onChange={e => handleChange('packingDate', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Packing Responsibility</label>
+                <input
+                  type="text"
+                  value={formData.packingResponsibility || ''}
+                  onChange={e => handleChange('packingResponsibility', e.target.value)}
+                  placeholder="e.g. Supplier / Transporter Insured"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Transit Damage / Packing Notes</label>
+              <textarea
+                rows={2}
+                value={formData.transitDamageInfo || ''}
+                onChange={e => handleChange('transitDamageInfo', e.target.value)}
+                placeholder="Details of transit insurance, damage claims, or packing specifications..."
+                className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                  isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* SECTION 8: INVOICE AUTHENTICITY & POD (8.3) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <FileCheck size={16} className={isDark ? 'text-[#89C9DF]' : 'text-sky-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                8. Invoice Authenticity & Proof of Delivery (POD) (8.3)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Invoice Verification Status</label>
+                <select
+                  value={formData.invoiceVerificationStatus || 'Verified'}
+                  onChange={e => handleChange('invoiceVerificationStatus', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="Verified">Verified & Authenticated</option>
+                  <option value="Pending">Pending Verification</option>
+                  <option value="Discrepancy">Discrepancy Flagged</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Invoice Reference No.</label>
+                <input
+                  type="text"
+                  value={formData.invoiceReference || ''}
+                  onChange={e => handleChange('invoiceReference', e.target.value)}
+                  placeholder="e.g. INV-2025-001"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Proof of Delivery (POD) Ref</label>
+                <input
+                  type="text"
+                  value={formData.podReference || ''}
+                  onChange={e => handleChange('podReference', e.target.value)}
+                  placeholder="e.g. POD-88231-ACK"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Verification Date</label>
+                <input
+                  type="date"
+                  value={formData.invoiceVerificationDate || ''}
+                  onChange={e => handleChange('invoiceVerificationDate', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 9: TRANSPORT COMPLIANCE (8.4) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <Truck size={16} className={isDark ? 'text-[#C9A86A]' : 'text-indigo-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                9. Transport & Dispatch Vehicle Compliance (8.4)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Vehicle Number</label>
+                <input
+                  type="text"
+                  value={formData.vehicleNumber || ''}
+                  onChange={e => handleChange('vehicleNumber', e.target.value)}
+                  placeholder="e.g. KA-01-EQ-9921"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Transporter Details</label>
+                <input
+                  type="text"
+                  value={formData.transporterDetails || ''}
+                  onChange={e => handleChange('transporterDetails', e.target.value)}
+                  placeholder="Transporter Name & Agency"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Driver Details</label>
+                <input
+                  type="text"
+                  value={formData.driverDetails || ''}
+                  onChange={e => handleChange('driverDetails', e.target.value)}
+                  placeholder="Driver Full Name"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Driver Contact Number</label>
+                <input
+                  type="tel"
+                  value={formData.driverContact || ''}
+                  onChange={e => handleChange('driverContact', e.target.value)}
+                  placeholder="+91 XXXXX XXXXX"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 10: RTO DOCUMENTS CHECKLIST (8.5) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <CheckSquare size={16} className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                10. RTO Documents Verification Checklist (8.5)
+              </h4>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              {[
+                { keyPrefix: 'rtoPuc', label: '1. Pollution Under Control (PUC)' },
+                { keyPrefix: 'rtoFitness', label: '2. Vehicle Fitness Certificate' },
+                { keyPrefix: 'rtoInsurance', label: '3. Commercial Vehicle Insurance' },
+                { keyPrefix: 'rtoRcBook', label: '4. Vehicle Registration Certificate (RC Book)' },
+                { keyPrefix: 'rtoDriverLicense', label: '5. Commercial Driving License' },
+              ].map(item => {
+                const statusKey = `${item.keyPrefix}Status` as keyof ProjectMaster;
+                const numKey = `${item.keyPrefix}Number` as keyof ProjectMaster;
+                const expKey = `${item.keyPrefix}Expiry` as keyof ProjectMaster;
+                const remKey = `${item.keyPrefix}Remarks` as keyof ProjectMaster;
+
+                return (
+                  <div key={item.keyPrefix} className={`grid grid-cols-1 sm:grid-cols-4 gap-3 p-3 rounded-lg border ${
+                    isDark ? 'bg-[#151517] border-[#262629]' : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <div>
+                      <span className={`block font-bold mb-1 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{item.label}</span>
+                      <select
+                        value={(formData[statusKey] as string) || 'Valid'}
+                        onChange={e => handleChange(statusKey, e.target.value)}
+                        className={`w-full p-2 border rounded-md outline-none ${
+                          isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                        }`}
+                      >
+                        <option value="Valid">Valid / Verified</option>
+                        <option value="Expired">Expired</option>
+                        <option value="Missing">Missing</option>
+                        <option value="NA">NA</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <span className={`block font-semibold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>Doc / Certificate No.</span>
+                      <input
+                        type="text"
+                        value={(formData[numKey] as string) || ''}
+                        onChange={e => handleChange(numKey, e.target.value)}
+                        placeholder="Certificate Number"
+                        className={`w-full p-2 border rounded-md outline-none ${
+                          isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <span className={`block font-semibold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>Expiry Date</span>
+                      <input
+                        type="date"
+                        value={(formData[expKey] as string) || ''}
+                        onChange={e => handleChange(expKey, e.target.value)}
+                        className={`w-full p-2 border rounded-md outline-none ${
+                          isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <span className={`block font-semibold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>Remarks</span>
+                      <input
+                        type="text"
+                        value={(formData[remKey] as string) || ''}
+                        onChange={e => handleChange(remKey, e.target.value)}
+                        placeholder="Verification notes"
+                        className={`w-full p-2 border rounded-md outline-none ${
+                          isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SECTION 11: HSE COMPLIANCE & SAFETY (8.6) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <ShieldCheck size={16} className={isDark ? 'text-[#F08A8A]' : 'text-rose-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                11. HSE Compliance, Safety & Incident Tracking (8.6)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>HSE Violation Record</label>
+                <select
+                  value={formData.hseViolationStatus || 'No Incident / No Violation'}
+                  onChange={e => handleChange('hseViolationStatus', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="No Incident / No Violation">No Incident / No Violation</option>
+                  <option value="Violation Reported">Violation Reported</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Site Accident Record</label>
+                <select
+                  value={formData.accidentStatus || 'No Accident'}
+                  onChange={e => handleChange('accidentStatus', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="No Accident">No Accident Reported</option>
+                  <option value="Accident Reported">Accident Reported</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Incident Date (If any)</label>
+                <input
+                  type="date"
+                  value={formData.hseIncidentDate || ''}
+                  onChange={e => handleChange('hseIncidentDate', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Incident Description</label>
+                <input
+                  type="text"
+                  value={formData.hseDescription || ''}
+                  onChange={e => handleChange('hseDescription', e.target.value)}
+                  placeholder="Details of safety incident..."
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Corrective / Preventive Action</label>
+                <input
+                  type="text"
+                  value={formData.hseCorrectiveAction || ''}
+                  onChange={e => handleChange('hseCorrectiveAction', e.target.value)}
+                  placeholder="CAPA measures taken..."
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 12: SPEED LIMIT, VEHICLE INSPECTION & SITE OPERATIONS (8.7 - 8.10) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <Shield size={16} className={isDark ? 'text-[#E5C47A]' : 'text-amber-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                12. Speed Limit, Vehicle Inspection & Site Rules (8.7 - 8.10)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Site Speed Limit Compliance (8.7)</label>
+                <select
+                  value={formData.speedLimitCompliance || 'Compliant'}
+                  onChange={e => handleChange('speedLimitCompliance', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="Compliant">Compliant (Below Limit)</option>
+                  <option value="Violation Reported">Speed Violation Reported</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Designated Parking Location (8.9)</label>
+                <input
+                  type="text"
+                  value={formData.designatedParkingLocation || ''}
+                  onChange={e => handleChange('designatedParkingLocation', e.target.value)}
+                  placeholder="e.g. Bay 4 - Material Yard"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Unattended Vehicle Rule (8.10)</label>
+                <select
+                  value={formData.unattendedVehicleRestrictionStatus || 'Restricted'}
+                  onChange={e => handleChange('unattendedVehicleRestrictionStatus', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="Restricted">Strictly Restricted / Compliant</option>
+                  <option value="Violation Reported">Violation Reported</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 7-Point Vehicle Safety Inspection Sub-Block (8.8) */}
+            <div className={`p-4 rounded-xl border space-y-3 ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+              <h5 className={`font-extrabold text-xs uppercase tracking-wider ${isDark ? 'text-[#C9A86A]' : 'text-slate-800'}`}>
+                7-Point Vehicle Safety Inspection Checklist (8.8)
+              </h5>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                {[
+                  { keyPrefix: 'vInspLights', label: '1. Vehicle Head/Tail Lights' },
+                  { keyPrefix: 'vInspHorn', label: '2. Horn & Reverse Alarm' },
+                  { keyPrefix: 'vInspWiper', label: '3. Windshield Wipers' },
+                  { keyPrefix: 'vInspBrakes', label: '4. Brakes & Hand Brake' },
+                  { keyPrefix: 'vInspIndicators', label: '5. Side Turn Indicators' },
+                  { keyPrefix: 'vInspGeneralCondition', label: '6. General Physical Condition' },
+                  { keyPrefix: 'vInspSafetyProtection', label: '7. Safety Protection Guards' },
+                ].map(item => {
+                  const statusKey = `${item.keyPrefix}` as keyof ProjectMaster;
+                  return (
+                    <div key={item.keyPrefix} className="p-2 border rounded-md bg-white/5 border-slate-700">
+                      <span className={`block font-semibold mb-1 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{item.label}</span>
+                      <select
+                        value={(formData[statusKey] as string) || 'Pass'}
+                        onChange={e => handleChange(statusKey, e.target.value)}
+                        className={`w-full p-1.5 border rounded outline-none text-xs ${
+                          isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                        }`}
+                      >
+                        <option value="Pass">Pass / Ok</option>
+                        <option value="Fail">Fail / Defective</option>
+                        <option value="NA">NA</option>
+                      </select>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 13: COMMERCIAL TAX & TDS COMPLIANCE (Section 9) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <Percent size={16} className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                13. Commercial Tax & TDS Compliance (Section 9)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>TDS Applicability</label>
+                <select
+                  value={formData.tdsApplicability || 'Applicable'}
+                  onChange={e => handleChange('tdsApplicability', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="Applicable">Applicable</option>
+                  <option value="Not Applicable">Not Applicable</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>TDS Rate (%)</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={formData.tdsPercentage ?? ''}
+                  onChange={e => handleChange('tdsPercentage', e.target.value ? parseFloat(e.target.value) : null)}
+                  placeholder="e.g. 2%"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>TDS Deducted Amount</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={formData.tdsAmount ?? ''}
+                  onChange={e => handleChange('tdsAmount', e.target.value ? parseFloat(e.target.value) : null)}
+                  placeholder="Amount"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>TDS Status</label>
+                <input
+                  type="text"
+                  value={formData.tdsStatus || ''}
+                  onChange={e => handleChange('tdsStatus', e.target.value)}
+                  placeholder="e.g. Deposited / Form 16A Issued"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 14: GST COMPLIANCE & PAYMENT CONDITIONS (Sections 10 & 11) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <FileSpreadsheet size={16} className={isDark ? 'text-[#89C9DF]' : 'text-sky-600'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                14. GST Compliance & Payment Conditions (Sections 10 & 11)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>GST Compliance Status</label>
+                <select
+                  value={formData.gstComplianceStatus || 'Compliant'}
+                  onChange={e => handleChange('gstComplianceStatus', e.target.value)}
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                >
+                  <option value="Compliant">Compliant / Verified</option>
+                  <option value="Pending">Pending Audit</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>GSTIN Details</label>
+                <input
+                  type="text"
+                  value={formData.gstRegistrationDetails || ''}
+                  onChange={e => handleChange('gstRegistrationDetails', e.target.value)}
+                  placeholder="e.g. 29AAAAA0000A1Z5"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>GST Rate (%)</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={formData.gstRate ?? ''}
+                  onChange={e => handleChange('gstRate', e.target.value ? parseFloat(e.target.value) : null)}
+                  placeholder="e.g. 18%"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>GST Amount</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={formData.gstAmount ?? ''}
+                  onChange={e => handleChange('gstAmount', e.target.value ? parseFloat(e.target.value) : null)}
+                  placeholder="GST Amount"
+                  className={`w-full p-2.5 border rounded-lg outline-none transition-all ${
+                    isDark ? 'border-[#303035] bg-[#151517] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 15: GSTR-1 & GSTR-3B STATUTORY FILING (Sections 12 & 13) */}
+          <div className={`border rounded-xl p-5 shadow-2xs space-y-4 ${
+            isDark ? 'bg-[#111113] border-[#262629]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
+              <FileCheck size={16} className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'} />
+              <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
+                15. Statutory Returns Filing (GSTR-1 & GSTR-3B) (Sections 12 & 13)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* GSTR-1 Sub-Box */}
+              <div className={`p-4 rounded-xl border space-y-3 ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+                <h5 className={`font-extrabold text-xs uppercase tracking-wider ${isDark ? 'text-[#89C9DF]' : 'text-sky-700'}`}>
+                  GSTR-1 Outward Return (Section 12)
+                </h5>
+
+                <div>
+                  <label className={`block text-[10px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>GSTR-1 Status</label>
+                  <select
+                    value={formData.gstr1Status || 'Filed'}
+                    onChange={e => handleChange('gstr1Status', e.target.value)}
+                    className={`w-full p-2 border rounded-md outline-none text-xs ${
+                      isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Filed">Filed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="NA">NA</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={`block text-[10px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>ARN Reference No.</label>
+                  <input
+                    type="text"
+                    value={formData.gstr1ArnReference || ''}
+                    onChange={e => handleChange('gstr1ArnReference', e.target.value)}
+                    placeholder="GSTR-1 ARN Reference"
+                    className={`w-full p-2 border rounded-md outline-none text-xs ${
+                      isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* GSTR-3B Sub-Box */}
+              <div className={`p-4 rounded-xl border space-y-3 ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+                <h5 className={`font-extrabold text-xs uppercase tracking-wider ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>
+                  GSTR-3B Tax Return & Payment (Section 13)
+                </h5>
+
+                <div>
+                  <label className={`block text-[10px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>GSTR-3B Status</label>
+                  <select
+                    value={formData.gstr3bStatus || 'Filed'}
+                    onChange={e => handleChange('gstr3bStatus', e.target.value)}
+                    className={`w-full p-2 border rounded-md outline-none text-xs ${
+                      isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  >
+                    <option value="Filed">Filed & Tax Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="NA">NA</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={`block text-[10px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>ARN Reference No.</label>
+                  <input
+                    type="text"
+                    value={formData.gstr3bArnReference || ''}
+                    onChange={e => handleChange('gstr3bArnReference', e.target.value)}
+                    placeholder="GSTR-3B ARN Reference"
+                    className={`w-full p-2 border rounded-md outline-none text-xs ${
+                      isDark ? 'border-[#303035] bg-[#111113] text-[#F5F5F3]' : 'border-slate-300 bg-white text-slate-900'
+                    }`}
+                  />
+                </div>
               </div>
             </div>
           </div>

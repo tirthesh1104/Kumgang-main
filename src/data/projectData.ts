@@ -101,6 +101,164 @@ export interface ProjectMaster {
   totalPayableArea?: number | null;
   totalPayableAreaUom?: string | null;
   areaApprovedDate?: string | null;
+
+  // Section 6: FORCE MAJEURE (8.1)
+  forceMajeureApplies?: string | null; // 'Yes' | 'No' | 'NA'
+  forceMajeureStatus?: string | null;
+  forceMajeureStartDate?: string | null;
+  forceMajeureEndDate?: string | null;
+  forceMajeureReason?: string | null;
+  forceMajeureRemarks?: string | null;
+
+  // Section 7: PACKING & DAMAGE RESPONSIBILITY (8.2)
+  packingStatus?: string | null;
+  packingDate?: string | null;
+  packingCompletedDate?: string | null;
+  packingRemarks?: string | null;
+  packingResponsibility?: string | null;
+  transitDamageInfo?: string | null;
+
+  // Section 8: INVOICE AUTHENTICITY & POD (8.3)
+  invoiceVerificationStatus?: string | null;
+  invoiceAuthenticityStatus?: string | null;
+  invoiceReference?: string | null;
+  podReference?: string | null;
+  invoiceVerificationDate?: string | null;
+  invoiceVerificationRemarks?: string | null;
+
+  // Section 9: TRANSPORT COMPLIANCE (8.4)
+  transportStatus?: string | null;
+  vehicleNumber?: string | null;
+  transporterDetails?: string | null;
+  driverDetails?: string | null;
+  driverContact?: string | null;
+  transportDate?: string | null;
+  transportRemarks?: string | null;
+
+  // Section 10: RTO DOCUMENTS CHECKLIST (8.5)
+  rtoPucStatus?: string | null; // 'Valid' | 'Expired' | 'Missing' | 'NA'
+  rtoPucNumber?: string | null;
+  rtoPucExpiry?: string | null;
+  rtoPucRemarks?: string | null;
+
+  rtoFitnessStatus?: string | null;
+  rtoFitnessNumber?: string | null;
+  rtoFitnessExpiry?: string | null;
+  rtoFitnessRemarks?: string | null;
+
+  rtoInsuranceStatus?: string | null;
+  rtoInsuranceNumber?: string | null;
+  rtoInsuranceExpiry?: string | null;
+  rtoInsuranceRemarks?: string | null;
+
+  rtoRcBookStatus?: string | null;
+  rtoRcBookNumber?: string | null;
+  rtoRcBookExpiry?: string | null;
+  rtoRcBookRemarks?: string | null;
+
+  rtoDriverLicenseStatus?: string | null;
+  rtoDriverLicenseNumber?: string | null;
+  rtoDriverLicenseExpiry?: string | null;
+  rtoDriverLicenseRemarks?: string | null;
+
+  // Section 11: HSE VIOLATIONS & ACCIDENTS (8.6)
+  hseViolationStatus?: string | null; // 'No Incident / No Violation' | 'Violation Occurred' | 'NA'
+  accidentStatus?: string | null; // 'No Accident' | 'Accident Reported' | 'NA'
+  hseIncidentDate?: string | null;
+  hseIncidentType?: string | null;
+  hseDescription?: string | null;
+  hseSeverity?: string | null;
+  hseCorrectiveAction?: string | null;
+  hseClosureStatus?: string | null; // 'Open' | 'Closed' | 'NA'
+  hseClosureDate?: string | null;
+  hseRemarks?: string | null;
+
+  // Section 12: SPEED LIMIT & SITE VEHICLE COMPLIANCE (8.7)
+  speedLimitCompliance?: string | null;
+  siteSpeedLimit?: string | null;
+  vehicleComplianceStatus?: string | null;
+  speedViolationStatus?: string | null;
+  speedViolationDate?: string | null;
+
+  // Section 13: VEHICLE SAFETY INSPECTION CHECKLIST (8.8 - 7 Points)
+  vInspLights?: string | null; // 'Pass' | 'Fail' | 'NA'
+  vInspLightsRemarks?: string | null;
+  vInspHorn?: string | null;
+  vInspHornRemarks?: string | null;
+  vInspWiper?: string | null;
+  vInspWiperRemarks?: string | null;
+  vInspBrakes?: string | null;
+  vInspBrakesRemarks?: string | null;
+  vInspIndicators?: string | null;
+  vInspIndicatorsRemarks?: string | null;
+  vInspGeneralCondition?: string | null;
+  vInspGeneralConditionRemarks?: string | null;
+  vInspSafetyProtection?: string | null;
+  vInspSafetyProtectionRemarks?: string | null;
+  vehicleInspectionDate?: string | null;
+  vehicleInspectorName?: string | null;
+  overallVehicleInspectionStatus?: string | null;
+
+  // Section 14: VEHICLE PARKING & SITE INSTRUCTIONS (8.9)
+  parkingInstructions?: string | null;
+  designatedParkingLocation?: string | null;
+  siteInstructions?: string | null;
+  parkingComplianceStatus?: string | null;
+
+  // Section 15: UNATTENDED VEHICLE RESTRICTION (8.10)
+  unattendedVehicleRestrictionStatus?: string | null;
+  unattendedComplianceStatus?: string | null;
+  unattendedViolationStatus?: string | null;
+  unattendedViolationDate?: string | null;
+
+  // Section 16: TAX & TDS COMPLIANCE (Section 9)
+  taxComplianceStatus?: string | null;
+  tdsApplicability?: string | null; // 'Applicable' | 'Not Applicable' | 'NA'
+  tdsAmount?: number | null;
+  tdsPercentage?: number | null;
+  tdsStatus?: string | null;
+  tdsRemarks?: string | null;
+
+  // Section 17: GST COMPLIANCE & PAYMENT CONDITION (Sections 10 & 11)
+  gstComplianceStatus?: string | null;
+  gstRegistrationDetails?: string | null;
+  gstVerificationStatus?: string | null;
+  gstAmount?: number | null;
+  gstRate?: number | null;
+  gstPaymentStatus?: string | null;
+  gstPaymentDate?: string | null;
+  gstPaymentRemarks?: string | null;
+
+  // Section 18: GSTR-1 COMPLIANCE (Section 12)
+  gstr1Status?: string | null;
+  gstr1FilingPeriod?: string | null;
+  gstr1FilingDate?: string | null;
+  gstr1ArnReference?: string | null;
+  gstr1VerificationStatus?: string | null;
+
+  // Section 19: GSTR-3B & TAX PAYMENT (Section 13)
+  gstr3bStatus?: string | null;
+  gstr3bFilingPeriod?: string | null;
+  gstr3bFilingDate?: string | null;
+  gstr3bTaxPaymentStatus?: string | null;
+  gstr3bTaxPaymentDate?: string | null;
+  gstr3bArnReference?: string | null;
+  gstr3bVerificationStatus?: string | null;
+
+  // Section 20: SHIPMENT MONITORING EXPANDED FIELDS
+  overallTotalDispatchQty?: number | null;
+  fyDispatchQty?: string | null;
+  bcsQty?: number | null;
+  acsQty?: number | null;
+  kgbhQty?: number | null;
+  ksbhQty?: number | null;
+  aluformQty?: number | null;
+  invoiceNumber?: string | null;
+  invoiceDate?: string | null;
+  unitPrice?: number | null;
+  invoiceAmount?: number | null;
+  containerTotal?: number | null;
+  containerSize?: string | null;
 }
 
 export interface DesignSchedule {
@@ -674,7 +832,7 @@ export const projectMasterData: ProjectMaster[] = [
     "contractWeightTons": 87,
     "actualDesignQtyM2": 4080.11,
     "actualDesignWeightTons": 94.21,
-    "designProgressPercent": 102,
+    "designProgressPercent": 100,
     "pricePerM2USD": 119,
     "totalAmountUSD": 485533.09,
     "advanceUSD": 485533.09,
@@ -872,7 +1030,7 @@ export const projectMasterData: ProjectMaster[] = [
     "contractWeightTons": 88.78,
     "actualDesignQtyM2": 2814.64,
     "actualDesignWeightTons": 65,
-    "designProgressPercent": 104,
+    "designProgressPercent": 100,
     "pricePerM2USD": 119.5,
     "totalAmountUSD": 510301.69,
     "advanceUSD": 510301.69,
@@ -936,7 +1094,7 @@ export const projectMasterData: ProjectMaster[] = [
     "contractWeightTons": 66.81,
     "actualDesignQtyM2": 3144.72,
     "actualDesignWeightTons": 69.6,
-    "designProgressPercent": 102,
+    "designProgressPercent": 100,
     "pricePerM2USD": 133,
     "totalAmountUSD": 418247.49,
     "advanceUSD": 418247.49,
@@ -1034,7 +1192,7 @@ export const projectMasterData: ProjectMaster[] = [
     "contractWeightTons": 23,
     "actualDesignQtyM2": 1068.79,
     "actualDesignWeightTons": 23,
-    "designProgressPercent": 101,
+    "designProgressPercent": 100,
     "pricePerM2USD": 111,
     "totalAmountUSD": 118635.47,
     "advanceUSD": 0,
