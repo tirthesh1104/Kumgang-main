@@ -1,12 +1,18 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { StatusBadge } from './ui/StatusBadge';
+import { QuickEditDesignModal } from './QuickEditDesignModal';
+import type { DesignSchedule } from '../data/projectData';
+import { Edit3 } from 'lucide-react';
 
 export function DesignPage() {
   const { navigate, theme } = useApp();
   const { projects, designSchedules } = useData();
   const isDark = theme === 'dark';
+
+  const [editingDesign, setEditingDesign] = useState<DesignSchedule | null>(null);
 
   const completedCount = designSchedules.filter(d => d.status === 'Completed').length;
   const inProgressCount = designSchedules.filter(d => d.status === 'In Progress').length;
@@ -84,6 +90,7 @@ export function DesignPage() {
                     <th className="text-left py-2.5 px-3">Planned</th>
                     <th className="text-left py-2.5 px-3">Actual</th>
                     <th className="text-left py-2.5 px-3">Status</th>
+                    <th className="text-right py-2.5 px-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDark ? 'divide-[#262629] bg-[#151517]' : 'divide-slate-200 bg-white'}`}>
@@ -94,6 +101,18 @@ export function DesignPage() {
                       <td className={`py-2.5 px-3 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.plannedDate ?? '—'}</td>
                       <td className={`py-2.5 px-3 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.actualDate ?? '—'}</td>
                       <td className="py-2.5 px-3"><StatusBadge status={d.status} /></td>
+                      <td className="py-2.5 px-3 text-right">
+                        <button
+                          onClick={() => setEditingDesign(d)}
+                          className={`px-2.5 py-1 text-xs rounded-lg font-bold inline-flex items-center gap-1 cursor-pointer transition-colors border ${
+                            isDark
+                              ? 'bg-[#18181B] text-[#1688D4] border-[#262629] hover:bg-[#202025]'
+                              : 'bg-slate-100 text-[#1688D4] border-slate-200 hover:bg-slate-200'
+                          }`}
+                        >
+                          <Edit3 size={12} /> Edit
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -102,6 +121,13 @@ export function DesignPage() {
           </motion.div>
         );
       })}
+
+      {editingDesign && (
+        <QuickEditDesignModal
+          designItem={editingDesign}
+          onClose={() => setEditingDesign(null)}
+        />
+      )}
     </div>
   );
 }

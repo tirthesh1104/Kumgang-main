@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { StatusBadge } from './ui/StatusBadge';
-import { AlertTriangle, ArrowRight, Info } from 'lucide-react';
+import { QuickEditDelayModal } from './QuickEditDelayModal';
+import type { ProjectMaster } from '../data/projectData';
+import { AlertTriangle, ArrowRight, Info, Edit3 } from 'lucide-react';
 
 function RiskTag({ isDark }: { isDark: boolean }) {
   return (
@@ -18,6 +21,8 @@ export function DelaysPage() {
   const { navigate, theme } = useApp();
   const { projects, productionRecords, getAttentionProjects } = useData();
   const isDark = theme === 'dark';
+
+  const [editingProjectDelay, setEditingProjectDelay] = useState<ProjectMaster | null>(null);
 
   const attentionProjects = getAttentionProjects();
   const productionDelays = productionRecords.filter(p => (p.completionPercent || 0) > 0 && (p.completionPercent || 0) < 100);
@@ -70,22 +75,19 @@ export function DelaysPage() {
               const issues: string[] = [];
               if ((project.balanceUSD || 0) > 0) issues.push(`Outstanding balance of $${project.balanceUSD?.toLocaleString()} (source: Master Sheet)`);
               if (project.paymentStatus && !project.paymentStatus.toLowerCase().includes('100%')) issues.push(`Payment status: ${project.paymentStatus}`);
-              
+              if (project.delayReason) issues.push(`Reason: ${project.delayReason} (Owner: ${project.actionOwner || 'Unassigned'})`);
+
               return (
                 <div
                   key={project.projectId}
-                  className={`border rounded-lg p-4 cursor-pointer transition-colors group ${
+                  className={`border rounded-lg p-4 transition-colors group ${
                     isDark 
                       ? 'border-[#5A292B] bg-[#34191B]/50 hover:border-[#E05A5A]' 
                       : 'border-red-200 bg-red-50/50 hover:border-red-400'
                   }`}
-                  onClick={() => navigate('project-detail', project.projectId)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => e.key === 'Enter' && navigate('project-detail', project.projectId)}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('project-detail', project.projectId)}>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded font-mono border ${
                         isDark ? 'text-[#F5F5F3] bg-[#18181B] border-[#303035]' : 'text-slate-700 bg-white border-slate-300'
                       }`}>
@@ -94,7 +96,25 @@ export function DelaysPage() {
                       <span className={`font-semibold ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>{project.project}</span>
                       <StatusBadge status={project.contractStatus} />
                     </div>
-                    <ArrowRight size={14} className={`${isDark ? 'text-[#F08A8A]' : 'text-red-600'} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setEditingProjectDelay(project)}
+                        className={`px-2.5 py-1 text-xs rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-colors border ${
+                          isDark
+                            ? 'bg-[#18181B] text-[#F08A8A] border-[#5A292B] hover:bg-[#202025]'
+                            : 'bg-white text-red-700 border-red-300 hover:bg-red-100'
+                        }`}
+                      >
+                        <Edit3 size={12} /> Update Risk Plan
+                      </button>
+                      <button
+                        onClick={() => navigate('project-detail', project.projectId)}
+                        className="p-1 cursor-pointer"
+                        title="View Project Details"
+                      >
+                        <ArrowRight size={14} className={`${isDark ? 'text-[#F08A8A]' : 'text-red-600'} opacity-75 hover:opacity-100`} />
+                      </button>
+                    </div>
                   </div>
                   <ul className="space-y-1">
                     {issues.map((issue, i) => (
@@ -103,6 +123,13 @@ export function DelaysPage() {
                   </ul>
                   <div className={`mt-2 flex flex-wrap gap-1.5 pt-2 border-t ${isDark ? 'border-[#5A292B]' : 'border-red-200'}`}>
                     <RiskTag isDark={isDark} />
+                    {project.delayReasonCode && (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
+                        isDark ? 'bg-[#18181B] border-[#303035] text-[#D5D5D8]' : 'bg-white border-slate-200 text-slate-700'
+                      }`}>
+                        Category: {project.delayReasonCode}
+                      </span>
+                    )}
                   </div>
                 </div>
               );
@@ -136,6 +163,13 @@ export function DelaysPage() {
             })}
           </div>
         </div>
+      )}
+
+      {editingProjectDelay && (
+        <QuickEditDelayModal
+          project={editingProjectDelay}
+          onClose={() => setEditingProjectDelay(null)}
+        />
       )}
     </div>
   );

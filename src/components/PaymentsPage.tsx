@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useData } from '../context/DataContext';
 import { formatCurrency } from '../data/projectData';
 import { PaymentBadge } from './ui/StatusBadge';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Plus, DollarSign } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { RecordPaymentModal } from './RecordPaymentModal';
 
 function PaymentBar({ received, total, isDark }: { received: number; total: number; isDark: boolean }) {
   const pct = total > 0 ? (received / total) * 100 : 0;
@@ -40,20 +42,40 @@ export function PaymentsPage() {
   const { projects, payments, getTotalOutstandingBalance } = useData();
   const isDark = theme === 'dark';
 
+  const [showRecordModal, setShowRecordModal] = useState(false);
+  const [selectedProjForPay, setSelectedProjForPay] = useState<string | undefined>(undefined);
+
   const totalOutstanding = getTotalOutstandingBalance();
   const activeProjects = projects.filter(p => p.contractStatus === 'Signed');
   const totalContract = activeProjects.reduce((s, p) => s + (p.totalAmountUSD || 0), 0);
   const safeTotalReceived = totalContract - totalOutstanding;
   const fullPaid = activeProjects.filter(p => p.paymentStatus && p.paymentStatus.toLowerCase().includes('100%')).length;
 
+  const handleOpenRecordModal = (projId?: string) => {
+    setSelectedProjForPay(projId);
+    setShowRecordModal(true);
+  };
+
   return (
     <div className={`space-y-6 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
-      <div>
-        <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Payment Monitoring</p>
-        <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>Payment Overview</h2>
-        <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-          Monitoring financial status across {activeProjects.length} signed projects.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Payment Monitoring</p>
+          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>Payment Overview</h2>
+          <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
+            Monitoring financial status across {activeProjects.length} signed projects.
+          </p>
+        </div>
+        <button
+          onClick={() => handleOpenRecordModal()}
+          className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm ${
+            isDark
+              ? 'bg-[#163127] text-[#70D0A8] border border-[#28523F] hover:bg-[#1E4235]'
+              : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+          }`}
+        >
+          <Plus size={15} /> Record New Payment
+        </button>
       </div>
 
       {/* Summary KPIs */}
@@ -122,7 +144,22 @@ export function PaymentsPage() {
                 }`}>{project.project}</h3>
                 <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{project.customer}</p>
               </div>
-              <PaymentBadge status={project.paymentStatus} />
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenRecordModal(project.projectId);
+                  }}
+                  className={`px-3 py-1.5 text-xs rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-colors border ${
+                    isDark
+                      ? 'bg-[#163127] text-[#70D0A8] border-[#28523F] hover:bg-[#1E4235]'
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                  }`}
+                >
+                  <DollarSign size={13} /> Record Payment
+                </button>
+                <PaymentBadge status={project.paymentStatus} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
@@ -186,6 +223,16 @@ export function PaymentsPage() {
           </motion.div>
         );
       })}
+
+      {showRecordModal && (
+        <RecordPaymentModal
+          defaultProjectId={selectedProjForPay}
+          onClose={() => {
+            setShowRecordModal(false);
+            setSelectedProjForPay(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FolderKanban, Paintbrush, Factory,
   Truck, AlertTriangle, User, ChevronRight, Menu, X, 
-  Building2, History, Sun, Moon, Database
+  Building2, History, Sun, Moon, Database, CreditCard
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { SyncExcelButton } from '../ui/SyncExcelButton';
@@ -42,6 +42,7 @@ const navGroups: NavGroup[] = [
       { id: 'design', label: 'Design', icon: Paintbrush },
       { id: 'production', label: 'Production', icon: Factory },
       { id: 'shipment', label: 'Shipment', icon: Truck },
+      { id: 'payments', label: 'Payments', icon: CreditCard },
     ]
   },
   {
@@ -77,6 +78,7 @@ function SidebarContent() {
     design: isDark ? 'text-[#9A82D4]' : 'text-[#C084FC]',
     production: isDark ? 'text-[#4BA7A7]' : 'text-[#2DD4BF]',
     shipment: isDark ? 'text-[#56A9C7]' : 'text-[#38BDF8]',
+    payments: isDark ? 'text-[#70D0A8]' : 'text-[#10B981]',
     delays: isDark ? 'text-[#E05A5A]' : 'text-[#F87171]',
     pipeline: isDark ? 'text-[#3FB984]' : 'text-[#34D399]',
     'audit-log': isDark ? 'text-[#85858B]' : 'text-slate-400',

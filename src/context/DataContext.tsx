@@ -74,6 +74,34 @@ interface DataContextType {
     user?: string
   ) => { success: boolean; errors?: string[] };
 
+  updateDesignSchedule: (
+    designId: string,
+    updatedFields: Partial<DesignSchedule>,
+    user?: string
+  ) => { success: boolean; errors?: string[] };
+
+  updateProductionRecord: (
+    productionId: string,
+    updatedFields: Partial<ProductionRecord>,
+    user?: string
+  ) => { success: boolean; errors?: string[] };
+
+  addProductionEntry: (
+    entry: ProductionRecord,
+    user?: string
+  ) => { success: boolean; errors?: string[] };
+
+  updateShipmentRecord: (
+    shipmentId: string,
+    updatedFields: Partial<ShipmentRecord>,
+    user?: string
+  ) => { success: boolean; errors?: string[] };
+
+  recordNewPayment: (
+    newPayment: PaymentRecord,
+    user?: string
+  ) => { success: boolean; errors?: string[] };
+
   commitExcelImport: (
     updatedProjectsMap: Map<string, Partial<ProjectMaster>>,
     newProjectsList: ProjectMaster[],
@@ -89,6 +117,10 @@ const DataContext = createContext<DataContextType | null>(null);
 
 const STORAGE_PROJECTS_KEY = 'kumkang_projects_data_v1';
 const STORAGE_AUDIT_LOGS_KEY = 'kumkang_audit_logs_v1';
+const STORAGE_DESIGN_KEY = 'kumkang_design_schedules_v1';
+const STORAGE_PRODUCTION_KEY = 'kumkang_production_records_v1';
+const STORAGE_SHIPMENTS_KEY = 'kumkang_shipment_records_v1';
+const STORAGE_PAYMENTS_KEY = 'kumkang_payment_records_v1';
 
 function formatLogTimestamp(date = new Date()): string {
   const day = String(date.getDate()).padStart(2, '0');
@@ -117,10 +149,57 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return projectMasterData;
   });
 
-  const [designSchedules] = useState<DesignSchedule[]>(designScheduleData);
-  const [productionRecords] = useState<ProductionRecord[]>(productionData);
-  const [shipments] = useState<ShipmentRecord[]>(shipmentData);
-  const [payments] = useState<PaymentRecord[]>(paymentData);
+  const [designSchedules, setDesignSchedules] = useState<DesignSchedule[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_DESIGN_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse design schedules from localStorage:', e);
+    }
+    return designScheduleData;
+  });
+
+  const [productionRecords, setProductionRecords] = useState<ProductionRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_PRODUCTION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse production records from localStorage:', e);
+    }
+    return productionData;
+  });
+
+  const [shipments, setShipments] = useState<ShipmentRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_SHIPMENTS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse shipment records from localStorage:', e);
+    }
+    return shipmentData;
+  });
+
+  const [payments, setPayments] = useState<PaymentRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_PAYMENTS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse payment records from localStorage:', e);
+    }
+    return paymentData;
+  });
 
   // Initialize Audit Logs
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
@@ -136,7 +215,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return [];
   });
 
-  // Persist projects whenever changed
+  // Persist state when changed
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_PROJECTS_KEY, JSON.stringify(projects));
@@ -144,6 +223,38 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       console.error('Error saving projects to localStorage:', e);
     }
   }, [projects]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_DESIGN_KEY, JSON.stringify(designSchedules));
+    } catch (e) {
+      console.error('Error saving design schedules to localStorage:', e);
+    }
+  }, [designSchedules]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_PRODUCTION_KEY, JSON.stringify(productionRecords));
+    } catch (e) {
+      console.error('Error saving production records to localStorage:', e);
+    }
+  }, [productionRecords]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_SHIPMENTS_KEY, JSON.stringify(shipments));
+    } catch (e) {
+      console.error('Error saving shipments to localStorage:', e);
+    }
+  }, [shipments]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_PAYMENTS_KEY, JSON.stringify(payments));
+    } catch (e) {
+      console.error('Error saving payments to localStorage:', e);
+    }
+  }, [payments]);
 
   // Persist audit logs whenever changed
   useEffect(() => {
@@ -355,6 +466,165 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return { success: true };
   }, [projects]);
 
+  // QUICK EDIT DESIGN SCHEDULE
+  const updateDesignSchedule = useCallback((
+    designId: string,
+    updatedFields: Partial<DesignSchedule>,
+    user = 'Project Manager'
+  ) => {
+    const idx = designSchedules.findIndex(d => d.designId === designId);
+    if (idx === -1) return { success: false, errors: [`Design record ${designId} not found.`] };
+
+    const current = designSchedules[idx];
+    const updated = { ...current, ...updatedFields };
+
+    const nextList = [...designSchedules];
+    nextList[idx] = updated;
+    setDesignSchedules(nextList);
+
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: formatLogTimestamp(),
+      user,
+      method: 'Manual',
+      projectId: updated.projectId,
+      summary: `Quick Edit Design element "${updated.element}" (${designId}): Status -> ${updated.status}`,
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+
+    return { success: true };
+  }, [designSchedules]);
+
+  // QUICK EDIT PRODUCTION RECORD
+  const updateProductionRecord = useCallback((
+    productionId: string,
+    updatedFields: Partial<ProductionRecord>,
+    user = 'Project Manager'
+  ) => {
+    const idx = productionRecords.findIndex(p => p.productionId === productionId);
+    if (idx === -1) return { success: false, errors: [`Production record ${productionId} not found.`] };
+
+    const current = productionRecords[idx];
+    const updated = { ...current, ...updatedFields };
+
+    if (updated.orderQtyM2 && updated.finishedQtyM2 !== null && updated.finishedQtyM2 !== undefined) {
+      updated.completionPercent = Math.min(100, Math.max(0, Math.round((updated.finishedQtyM2 / updated.orderQtyM2) * 100)));
+      updated.balanceQty = Math.max(0, updated.orderQtyM2 - updated.finishedQtyM2);
+    }
+
+    const nextList = [...productionRecords];
+    nextList[idx] = updated;
+    setProductionRecords(nextList);
+
+    if (updated.projectId && (updatedFields.productionStartDate || updatedFields.productionCompleteDate)) {
+      updateProjectManual(updated.projectId, {
+        ...(updatedFields.productionStartDate ? { productionStart: updatedFields.productionStartDate } : {}),
+        ...(updatedFields.productionCompleteDate ? { productionComplete: updatedFields.productionCompleteDate } : {}),
+      }, user);
+    }
+
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: formatLogTimestamp(),
+      user,
+      method: 'Manual',
+      projectId: updated.projectId || undefined,
+      summary: `Quick Edit Production record ${updated.part} (${productionId}): Progress -> ${updated.completionPercent ?? 0}%`,
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+
+    return { success: true };
+  }, [productionRecords, updateProjectManual]);
+
+  // ADD PRODUCTION ENTRY
+  const addProductionEntry = useCallback((
+    entry: ProductionRecord,
+    user = 'Project Manager'
+  ) => {
+    setProductionRecords(prev => [entry, ...prev]);
+
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: formatLogTimestamp(),
+      user,
+      method: 'Manual',
+      projectId: entry.projectId || undefined,
+      summary: `Added new Production entry for ${entry.part} (${entry.projectId})`,
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+
+    return { success: true };
+  }, []);
+
+  // QUICK EDIT SHIPMENT RECORD
+  const updateShipmentRecord = useCallback((
+    shipmentId: string,
+    updatedFields: Partial<ShipmentRecord>,
+    user = 'Project Manager'
+  ) => {
+    const idx = shipments.findIndex(s => s.shipmentId === shipmentId);
+    if (idx === -1) return { success: false, errors: [`Shipment record ${shipmentId} not found.`] };
+
+    const current = shipments[idx];
+    const updated = { ...current, ...updatedFields };
+
+    const nextList = [...shipments];
+    nextList[idx] = updated;
+    setShipments(nextList);
+
+    if (updated.projectId) {
+      updateProjectManual(updated.projectId, {
+        ...(updatedFields.etd !== undefined ? { etd: updatedFields.etd } : {}),
+        ...(updatedFields.eta !== undefined ? { eta: updatedFields.eta } : {}),
+        ...(updatedFields.fwd !== undefined ? { fwd: updatedFields.fwd } : {}),
+        ...(updatedFields.loadingDate !== undefined ? { loadingDate: updatedFields.loadingDate } : {}),
+      }, user);
+    }
+
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: formatLogTimestamp(),
+      user,
+      method: 'Manual',
+      projectId: updated.projectId,
+      summary: `Quick Edit Shipment ${shipmentId} (${updated.projectId}): Status -> ${updated.status}`,
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+
+    return { success: true };
+  }, [shipments, updateProjectManual]);
+
+  // RECORD NEW PAYMENT
+  const recordNewPayment = useCallback((
+    newPayment: PaymentRecord,
+    user = 'Project Manager'
+  ) => {
+    setPayments(prev => [newPayment, ...prev]);
+
+    if (newPayment.projectId && newPayment.amountUSD) {
+      const proj = projects.find(p => p.projectId === newPayment.projectId);
+      if (proj) {
+        const currentAdv = proj.advanceUSD || 0;
+        const newAdv = currentAdv + newPayment.amountUSD;
+        updateProjectManual(newPayment.projectId, {
+          advanceUSD: newAdv,
+        }, user);
+      }
+    }
+
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: formatLogTimestamp(),
+      user,
+      method: 'Manual',
+      projectId: newPayment.projectId || undefined,
+      summary: `Recorded new Payment of $${newPayment.amountUSD?.toLocaleString()} for ${newPayment.projectId}`,
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+
+    return { success: true };
+  }, [projects, updateProjectManual]);
+
   // EXCEL IMPORT COMMIT MUTATION
   const commitExcelImport = useCallback((
     updatedProjectsMap: Map<string, Partial<ProjectMaster>>,
@@ -410,7 +680,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const resetToInitialData = useCallback(() => {
     setProjects(projectMasterData);
+    setDesignSchedules(designScheduleData);
+    setProductionRecords(productionData);
+    setShipments(shipmentData);
+    setPayments(paymentData);
+
     localStorage.removeItem(STORAGE_PROJECTS_KEY);
+    localStorage.removeItem(STORAGE_DESIGN_KEY);
+    localStorage.removeItem(STORAGE_PRODUCTION_KEY);
+    localStorage.removeItem(STORAGE_SHIPMENTS_KEY);
+    localStorage.removeItem(STORAGE_PAYMENTS_KEY);
+
     const resetLog: AuditLogEntry = {
       id: `LOG-${Date.now()}`,
       timestamp: formatLogTimestamp(),
@@ -451,6 +731,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     getTotalOutstandingBalance,
     updateProjectManual,
     addProjectManual,
+    updateDesignSchedule,
+    updateProductionRecord,
+    addProductionEntry,
+    updateShipmentRecord,
+    recordNewPayment,
     commitExcelImport,
     resetToInitialData,
     clearAuditLogs,
@@ -479,6 +764,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     getTotalOutstandingBalance,
     updateProjectManual,
     addProjectManual,
+    updateDesignSchedule,
+    updateProductionRecord,
+    addProductionEntry,
+    updateShipmentRecord,
+    recordNewPayment,
     commitExcelImport,
     resetToInitialData,
     clearAuditLogs,

@@ -259,6 +259,16 @@ export interface ProjectMaster {
   invoiceAmount?: number | null;
   containerTotal?: number | null;
   containerSize?: string | null;
+
+  // Delay & Risk Quick Edit fields
+  delayReason?: string | null;
+  delayReasonCode?: string | null;
+  expectedResolutionDate?: string | null;
+  targetResolutionDate?: string | null;
+  actionOwner?: string | null;
+  correctiveAction?: string | null;
+  delayStatus?: string | null;
+  delayRemarks?: string | null;
 }
 
 export interface DesignSchedule {
@@ -268,6 +278,11 @@ export interface DesignSchedule {
   plannedDate: string | null;
   actualDate: string | null;
   status: string;
+  wallStatus?: string | null;
+  beamStatus?: string | null;
+  slabStatus?: string | null;
+  stairStatus?: string | null;
+  remarks?: string | null;
 }
 
 export interface ProductionRecord {
@@ -282,6 +297,9 @@ export interface ProductionRecord {
   completionPercent: number | null;
   productionStartDate: string | null;
   productionCompleteDate: string | null;
+  productionDate?: string | null;
+  productionStatus?: string | null;
+  remarks?: string | null;
 }
 
 export interface ShipmentRecord {
@@ -297,6 +315,13 @@ export interface ShipmentRecord {
   status: string;
 
   // Additional Shipment Tracking Fields
+  containerNumber?: string | null;
+  billOfLading?: string | null;
+  vesselName?: string | null;
+  containerStatus?: string | null;
+  shipmentRemarks?: string | null;
+  fwdAssignmentDate?: string | null;
+
   invoiceNumber?: string | null;
   invoiceDate?: string | null;
   unitPrice?: number | null;
@@ -356,6 +381,9 @@ export interface PaymentRecord {
   paymentStatus: string;
   remark: string;
   sourceSheet?: string;
+  paymentDate?: string | null;
+  paymentType?: string | null;
+  paymentReference?: string | null;
 }
 
 // ============================================================

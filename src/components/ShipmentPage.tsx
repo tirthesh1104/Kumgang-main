@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { StatusBadge } from './ui/StatusBadge';
+import { QuickEditShipmentModal } from './QuickEditShipmentModal';
 import type { ShipmentRecord } from '../data/projectData';
+import { Edit3 } from 'lucide-react';
 
 function ShipmentJourneyBar({ shipment, isDark }: { shipment: ShipmentRecord; isDark: boolean }) {
   const steps = [
@@ -47,6 +49,8 @@ export function ShipmentPage() {
   const { theme } = useApp();
   const { projects, shipments } = useData();
   const isDark = theme === 'dark';
+
+  const [editingShipment, setEditingShipment] = useState<ShipmentRecord | null>(null);
 
   const inTransit = shipments.filter(s => s.status === 'In Transit').length;
   const delivered = shipments.filter(s => s.status === 'Delivered').length;
@@ -151,7 +155,19 @@ export function ShipmentPage() {
                 <h3 className={`font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{project?.project ?? shipment.projectId}</h3>
                 <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{project?.customer ?? '—'}</p>
               </div>
-              <StatusBadge status={shipment.status} />
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setEditingShipment(shipment)}
+                  className={`px-3 py-1.5 text-xs rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-colors border ${
+                    isDark
+                      ? 'bg-[#18181B] text-[#89C9DF] border-[#303035] hover:bg-[#202025]'
+                      : 'bg-slate-100 text-sky-700 border-slate-200 hover:bg-slate-200'
+                  }`}
+                >
+                  <Edit3 size={13} /> Edit Logistics
+                </button>
+                <StatusBadge status={shipment.status} />
+              </div>
             </div>
 
             <div className={`grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 text-sm mb-4 border-y py-3 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
@@ -222,6 +238,13 @@ export function ShipmentPage() {
             <p className={`text-sm mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No shipment records mapped.</p>
           </div>
         ))}
+
+      {editingShipment && (
+        <QuickEditShipmentModal
+          shipment={editingShipment}
+          onClose={() => setEditingShipment(null)}
+        />
+      )}
     </div>
   );
 }
