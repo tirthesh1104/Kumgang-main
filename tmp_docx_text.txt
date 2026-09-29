@@ -1,0 +1,76 @@
+7Dashboard Observation Points:
+The Company Name along with the Company Logo should be included on the dashboard.
+Company Logo -
+b) Instead of “Executive Brief,” the word “Project Summary” would be more professional.
+c) The Project Summary should be listed separately based on the Scope of Supply – KKV, KKI, and
+KKHQ, including Total Area and Total Amount for Signed PO, Not Signed PO, Under Review
+PO, and Upcoming PO.
+2. Project Observation Point:
+A. Instead of (Project Information)  “Project Identity & Location,” use “Project Information.”
+Vendor Company Name should be included instead of Country, with options such as KKV, KKI, or KKHQ.
+Description of Material –Aluform or Climbing System
+Client Name
+Project Name
+PO Number should be included.
+PO Date
+Bill to Address with Pin code
+Ship to Address with Pin code
+Client Contact details
+PO Qty
+Rate
+Scope of Technical Support
+Current Site Status
+Site Location or Region should be included
+B. Commercial & Financial Values should include:
+PO Rate
+Contract Amount
+Actual Total Amount
+Actual Total Receivable
+Actual Balance Amount
+Current Payment Status – Amount & %
+Last PI Raised Date, along with Payment Terms and Due Days
+PO Payment Terms
+BG Amount – Amount & %
+LC Amount – Amount & %
+BG Open Date
+BG Expiry Date
+LC Open Date
+LC Expiry Date
+c) Schedule & Milestone Dates: The following details should be included:
+Shell Plan Confirmation Date (manually editable) e.g 2-09-2026 after 13 week
+Payment Received Date against Shell Plan Confirmation (manually editable)
+MD Completion Date- (Mfg. Dwg)
+Production Start Date
+Production Completion Date
+Loading Date
+ETD Date
+ETA Date with Location
+Incoterms
+Delivery Timeline
+Actual Total Weeks calculated from the Shell Plan Confirmation Date and Payment Received Date – 1. After shell confirm date – ( Shell plan confirm date + 13 weeks) 2. After Received payment – (payment date +13 weeks)
+Current Project Status (manually editable)
+Factory Visit If any –Total No of Visit person- NA, Mock up
+Factory visit planned date, Completed date- After Production before Packaging
+Design Elements should include:
+Typical Floor Area – (Sqm , PCs, Nos) - UOM
+Basement Floor Area
+Change Floor Area
+Plumbing Groove Area
+Elevation Groove Area
+Total Payable Area
+Area Approved Date
+Shipment Tracking should include:
+Overall Total Dispatch Quantity
+Financial Year (F.Y.)-wise Dispatch Quantity
+Material-wise Dispatch Quantity:
+BCS – Separate Quantity
+ACS – Separate Quantity
+KGBH – Separate Quantity
+KSBH – Separate Quantity
+Aluform – Separate Quantity
+Invoice Number
+Invoice Date
+Unit Price
+Invoice Amount
+Container Total
+Container Size

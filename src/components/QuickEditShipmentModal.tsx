@@ -21,6 +21,7 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
   const [containerNumber, setContainerNumber] = useState(shipment.containerNumber || '');
   const [billOfLading, setBillOfLading] = useState(shipment.billOfLading || '');
   const [vesselName, setVesselName] = useState(shipment.vesselName || '');
+  const [containerStatus, setContainerStatus] = useState(shipment.containerStatus || '');
   const [fwd, setFwd] = useState(shipment.fwd || '');
   const [fwdAssignmentDate, setFwdAssignmentDate] = useState(shipment.fwdAssignmentDate || '');
   const [loadingDate, setLoadingDate] = useState(shipment.loadingDate || '');
@@ -62,6 +63,7 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
       containerNumber: containerNumber || null,
       billOfLading: billOfLading || null,
       vesselName: vesselName || null,
+      containerStatus: containerStatus || null,
       fwd: fwd || null,
       fwdAssignmentDate: fwdAssignmentDate || null,
       loadingDate: loadingDate || null,
@@ -213,22 +215,47 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
             </div>
           </div>
 
-          <div>
-            <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
-              isDark ? 'text-[#85858B]' : 'text-slate-600'
-            }`}>
-              FWD Assignment Date
-            </label>
-            <input
-              type="text"
-              disabled={isClient}
-              placeholder="15-07-2025"
-              value={fwdAssignmentDate}
-              onChange={e => setFwdAssignmentDate(e.target.value)}
-              className={`w-full px-3 py-2 text-sm rounded-lg border font-medium ${
-                isDark ? 'bg-[#18181B] border-[#303035] text-white focus:border-[#1688D4]' : 'bg-white border-slate-300 text-slate-900'
-              }`}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
+                isDark ? 'text-[#85858B]' : 'text-slate-600'
+              }`}>
+                Container Status
+              </label>
+              <select
+                disabled={isClient}
+                value={containerStatus}
+                onChange={e => setContainerStatus(e.target.value)}
+                className={`w-full px-3 py-2 text-sm rounded-lg border font-medium ${
+                  isDark ? 'bg-[#18181B] border-[#303035] text-white focus:border-[#1688D4]' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              >
+                <option value="">Select Status</option>
+                <option value="Loading">Loading</option>
+                <option value="In Transit">In Transit</option>
+                <option value="At Port">At Port</option>
+                <option value="Customs Cleared">Customs Cleared</option>
+                <option value="Delivered">Delivered</option>
+              </select>
+            </div>
+
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
+                isDark ? 'text-[#85858B]' : 'text-slate-600'
+              }`}>
+                FWD Assignment Date
+              </label>
+              <input
+                type="text"
+                disabled={isClient}
+                placeholder="15-07-2025"
+                value={fwdAssignmentDate}
+                onChange={e => setFwdAssignmentDate(e.target.value)}
+                className={`w-full px-3 py-2 text-sm rounded-lg border font-medium ${
+                  isDark ? 'bg-[#18181B] border-[#303035] text-white focus:border-[#1688D4]' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">

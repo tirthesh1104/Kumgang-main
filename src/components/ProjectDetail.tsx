@@ -7,6 +7,7 @@ import { ProjectJourney, buildProjectStages } from './projects/ProjectJourney';
 import { exportProjectPDF } from '../utils/pdfExport';
 import { addWeeksToDate } from '../data/projectData';
 import { EditProjectModal } from './EditProjectModal';
+import { QuickEditDesignModal } from './QuickEditDesignModal';
 import { useState } from 'react';
 import {
   ArrowLeft, AlertTriangle, ChevronDown, ChevronUp, FileText, Printer, X, Edit3
@@ -443,6 +444,7 @@ export function ProjectDetail() {
 
   const [isExportPreviewOpen, setIsExportPreviewOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingDesign, setEditingDesign] = useState<any>(null);
 
   const project = selectedProjectId ? getProjectById(selectedProjectId) : undefined;
 
@@ -583,6 +585,32 @@ export function ProjectDetail() {
 
         <div className="xl:col-span-2 space-y-5">
 
+          {/* Project Information */}
+          <SectionCard title="Project Information" label="Core Details">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
+              <FieldRow label="Project ID" value={project.projectId} />
+              <FieldRow label="Vendor Company Name" value={project.vendorCompany || (['TOTAL ENVIROMENT', 'BREN', 'TRIFECTA', 'KANWARJI  CONSTRUCTION'].includes(project.customer) ? 'KKV' : 'KKI')} />
+              <FieldRow label="Description of Material" value={project.materialDescription || 'Aluform'} />
+              <FieldRow label="Client Name" value={project.customer} />
+              <FieldRow label="Project Name" value={project.project} />
+              <FieldRow label="PO Number" value={project.poNumber} />
+              <FieldRow label="PO Date" value={project.poDate} />
+              <FieldRow label="Bill To Address" value={project.billToAddress} />
+              <FieldRow label="Bill To PIN Code" value={project.billToPinCode} />
+              <FieldRow label="Ship To Address" value={project.shipToAddress} />
+              <FieldRow label="Ship To PIN Code" value={project.shipToPinCode} />
+              <FieldRow label="Client Contact Name" value={project.clientContactName} />
+              <FieldRow label="Client Contact Phone" value={project.clientContactPhone} />
+              <FieldRow label="Client Contact Email" value={project.clientContactEmail} />
+              <FieldRow label="PO Quantity" value={project.poQty ? `${project.poQty} m²` : null} />
+              <FieldRow label="Rate (USD)" value={project.rate ? `$${project.rate}` : (project.pricePerM2USD ? `$${project.pricePerM2USD}` : null)} />
+              <FieldRow label="Scope of Technical Support" value={project.scopeOfTechnicalSupport} />
+              <FieldRow label="Current Site Status" value={project.currentSiteStatus} />
+              <FieldRow label="Site Location / Region" value={project.siteLocationRegion || project.country} />
+              <FieldRow label="Unloading Scope" value={project.remark?.toLowerCase().includes('client') ? 'Client Scope' : 'KKI Scope'} />
+            </div>
+          </SectionCard>
+
           {/* Project Overview */}
           <SectionCard title="Project Overview" label="Contract & Quantities">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
@@ -687,20 +715,35 @@ export function ProjectDetail() {
               <div className="overflow-x-auto border-t pt-3">
                 <table className="w-full text-sm" aria-label="Design schedule table">
                   <thead>
-                    <tr className={`border-b text-xs uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
-                      <th className="text-left py-2 pr-4 font-semibold">Element</th>
-                      <th className="text-left py-2 pr-4 font-semibold">Planned</th>
-                      <th className="text-left py-2 pr-4 font-semibold">Actual</th>
-                      <th className="text-left py-2 pr-4 font-semibold">Status</th>
+                    <tr className={`border-b text-xs font-semibold uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
+                      <th className="text-left py-2.5 px-3">ID</th>
+                      <th className="text-left py-2.5 px-3">Element</th>
+                      <th className="text-left py-2.5 px-3">Planned</th>
+                      <th className="text-left py-2.5 px-3">Actual</th>
+                      <th className="text-left py-2.5 px-3">Status</th>
+                      <th className="text-right py-2.5 px-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
                     {design.map(d => (
                       <tr key={d.designId} className={`transition-colors ${isDark ? 'hover:bg-[#1B1B1F]' : 'hover:bg-slate-50'}`}>
-                        <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{d.element}</td>
-                        <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.plannedDate ?? '—'}</td>
-                        <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.actualDate ?? '—'}</td>
-                        <td className="py-2.5 pr-4"><StatusBadge status={d.status} /></td>
+                        <td className={`py-2.5 px-3 text-xs font-mono font-semibold ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{d.designId}</td>
+                        <td className={`py-2.5 px-3 font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{d.element}</td>
+                        <td className={`py-2.5 px-3 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.plannedDate ?? '—'}</td>
+                        <td className={`py-2.5 px-3 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{d.actualDate ?? '—'}</td>
+                        <td className="py-2.5 px-3"><StatusBadge status={d.status} /></td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            onClick={() => setEditingDesign(d)}
+                            className={`px-2.5 py-1 text-xs rounded-lg font-bold inline-flex items-center gap-1 cursor-pointer transition-colors border ${
+                              isDark
+                                ? 'bg-[#18181B] text-[#1688D4] border-[#262629] hover:bg-[#202025]'
+                                : 'bg-slate-100 text-[#1688D4] border-slate-200 hover:bg-slate-200'
+                            }`}
+                          >
+                            <Edit3 size={12} /> Edit
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -870,6 +913,41 @@ export function ProjectDetail() {
                 </div>
               </div>
               <PaymentBadge status={project.paymentStatus} />
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
+                <FieldRow label="PO Rate" value={project.poRate ? `$${project.poRate}` : (project.pricePerM2USD ? `$${project.pricePerM2USD}` : null)} />
+                <FieldRow label="Actual Total Amount" value={project.actualTotalAmount ? `$${project.actualTotalAmount.toLocaleString()}` : null} />
+                <FieldRow label="Actual Total Receivable" value={project.actualTotalReceivable ? `$${project.actualTotalReceivable.toLocaleString()}` : null} />
+                <FieldRow label="Actual Balance Amount" value={project.actualBalanceAmount ? `$${project.actualBalanceAmount.toLocaleString()}` : null} />
+                <FieldRow label="Current Payment Amt" value={project.paymentStatusAmount ? `$${project.paymentStatusAmount.toLocaleString()}` : null} />
+                <FieldRow label="Current Payment %" value={project.paymentStatusPercent ? `${project.paymentStatusPercent}%` : null} />
+                <FieldRow label="Last PI Raised Date" value={project.lastPiRaisedDate} />
+                <FieldRow label="Due Days" value={project.dueDays} />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <FieldRow label="Payment Terms" value={project.paymentTerm} />
+                <FieldRow label="PO Payment Terms" value={project.poPaymentTerm} />
+              </div>
+
+              <div className={`border rounded-xl p-4 text-xs space-y-2 mt-5 ${
+                isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#C9A86A]' : 'text-amber-800'}`}>
+                  Bank Guarantee (BG) & Letter of Credit (LC)
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
+                  <FieldRow label="BG Amount" value={project.bgAmount ? `$${project.bgAmount.toLocaleString()}` : null} />
+                  <FieldRow label="BG %" value={project.bgPercent ? `${project.bgPercent}%` : null} />
+                  <FieldRow label="BG Open Date" value={project.bgOpenDate} />
+                  <FieldRow label="BG Expiry Date" value={project.bgExpiryDate} />
+                  
+                  <FieldRow label="LC Amount" value={project.lcAmount ? `$${project.lcAmount.toLocaleString()}` : null} />
+                  <FieldRow label="LC %" value={project.lcPercent ? `${project.lcPercent}%` : null} />
+                  <FieldRow label="LC Open Date" value={project.lcOpenDate} />
+                  <FieldRow label="LC Expiry Date" value={project.lcExpiryDate} />
+                </div>
+              </div>
               
               {payments.length > 0 && (
                 <div className={`mt-6 border-t pt-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
@@ -1066,6 +1144,14 @@ export function ProjectDetail() {
         <ExportPreviewModal
           project={project}
           onClose={() => setIsExportPreviewOpen(false)}
+        />
+      )}
+
+      {/* Quick Edit Design Modal */}
+      {editingDesign && (
+        <QuickEditDesignModal
+          designItem={editingDesign}
+          onClose={() => setEditingDesign(null)}
         />
       )}
     </motion.div>

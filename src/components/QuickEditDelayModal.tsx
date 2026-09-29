@@ -234,8 +234,10 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
                   isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
                 }`}
               >
+                <option value="Open">Open</option>
                 <option value="Active Risk">Active Risk</option>
                 <option value="In Resolution">In Resolution</option>
+                <option value="Escalated">Escalated</option>
                 <option value="Resolved">Resolved</option>
                 <option value="Closed">Closed</option>
               </select>

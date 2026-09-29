@@ -177,11 +177,14 @@ export function ScopeWiseSummary() {
                 <span className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-[#94A3B8]' : 'text-slate-500'}`}>
                   {scope}
                 </span>
-                <div className={`text-3xl sm:text-4xl font-black tracking-tight mt-0.5 ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-                  <AnimatedNumber value={metric.totalProjects} />
-                </div>
-                <div className={`text-xs font-medium mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-                  Total Projects
+                
+                <div className="mt-1">
+                  <div className={`text-2xl sm:text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
+                    <AnimatedNumber value={metric.totalProjects} />
+                  </div>
+                  <div className={`text-xs font-medium mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
+                    Total Projects
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -15,18 +15,49 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
   const isDark = theme === 'dark';
   const { auditLogs, resetToInitialData, clearAuditLogs } = useData();
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [filterUser, setFilterUser] = useState('All');
+  const [filterMethod, setFilterMethod] = useState('All');
+  const [filterDate, setFilterDate] = useState('All');
   const [showConfirmReset, setShowConfirmReset] = useState(false);
+
+  const filteredLogs = auditLogs.filter(log => {
+    if (filterUser !== 'All' && !log.user.toLowerCase().includes(filterUser.toLowerCase())) return false;
+    if (filterMethod !== 'All' && log.method !== filterMethod) return false;
+    
+    if (filterDate !== 'All') {
+      const logDate = new Date(log.timestamp.replace('Sept', 'Sep'));
+      const now = new Date();
+      if (filterDate === 'Today') {
+        if (logDate.toDateString() !== now.toDateString()) return false;
+      } else if (filterDate === 'Last 7 Days') {
+        const diff = now.getTime() - logDate.getTime();
+        if (diff > 7 * 24 * 60 * 60 * 1000) return false;
+      } else if (filterDate === 'This Month') {
+        if (logDate.getMonth() !== now.getMonth() || logDate.getFullYear() !== now.getFullYear()) return false;
+      }
+    }
+    return true;
+  });
 
   const handleReset = () => {
     resetToInitialData();
     setShowConfirmReset(false);
   };
 
+  const handleResetFilters = () => {
+    setFilterUser('All');
+    setFilterMethod('All');
+    setFilterDate('All');
+    setExpandedLogId(null);
+  };
+
+  const allUsers = ['All', ...new Set(auditLogs.map(l => l.user))];
+
   return (
     <div className={`fixed inset-0 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 z-50 overflow-y-auto ${
       isDark ? 'bg-black/75' : 'bg-slate-900/50'
     }`}>
-      <div className={`border rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 ${
+      <div className={`border rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 ${
         isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-200 text-slate-800'
       }`}>
         
@@ -58,12 +89,67 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
           </button>
         </div>
 
+        {/* Filters Bar */}
+        <div className={`p-4 border-b flex flex-wrap items-center gap-4 text-xs font-medium ${
+          isDark ? 'bg-[#0A0A0A] border-[#262629]' : 'bg-slate-50 border-slate-200'
+        }`}>
+          <div className="flex items-center gap-2">
+            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>User Role:</label>
+            <select
+              value={filterUser}
+              onChange={e => setFilterUser(e.target.value)}
+              className={`px-2 py-1.5 rounded border outline-none ${
+                isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-800'
+              }`}
+            >
+              {allUsers.map(u => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Action Category:</label>
+            <select
+              value={filterMethod}
+              onChange={e => setFilterMethod(e.target.value)}
+              className={`px-2 py-1.5 rounded border outline-none ${
+                isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-800'
+              }`}
+            >
+              <option value="All">All</option>
+              <option value="Manual">Manual</option>
+              <option value="Excel Import">Excel Import</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Date Range:</label>
+            <select
+              value={filterDate}
+              onChange={e => setFilterDate(e.target.value)}
+              className={`px-2 py-1.5 rounded border outline-none ${
+                isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-800'
+              }`}
+            >
+              <option value="All">All Time</option>
+              <option value="Today">Today</option>
+              <option value="Last 7 Days">Last 7 Days</option>
+              <option value="This Month">This Month</option>
+            </select>
+          </div>
+          <button
+            onClick={handleResetFilters}
+            className={`px-3 py-1.5 rounded border transition-colors cursor-pointer ml-auto ${
+              isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#202025]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
+            }`}
+          >
+            Reset Filters
+          </button>
+        </div>
+
         {/* Action Top Bar */}
         <div className={`border-b px-6 py-3 flex items-center justify-between text-xs ${
           isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-100 border-slate-200'
         }`}>
           <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>
-            {auditLogs.length} Logged Action{auditLogs.length !== 1 ? 's' : ''}
+            {filteredLogs.length} Logged Action{filteredLogs.length !== 1 ? 's' : ''} shown
           </span>
           <div className="flex items-center gap-3">
             {auditLogs.length > 0 && (
@@ -125,16 +211,16 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
         <div className={`flex-1 overflow-y-auto p-6 space-y-3 ${
           isDark ? 'bg-[#0A0A0A]' : 'bg-slate-50'
         }`}>
-          {auditLogs.length === 0 ? (
+          {filteredLogs.length === 0 ? (
             <div className={`text-center py-12 text-xs font-medium space-y-2 ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>
               <History size={32} className={`mx-auto ${isDark ? 'text-[#4D4D52]' : 'text-slate-300'}`} />
-              <p className={isDark ? 'text-[#85858B]' : 'text-slate-600'}>No data updates logged yet.</p>
+              <p className={isDark ? 'text-[#85858B]' : 'text-slate-600'}>No data updates logged or found for these filters.</p>
               <p className={`text-[11px] ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>
                 Manual project edits and Excel imports will be logged here for administrative auditing.
               </p>
             </div>
           ) : (
-            auditLogs.map(log => {
+            filteredLogs.map(log => {
               const isExpanded = expandedLogId === log.id;
               const isExcel = log.method === 'Excel Import';
               return (

@@ -70,7 +70,7 @@ function parseStateFromURL(): {
     const params = new URLSearchParams(window.location.search);
     const validPages: NavPage[] = [
       'dashboard', 'projects', 'project-detail', 'design',
-      'production', 'shipment', 'payments', 'delays', 'reports', 'crm'
+      'production', 'shipment', 'payments', 'delays', 'reports', 'crm', 'pipeline'
     ];
     const rawPage = params.get('page') as NavPage | null;
     const page = rawPage && validPages.includes(rawPage) ? rawPage : 'dashboard';

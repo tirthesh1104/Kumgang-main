@@ -26,6 +26,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
   const [orderQtyM2, setOrderQtyM2] = useState<number | string>(prodItem?.orderQtyM2 ?? '');
   const [finishedQtyM2, setFinishedQtyM2] = useState<number | string>(prodItem?.finishedQtyM2 ?? '');
   const [completionPercent, setCompletionPercent] = useState<number | string>(prodItem?.completionPercent ?? 0);
+  const [productionDate, setProductionDate] = useState(prodItem?.productionDate || '');
   const [productionStartDate, setProductionStartDate] = useState(prodItem?.productionStartDate || '');
   const [productionCompleteDate, setProductionCompleteDate] = useState(prodItem?.productionCompleteDate || '');
   const [productionStatus, setProductionStatus] = useState(prodItem?.productionStatus || 'In Production');
@@ -84,6 +85,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
         finishedQtyKg: null,
         balanceQty: isNaN(ordNum) || isNaN(finNum) ? null : Math.max(0, ordNum - finNum),
         completionPercent: isNaN(pctNum) ? 0 : Math.min(100, Math.max(0, pctNum)),
+        productionDate: productionDate || null,
         productionStartDate: productionStartDate || null,
         productionCompleteDate: productionCompleteDate || null,
         productionStatus,
@@ -99,6 +101,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
         orderQtyM2: isNaN(ordNum) ? null : ordNum,
         finishedQtyM2: isNaN(finNum) ? null : finNum,
         completionPercent: isNaN(pctNum) ? 0 : Math.min(100, Math.max(0, pctNum)),
+        productionDate: productionDate || null,
         productionStartDate: productionStartDate || null,
         productionCompleteDate: productionCompleteDate || null,
         productionStatus,
@@ -244,6 +247,26 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
                 onChange={e => setCompletionPercent(e.target.value)}
                 className={`w-full px-3 py-2 text-sm rounded-lg border font-bold ${
                   isDark ? 'bg-[#18181B] border-[#303035] text-[#70D0A8]' : 'bg-white border-slate-300 text-emerald-600'
+                }`}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
+                isDark ? 'text-[#85858B]' : 'text-slate-600'
+              }`}>
+                Production Date
+              </label>
+              <input
+                type="text"
+                disabled={isClient}
+                placeholder="e.g. 15-06-2025"
+                value={productionDate}
+                onChange={e => setProductionDate(e.target.value)}
+                className={`w-full px-3 py-2 text-sm rounded-lg border font-medium ${
+                  isDark ? 'bg-[#18181B] border-[#303035] text-white focus:border-[#1688D4]' : 'bg-white border-slate-300 text-slate-900'
                 }`}
               />
             </div>

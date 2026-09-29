@@ -162,21 +162,25 @@ export function PortfolioOverviewMetrics() {
     });
   }, [scopeFilteredProjects, selectedPeriod]);
 
-  // Portfolio Overview PO Status Counts (respects selectedScope)
-  const poCounts = useMemo(() => {
-    const counts: Record<POStatus, number> = {
-      'Signed PO': 0,
-      'Under Review PO': 0,
-      'Upcoming PO': 0,
-      'Not Signed PO': 0,
+  // Portfolio Overview PO Status Metrics (respects selectedScope)
+  const poMetrics = useMemo(() => {
+    const metrics: Record<POStatus, { count: number; area: number; amount: number }> = {
+      'Signed PO': { count: 0, area: 0, amount: 0 },
+      'Under Review PO': { count: 0, area: 0, amount: 0 },
+      'Upcoming PO': { count: 0, area: 0, amount: 0 },
+      'Not Signed PO': { count: 0, area: 0, amount: 0 },
     };
     scopeFilteredProjects.forEach(p => {
       const status = getProjectPOStatus(p);
-      if (counts[status] !== undefined) {
-        counts[status] += 1;
+      const area = p.actualDesignQtyM2 || p.contractQtyM2 || p.poQty || 0;
+      const amt = p.totalAmountUSD || p.actualTotalAmount || 0;
+      if (metrics[status]) {
+        metrics[status].count += 1;
+        metrics[status].area += area;
+        metrics[status].amount += amt;
       }
     });
-    return counts;
+    return metrics;
   }, [scopeFilteredProjects]);
 
   // Key Metrics calculations (respects selectedScope and selectedPeriod)
@@ -461,7 +465,7 @@ export function PortfolioOverviewMetrics() {
         {/* Four PO Status Cards in a Single Responsive Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {poCardConfigs.map((item, idx) => {
-            const count = poCounts[item.status] || 0;
+            const statusMetrics = poMetrics[item.status] || { count: 0, area: 0, amount: 0 };
             const IconComponent = item.icon;
 
             return (
@@ -490,12 +494,13 @@ export function PortfolioOverviewMetrics() {
                 </div>
 
                 {/* Bottom Row: Title, Large Number & Subtitle */}
-                <div className="mt-4 relative z-10">
+                <div className="mt-4 relative z-10 flex flex-col h-full justify-end">
                   <span className={`text-xs font-bold tracking-tight ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
                     {item.displayName}
                   </span>
-                  <div className={`text-3xl sm:text-4xl font-black tracking-tight mt-1 ${item.numColor}`}>
-                    <AnimatedNumber value={count} />
+                  
+                  <div className={`text-2xl sm:text-3xl font-black tracking-tight mt-1 ${item.numColor}`}>
+                    <AnimatedNumber value={statusMetrics.count} />
                   </div>
                   <p className={`text-xs mt-0.5 ${item.descColor}`}>
                     {item.description}
