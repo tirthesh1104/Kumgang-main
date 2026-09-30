@@ -116,7 +116,7 @@ export function ProjectList({
                         <span className={`text-xs font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</span>
                       </div>
                     ) : (
-                      <span className={`font-mono ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>—</span>
+                      <span className={`text-[11px] font-semibold ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>Progress not available</span>
                     )}
                   </td>
                   <td className="py-3 px-3.5">
@@ -228,15 +228,21 @@ export function ProjectList({
                 </div>
               </div>
 
-              {progress != null && (
-                <div className={`mb-4 p-3 rounded-lg border ${isDark ? 'bg-[#111113] border-[#202023]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
-                  <div className="flex justify-between text-xs mb-1.5 font-semibold">
-                    <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>Design Progress <span className={`text-[10px] font-normal ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>(DERIVED)</span></span>
+              <div className={`mb-4 p-3 rounded-lg border ${isDark ? 'bg-[#111113] border-[#202023]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>Design Progress</span>
+                  {progress != null ? (
                     <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</span>
-                  </div>
-                  <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="md" />
+                  ) : (
+                    <span className={`text-[11px] font-medium ${isDark ? 'text-[#65656B]' : 'text-[#94A3B8]'}`}>Progress not available</span>
+                  )}
                 </div>
-              )}
+                {progress != null && (
+                  <div className="mt-1.5">
+                    <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="md" />
+                  </div>
+                )}
+              </div>
 
               <div className={`flex flex-wrap gap-x-5 gap-y-1.5 text-xs font-medium border-t pt-3 mt-2 ${
                 isDark ? 'text-[#85858B] border-[#202023]' : 'text-[#64748B] border-[#E2E8F0]'

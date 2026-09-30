@@ -245,13 +245,18 @@ export function ProjectsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {progress != null && (
-                        <div className="text-right hidden sm:block">
+                      {progress != null ? (
+                        <div className="text-right flex flex-col items-end">
                           <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Design Progress</p>
                           <p className={`text-base font-extrabold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</p>
                           <div className="w-24 mt-1">
                             <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="sm" />
                           </div>
+                        </div>
+                      ) : (
+                        <div className="text-right flex flex-col items-end">
+                          <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Design Progress</p>
+                          <span className={`text-[11px] font-semibold ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>Progress not available</span>
                         </div>
                       )}
 

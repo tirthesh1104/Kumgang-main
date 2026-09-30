@@ -564,13 +564,18 @@ export function ProjectDetail() {
               {project.customer}{project.block ? ` · Block ${project.block}` : ''} • {project.country}
             </p>
           </div>
-          {progressPercent != null && (
+          {progressPercent != null ? (
             <div className="text-right">
-              <p className={`text-[10px] font-extrabold uppercase tracking-widest mb-1 ${needsAttention ? 'text-red-500' : 'text-slate-400'}`}>Design Progress</p>
+              <p className={`text-[10px] font-extrabold uppercase tracking-widest mb-1 ${needsAttention ? 'text-red-500' : (isDark ? 'text-[#85858B]' : 'text-slate-400')}`}>Design Progress</p>
               <p className={`text-4xl font-extrabold ${needsAttention ? (isDark ? 'text-[#F08A8A]' : 'text-red-600') : (isDark ? 'text-[#FFFFFF]' : 'text-slate-900')}`}>{progressPercent}%</p>
               <div className="mt-2 w-32">
                 <ProgressBar value={progressPercent} color={needsAttention ? 'orange' : 'forest'} size="lg" />
               </div>
+            </div>
+          ) : (
+            <div className="text-right">
+              <p className={`text-[10px] font-extrabold uppercase tracking-widest mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-400'}`}>Design Progress</p>
+              <p className={`text-xs font-semibold ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>Progress not available</p>
             </div>
           )}
         </div>
