@@ -232,14 +232,11 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
     gstr3bVerificationStatus: existing?.gstr3bVerificationStatus || 'Verified',
   });
 
-  const [isDirty, setIsDirty] = useState(false);
-  const [showConfirmClose, setShowConfirmClose] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleChange = (field: keyof ProjectMaster, value: any) => {
-    setIsDirty(true);
     setSubmitError(null);
     setFormData(prev => {
       const next = { ...prev, [field]: value };
@@ -261,11 +258,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
   };
 
   const handleCloseAttempt = () => {
-    if (isDirty) {
-      setShowConfirmClose(true);
-    } else {
-      onClose();
-    }
+    onClose();
   };
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -2409,37 +2402,6 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             </div>
           </div>
 
-          {/* UNSAVED CHANGES WARNING SUB-DIALOG */}
-          {showConfirmClose && (
-            <div className={`p-4 border rounded-xl flex items-center justify-between text-xs font-bold animate-in fade-in ${
-              isDark ? 'bg-[#322917] border-[#5B4724] text-[#E5C47A]' : 'bg-amber-50 border-amber-200 text-amber-900'
-            }`}>
-              <div className="flex items-center gap-2">
-                <ShieldAlert size={18} className={isDark ? 'text-[#D6A84F]' : 'text-amber-600'} />
-                <span>{t('unsavedChangesWarning')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmClose(false)}
-                  className={`px-3 py-1.5 border rounded-lg ${
-                    isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#222226]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
-                  }`}
-                >
-                  {t('keepEditing')}
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className={`px-3 py-1.5 rounded-lg ${
-                    isDark ? 'bg-[#5B4724] text-[#E5C47A] hover:bg-[#322917]' : 'bg-amber-600 text-white hover:bg-amber-700'
-                  }`}
-                >
-                  {t('discardChanges')}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Footer Actions */}
           <div className={`flex items-center justify-between border-t pt-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
