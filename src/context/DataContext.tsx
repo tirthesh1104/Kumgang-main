@@ -1306,6 +1306,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const existingCount = proformaInvoices.filter(pi => pi.projectId === projectId).length;
     const newPI = generatePIDataFromProject(project, existingCount + 1, user, stakeholderEmails);
 
+    const dateNow = new Date().toISOString().slice(0, 10);
+    setProjects(prev => prev.map(p => {
+      if (p.projectId !== projectId) return p;
+      return {
+        ...p,
+        lastPiRaisedDate: dateNow,
+      };
+    }));
+
     setProformaInvoices(prev => [newPI, ...prev]);
 
     const log: AuditLogEntry = {
