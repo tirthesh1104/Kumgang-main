@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { validateProjectMaster, type ValidationError } from '../utils/dataValidation';
 import type { ProjectMaster } from '../data/projectData';
 import {
@@ -16,6 +17,7 @@ interface EditProjectModalProps {
 
 export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectModalProps) {
   const { theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const { getProjectById, updateProjectManual, addProjectManual } = useData();
 
@@ -327,10 +329,10 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             </div>
             <div>
               <h3 className="font-extrabold text-base tracking-wide text-white">
-                {isNew ? 'ADD NEW PROJECT' : `UPDATE PROJECT DATA — ${formData.projectId}`}
+                {isNew ? t('addNewProject') : `${t('updateProjectData')} — ${formData.projectId}`}
               </h3>
               <p className="text-xs text-slate-400 font-medium">
-                {isNew ? 'Register a new project into canonical dataset' : `Modifying project parameters for ${formData.project || formData.projectId}`}
+                {isNew ? t('registerNewProjectDesc') : `${t('modifyingProjectParams')} for ${formData.project || formData.projectId}`}
               </p>
             </div>
           </div>
@@ -377,7 +379,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <Building2 size={16} className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                1. PROJECT INFORMATION
+                {t('section1ProjectInfo')}
               </h4>
             </div>
 
@@ -746,7 +748,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <Layers size={16} className={isDark ? 'text-[#BBA8E8]' : 'text-purple-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                2. Technical Scope, Quantities & Progress
+                {t('section2ProgressQuantities')}
               </h4>
             </div>
 
@@ -852,7 +854,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <DollarSign size={16} className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                3. Commercial & Financial Values
+                {t('section3CommercialFinancial')}
               </h4>
             </div>
 
@@ -1187,7 +1189,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <Calendar size={16} className={isDark ? 'text-[#C9A86A]' : 'text-sky-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                4. Schedule & Milestone Dates
+                {t('section4KeyDatesSchedules')}
               </h4>
             </div>
 
@@ -1449,7 +1451,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <Layers size={16} className={isDark ? 'text-[#C9A86A]' : 'text-indigo-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                5. Design Elements Breakdown & Areas
+                {t('section5DesignElements')}
               </h4>
             </div>
 
@@ -1645,7 +1647,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <ShieldAlert size={16} className={isDark ? 'text-[#E5C47A]' : 'text-amber-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                6. Force Majeure & Contractual Exceptions (8.1)
+                {t('section6ForceMajeure')}
               </h4>
             </div>
 
@@ -1726,7 +1728,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <PackageCheck size={16} className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                7. Packing & Damage Responsibility (8.2)
+                {t('section7PackingDamage')}
               </h4>
             </div>
 
@@ -1791,7 +1793,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <FileCheck size={16} className={isDark ? 'text-[#89C9DF]' : 'text-sky-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                8. Invoice Authenticity & Proof of Delivery (POD) (8.3)
+                {t('section8InvoicePod')}
               </h4>
             </div>
 
@@ -1859,7 +1861,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <Truck size={16} className={isDark ? 'text-[#C9A86A]' : 'text-indigo-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                9. Transport & Dispatch Vehicle Compliance (8.4)
+                {t('section9TransportCompliance')}
               </h4>
             </div>
 
@@ -1925,7 +1927,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <CheckSquare size={16} className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                10. RTO Documents Verification Checklist (8.5)
+                {t('section10RtoChecklist')}
               </h4>
             </div>
 
@@ -2012,7 +2014,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <ShieldCheck size={16} className={isDark ? 'text-[#F08A8A]' : 'text-rose-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                11. HSE Compliance, Safety & Incident Tracking (8.6)
+                {t('section11HseSafety')}
               </h4>
             </div>
 
@@ -2096,7 +2098,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <Shield size={16} className={isDark ? 'text-[#E5C47A]' : 'text-amber-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                12. Speed Limit, Vehicle Inspection & Site Rules (8.7 - 8.10)
+                {t('section12SpeedLimitOps')}
               </h4>
             </div>
 
@@ -2190,7 +2192,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <Percent size={16} className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                13. Commercial Tax & TDS Compliance (Section 9)
+                {t('section13CommercialTaxTds')}
               </h4>
             </div>
 
@@ -2260,7 +2262,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <FileSpreadsheet size={16} className={isDark ? 'text-[#89C9DF]' : 'text-sky-600'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                14. GST Compliance & Payment Conditions (Sections 10 & 11)
+                {t('section14GstPaymentConditions')}
               </h4>
             </div>
 
@@ -2330,7 +2332,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             <div className={`flex items-center gap-2 border-b pb-2 ${isDark ? 'border-[#202023]' : 'border-slate-100'}`}>
               <FileCheck size={16} className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'} />
               <h4 className={`font-extrabold text-sm uppercase tracking-wider ${isDark ? 'text-[#FFFFFF]' : 'text-slate-900'}`}>
-                15. Statutory Returns Filing (GSTR-1 & GSTR-3B) (Sections 12 & 13)
+                {t('section15GstrFilings')}
               </h4>
             </div>
 
@@ -2414,7 +2416,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
             }`}>
               <div className="flex items-center gap-2">
                 <ShieldAlert size={18} className={isDark ? 'text-[#D6A84F]' : 'text-amber-600'} />
-                <span>You have unsaved changes. Are you sure you want to discard them?</span>
+                <span>{t('unsavedChangesWarning')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -2424,7 +2426,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                     isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#222226]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
                   }`}
                 >
-                  Keep Editing
+                  {t('keepEditing')}
                 </button>
                 <button
                   type="button"
@@ -2433,7 +2435,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                     isDark ? 'bg-[#5B4724] text-[#E5C47A] hover:bg-[#322917]' : 'bg-amber-600 text-white hover:bg-amber-700'
                   }`}
                 >
-                  Discard Changes
+                  {t('discardChanges')}
                 </button>
               </div>
             </div>
@@ -2448,7 +2450,7 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                 isDark ? 'text-[#B4B4B8] hover:text-[#FFFFFF]' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -2458,17 +2460,17 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
               {saveState === 'saving' ? (
                 <>
                   <RefreshCw size={15} className="animate-spin text-white flex-shrink-0" />
-                  <span>Saving Changes...</span>
+                  <span>{t('savingChanges')}</span>
                 </>
               ) : saveState === 'saved' ? (
                 <>
                   <CheckCircle2 size={15} className="text-white animate-in zoom-in-75 duration-200 flex-shrink-0" />
-                  <span>Saved!</span>
+                  <span>{t('saved')}</span>
                 </>
               ) : (
                 <>
                   <Save size={15} className="btn-icon-edit flex-shrink-0" />
-                  <span>SAVE & RECALCULATE METRICS</span>
+                  <span>{t('saveRecalculateMetrics')}</span>
                 </>
               )}
             </button>

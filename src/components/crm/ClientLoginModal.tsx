@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, User, ShieldCheck, Key, AlertCircle, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useClientAccess } from '../../context/ClientAccessContext';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 
 export function ClientLoginModal({ isOpen, onClose }: Props) {
   const { theme, showNotification } = useApp();
+  const { t } = useLanguage();
   const { loginClient, clients, switchRole } = useClientAccess();
   const isDark = theme === 'dark';
 
@@ -25,11 +27,11 @@ export function ClientLoginModal({ isOpen, onClose }: Props) {
     setErrorMsg(null);
 
     if (!username.trim()) {
-      setErrorMsg('Please enter your Client ID or Username.');
+      setErrorMsg(t('enterClientIdError'));
       return;
     }
     if (!password.trim()) {
-      setErrorMsg('Please enter your password.');
+      setErrorMsg(t('enterPasswordError'));
       return;
     }
 
@@ -79,10 +81,10 @@ export function ClientLoginModal({ isOpen, onClose }: Props) {
             </div>
             <div>
               <p className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-                SECURE PORTAL
+                {t('securePortal')}
               </p>
               <h2 className={`text-base font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-[#0F172A]'}`}>
-                Client Login Access
+                {t('clientLoginAccess')}
               </h2>
             </div>
           </div>
@@ -107,7 +109,7 @@ export function ClientLoginModal({ isOpen, onClose }: Props) {
 
           <div>
             <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>
-              Client ID / Username
+              {t('clientIdUsername')}
             </label>
             <div className="relative">
               <User size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
@@ -126,14 +128,14 @@ export function ClientLoginModal({ isOpen, onClose }: Props) {
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className={`block text-xs font-bold ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>
-                Password
+                {t('passwordLabel')}
               </label>
               <button
                 type="button"
                 onClick={() => showNotification('Please contact your Kumkang Project Manager or Admin to reset your password.')}
                 className={`text-[11px] font-bold hover:underline ${isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'}`}
               >
-                Forgot Password?
+                {t('forgotPassword')}
               </button>
             </div>
             <div className="relative">
@@ -158,14 +160,14 @@ export function ClientLoginModal({ isOpen, onClose }: Props) {
             }`}
           >
             <ShieldCheck size={16} />
-            <span>{isSubmitting ? 'VERIFYING...' : 'LOGIN TO CLIENT DASHBOARD'}</span>
+            <span>{isSubmitting ? t('verifying') : t('loginToClientDashboard')}</span>
           </button>
 
           {/* Quick Demo Switcher if Clients exist */}
           {clients.length > 0 && (
             <div className={`pt-3 border-t space-y-2 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
               <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 flex items-center gap-1">
-                <Sparkles size={11} /> Quick Demo Access (Registered Clients):
+                <Sparkles size={11} /> {t('quickDemoAccess')}
               </p>
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {clients.map(c => (
@@ -181,7 +183,7 @@ export function ClientLoginModal({ isOpen, onClose }: Props) {
                       <span className="font-mono font-bold text-[#C9A86A] mr-2">{c.clientId}</span>
                       <span className="font-bold">{c.companyName}</span>
                     </div>
-                    <span className="text-[10px] text-slate-400 font-semibold">Simulate Login →</span>
+                    <span className="text-[10px] text-slate-400 font-semibold">{t('simulateLogin')}</span>
                   </button>
                 ))}
               </div>

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Building2, Layers, Plus, Factory, Briefcase, ArrowRight } from 'lucide-react';
 import { calculateScopeMetrics } from '../utils/scopeUtils';
 import { ScopeDetailModal } from './ScopeDetailModal';
@@ -39,6 +40,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
 export function ScopeWiseSummary() {
   const { theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const { projects } = useData();
 
@@ -109,7 +111,7 @@ export function ScopeWiseSummary() {
         <div className="flex items-center gap-2">
           <Layers size={17} className={isDark ? 'text-[#38BDF8]' : 'text-[#0284C7]'} />
           <h2 className={`text-sm font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-            Scope
+            {t('scopeWiseSummary')}
           </h2>
         </div>
         <p className={`text-xs mt-0.5 font-medium ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>

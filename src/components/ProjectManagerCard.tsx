@@ -1,8 +1,10 @@
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Pencil, Building2, FolderKanban, Mail, Phone } from 'lucide-react';
 
 export function ProjectManagerCard() {
   const { projectManager, setIsEditModalOpen, theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   return (
@@ -54,7 +56,7 @@ export function ProjectManagerCard() {
                     : 'bg-[#DCFCE7] text-[#16A34A] border-[#BBF7D0]/80'
                 }`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Active
+                  {t('activeLabel')}
                 </span>
               )}
             </div>
@@ -70,7 +72,7 @@ export function ProjectManagerCard() {
 
               <div className={`flex items-center gap-1.5 font-medium ${isDark ? 'text-[#94A3B8]' : 'text-[#64748B]'}`}>
                 <FolderKanban size={12} className={isDark ? 'text-[#85858B]' : 'text-slate-400'} />
-                <span>Kumkang Live Monitoring</span>
+                <span>{t('kumkangLiveMonitoring')}</span>
               </div>
 
               {projectManager.email && (
@@ -110,7 +112,7 @@ export function ProjectManagerCard() {
           aria-label="Edit Project Manager"
         >
           <Pencil size={12} className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'} />
-          <span>Edit Manager</span>
+          <span>{t('editManager')}</span>
         </button>
       </div>
     </div>

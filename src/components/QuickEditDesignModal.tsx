@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { useClientAccess } from '../context/ClientAccessContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { DesignSchedule } from '../data/projectData';
 import { validateDateChronology } from '../utils/dataValidation';
 import { X, Check, Edit3, AlertTriangle, Info } from 'lucide-react';
@@ -15,6 +16,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
   const { theme } = useApp();
   const { updateDesignSchedule } = useData();
   const { activeSession } = useClientAccess();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const isClient = activeSession.role === 'Client';
 
@@ -33,7 +35,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (isClient) {
-      setErrorMsg('Clients have read-only access and cannot save changes.');
+      setErrorMsg(t('clientReadOnlyWarning'));
       return;
     }
 
@@ -85,7 +87,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
               <Edit3 size={18} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-white">QUICK EDIT DESIGN ELEMENT</h3>
+              <h3 className="font-extrabold text-base tracking-wide text-white uppercase">{t('quickEditDesignElement')}</h3>
               <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
                 {designItem.designId} · Project {designItem.projectId}
               </p>
@@ -107,7 +109,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
             <div className={`p-3 rounded-lg text-xs font-semibold flex items-center gap-2 border ${
               isDark ? 'bg-[#322917] border-[#5B4724] text-[#E5C47A]' : 'bg-amber-50 border-amber-200 text-amber-800'
             }`}>
-              <Info size={16} /> Client accounts are restricted to view-only access.
+              <Info size={16} /> {t('clientReadOnlyWarning')}
             </div>
           )}
 
@@ -131,7 +133,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Element Name
+              {t('elementName')}
             </label>
             <input
               type="text"
@@ -148,7 +150,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Overall Status
+                {t('designStatus')}
               </label>
               <select
                 disabled={isClient}
@@ -169,7 +171,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Planned Date
+                {t('plannedDate')}
               </label>
               <input
                 type="text"
@@ -189,7 +191,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Actual Completion Date
+                {t('actualDate')}
               </label>
               <input
                 type="text"
@@ -282,7 +284,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Remarks / Notes
+              {t('additionalRemarks')}
             </label>
             <textarea
               rows={2}
@@ -304,7 +306,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
                 isDark ? 'bg-[#18181B] text-[#85858B] hover:text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -315,7 +317,7 @@ export function QuickEditDesignModal({ designItem, onClose }: QuickEditDesignMod
                   : 'bg-[#1688D4] hover:bg-[#1272B2] text-white shadow-md'
               }`}
             >
-              <Check size={14} /> Save Design Status
+              <Check size={14} /> {t('saveDesignStatus')}
             </button>
           </div>
         </form>

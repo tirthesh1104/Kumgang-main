@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useData } from '../context/DataContext';
 import {
   History, X, RotateCcw, Trash2, FileSpreadsheet,
@@ -12,6 +13,7 @@ interface UpdateHistoryModalProps {
 
 export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
   const { theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const { auditLogs, resetToInitialData, clearAuditLogs } = useData();
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
@@ -72,9 +74,9 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
               <History size={20} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-white">DATA UPDATE & SYNCHRONIZATION HISTORY</h3>
+              <h3 className="font-extrabold text-base tracking-wide text-white">{t('dataUpdateSyncHistory')}</h3>
               <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
-                Audit log of all manual edits and Excel import operations
+                {t('auditLogSubtitle')}
               </p>
             </div>
           </div>
@@ -94,7 +96,7 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
           isDark ? 'bg-[#0A0A0A] border-[#262629]' : 'bg-slate-50 border-slate-200'
         }`}>
           <div className="flex items-center gap-2">
-            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>User Role:</label>
+            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('userRoleFilter')}</label>
             <select
               value={filterUser}
               onChange={e => setFilterUser(e.target.value)}
@@ -106,7 +108,7 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Action Category:</label>
+            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('methodFilter')}</label>
             <select
               value={filterMethod}
               onChange={e => setFilterMethod(e.target.value)}
@@ -120,7 +122,7 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Date Range:</label>
+            <label className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('timeframeFilter')}</label>
             <select
               value={filterDate}
               onChange={e => setFilterDate(e.target.value)}
@@ -140,7 +142,7 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
               isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#202025]' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
             }`}
           >
-            Reset Filters
+            {t('resetFilters')}
           </button>
         </div>
 
@@ -193,7 +195,7 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
                   isDark ? 'bg-[#18181B] border border-[#303035] text-[#D5D5D8]' : 'bg-white border border-slate-300 text-slate-700'
                 }`}
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleReset}
@@ -214,7 +216,7 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
           {filteredLogs.length === 0 ? (
             <div className={`text-center py-12 text-xs font-medium space-y-2 ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>
               <History size={32} className={`mx-auto ${isDark ? 'text-[#4D4D52]' : 'text-slate-300'}`} />
-              <p className={isDark ? 'text-[#85858B]' : 'text-slate-600'}>No data updates logged or found for these filters.</p>
+              <p className={isDark ? 'text-[#85858B]' : 'text-slate-600'}>{t('noAuditLogsMatch')}</p>
               <p className={`text-[11px] ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>
                 Manual project edits and Excel imports will be logged here for administrative auditing.
               </p>
@@ -316,7 +318,7 @@ export function UpdateHistoryModal({ onClose }: UpdateHistoryModalProps) {
               isDark ? 'bg-[#1688D4] hover:bg-[#1272B2] text-white' : 'bg-[#1688D4] hover:bg-[#1272B2] text-white shadow-sm'
             }`}
           >
-            Close
+            {t('close')}
           </button>
         </div>
       </div>

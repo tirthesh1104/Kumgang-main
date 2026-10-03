@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { useClientAccess } from '../context/ClientAccessContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { ShipmentRecord } from '../data/projectData';
 import { validateDateChronology } from '../utils/dataValidation';
 import { X, Check, Truck, AlertTriangle, Info } from 'lucide-react';
@@ -15,6 +16,7 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
   const { theme } = useApp();
   const { updateShipmentRecord } = useData();
   const { activeSession } = useClientAccess();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const isClient = activeSession.role === 'Client';
 
@@ -29,11 +31,25 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
   const [eta, setEta] = useState(shipment.eta || '');
   const [containerSize, setContainerSize] = useState(shipment.containerSize || '');
   const [containerTotal, setContainerTotal] = useState<number | string>(shipment.containerTotal ?? '');
+  const [netWeightKg, setNetWeightKg] = useState<number | string>(shipment.netWeightKg ?? '');
+  const [grossWeightKg, setGrossWeightKg] = useState<number | string>(shipment.grossWeightKg ?? '');
+  const [pcs, setPcs] = useState<number | string>(shipment.pcs ?? '');
+  const [bcsQty, setBcsQty] = useState<number | string>(shipment.bcsQty ?? '');
+  const [acsQty, setAcsQty] = useState<number | string>(shipment.acsQty ?? '');
+  const [kgbhQty, setKgbhQty] = useState<number | string>(shipment.kgbhQty ?? '');
+  const [ksbhQty, setKsbhQty] = useState<number | string>(shipment.ksbhQty ?? '');
+  const [aluformQty, setAluformQty] = useState<number | string>(shipment.aluformQty ?? '');
   const [status, setStatus] = useState(shipment.status || 'Planned');
   const [shipmentRemarks, setShipmentRemarks] = useState(shipment.shipmentRemarks || '');
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+
+  const parseNum = (val: number | string) => {
+    if (val === '' || val === null || val === undefined) return null;
+    const n = typeof val === 'number' ? val : parseFloat(val);
+    return isNaN(n) ? null : n;
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +73,7 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
 
     setWarnings(valResult.warnings);
 
-    const totalNum = typeof containerTotal === 'number' ? containerTotal : parseFloat(containerTotal as string);
+    const totalNum = parseNum(containerTotal);
 
     const res = updateShipmentRecord(shipment.shipmentId, {
       containerNumber: containerNumber || null,
@@ -70,7 +86,15 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
       etd: etd || null,
       eta: eta || null,
       containerSize: containerSize || null,
-      containerTotal: isNaN(totalNum) ? null : totalNum,
+      containerTotal: totalNum,
+      netWeightKg: parseNum(netWeightKg),
+      grossWeightKg: parseNum(grossWeightKg),
+      pcs: parseNum(pcs),
+      bcsQty: parseNum(bcsQty),
+      acsQty: parseNum(acsQty),
+      kgbhQty: parseNum(kgbhQty),
+      ksbhQty: parseNum(ksbhQty),
+      aluformQty: parseNum(aluformQty),
       status,
       shipmentRemarks: shipmentRemarks || null,
     }, activeSession.displayName || 'Project Manager');
@@ -97,7 +121,7 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
               <Truck size={18} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-white">QUICK EDIT SHIPMENT LOGISTICS</h3>
+              <h3 className="font-extrabold text-base tracking-wide text-white uppercase">{t('quickEditShipment')}</h3>
               <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
                 Shipment: {shipment.shipmentId} · Project {shipment.projectId}
               </p>
@@ -377,6 +401,129 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
             </div>
           </div>
 
+          {/* Phase 3 Weights & PCS */}
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>
+                Net Weight (KG)
+              </label>
+              <input
+                type="number"
+                disabled={isClient}
+                placeholder="e.g. 18500"
+                value={netWeightKg}
+                onChange={e => setNetWeightKg(e.target.value)}
+                className={`w-full px-2.5 py-2 text-xs rounded-lg border font-medium ${
+                  isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>
+                Gross Weight (KG)
+              </label>
+              <input
+                type="number"
+                disabled={isClient}
+                placeholder="e.g. 19200"
+                value={grossWeightKg}
+                onChange={e => setGrossWeightKg(e.target.value)}
+                className={`w-full px-2.5 py-2 text-xs rounded-lg border font-medium ${
+                  isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>
+                PCS
+              </label>
+              <input
+                type="number"
+                disabled={isClient}
+                placeholder="e.g. 450"
+                value={pcs}
+                onChange={e => setPcs(e.target.value)}
+                className={`w-full px-2.5 py-2 text-xs rounded-lg border font-medium ${
+                  isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* Phase 3 Material-wise Breakdown */}
+          <div>
+            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-sky-400' : 'text-sky-700'}`}>
+              Material-wise Dispatch Breakdown ($m^2$)
+            </label>
+            <div className="grid grid-cols-5 gap-2">
+              <div>
+                <span className={`block text-[10px] font-semibold mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>BCS</span>
+                <input
+                  type="number"
+                  disabled={isClient}
+                  placeholder="m²"
+                  value={bcsQty}
+                  onChange={e => setBcsQty(e.target.value)}
+                  className={`w-full px-2 py-1.5 text-xs rounded border ${
+                    isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <span className={`block text-[10px] font-semibold mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>ACS</span>
+                <input
+                  type="number"
+                  disabled={isClient}
+                  placeholder="m²"
+                  value={acsQty}
+                  onChange={e => setAcsQty(e.target.value)}
+                  className={`w-full px-2 py-1.5 text-xs rounded border ${
+                    isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <span className={`block text-[10px] font-semibold mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>KGBH</span>
+                <input
+                  type="number"
+                  disabled={isClient}
+                  placeholder="m²"
+                  value={kgbhQty}
+                  onChange={e => setKgbhQty(e.target.value)}
+                  className={`w-full px-2 py-1.5 text-xs rounded border ${
+                    isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <span className={`block text-[10px] font-semibold mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>KSBH</span>
+                <input
+                  type="number"
+                  disabled={isClient}
+                  placeholder="m²"
+                  value={ksbhQty}
+                  onChange={e => setKsbhQty(e.target.value)}
+                  className={`w-full px-2 py-1.5 text-xs rounded border ${
+                    isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <span className={`block text-[10px] font-semibold mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-600'}`}>Aluform</span>
+                <input
+                  type="number"
+                  disabled={isClient}
+                  placeholder="m²"
+                  value={aluformQty}
+                  onChange={e => setAluformQty(e.target.value)}
+                  className={`w-full px-2 py-1.5 text-xs rounded border ${
+                    isDark ? 'bg-[#18181B] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
@@ -403,7 +550,7 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
                 isDark ? 'bg-[#18181B] text-[#85858B] hover:text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -414,7 +561,7 @@ export function QuickEditShipmentModal({ shipment, onClose }: QuickEditShipmentM
                   : 'bg-[#1688D4] hover:bg-[#1272B2] text-white shadow-md'
               }`}
             >
-              <Check size={14} /> Save Shipment Logistics
+              <Check size={14} /> {t('saveShipmentLogistics')}
             </button>
           </div>
         </form>

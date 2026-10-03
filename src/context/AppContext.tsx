@@ -8,11 +8,13 @@ type NavPage =
   | 'design'
   | 'production'
   | 'shipment'
+  | 'site-execution'
   | 'payments'
   | 'delays'
   | 'reports'
   | 'crm'
-  | 'pipeline';
+  | 'pipeline'
+  | 'pi-approvals';
 
 export type ThemeMode = 'light' | 'dark';
 

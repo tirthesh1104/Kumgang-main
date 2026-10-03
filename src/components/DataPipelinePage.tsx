@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { getProjectScope } from '../utils/scopeUtils';
 import { SyncExcelButton } from './ui/SyncExcelButton';
 import { UpdateHistoryModal } from './UpdateHistoryModal';
@@ -13,6 +14,7 @@ import { UpdateHistoryModal } from './UpdateHistoryModal';
 export function DataPipelinePage() {
   const { theme, liveDateTime, lastUpdated } = useApp();
   const { projects, auditLogs, shipments } = useData();
+  const { t } = useLanguage();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const isDark = theme === 'dark';
@@ -40,21 +42,21 @@ export function DataPipelinePage() {
                 isDark ? 'text-[#38BDF8] bg-[#0E2838] border-[#164E63]' : 'text-[#0284C7] bg-[#E0F2FE] border-[#BAE6FD]'
               }`}>
                 <Database size={13} />
-                CANONICAL PIPELINE
+                {t('canonicalPipeline')}
               </span>
               <span className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border ${
                 isDark ? 'text-[#3FB984] bg-[#14291F] border-[#204E38]' : 'text-[#16A36A] bg-[#DCFCE7] border-[#BBF7D0]'
               }`}>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                LIVE SYNC ACTIVE
+                {t('liveSyncActive')}
               </span>
             </div>
 
             <h1 className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-[#0F172A]'}`}>
-              Live Data Pipeline
+              {t('livePipelineTitle')}
             </h1>
             <p className={`mt-1.5 text-sm font-medium max-w-2xl leading-relaxed ${isDark ? 'text-[#85858B]' : 'text-[#475569]'}`}>
-              Synchronize canonical project data directly from the master Excel workbook. Parse, validate schemas, calculate derived progress milestones, and maintain real-time audit logs.
+              {t('livePipelineDesc')}
             </p>
           </div>
 
@@ -68,9 +70,9 @@ export function DataPipelinePage() {
               }`}
             >
               <History size={14} className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'} />
-              <span>Audit Trail ({auditLogs.length})</span>
+              <span>{t('auditTrail')} ({auditLogs.length})</span>
             </button>
-            <SyncExcelButton variant="primary" label="Upload & Sync Excel" />
+            <SyncExcelButton variant="primary" label={t('uploadSyncExcel')} />
           </div>
         </div>
       </motion.div>
@@ -79,20 +81,20 @@ export function DataPipelinePage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className={`p-5 rounded-xl border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-[#DCE5EE]'}`}>
           <div className="flex items-center justify-between text-xs font-semibold mb-2">
-            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>TOTAL SYNCED PROJECTS</span>
+            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>{t('totalSyncedProjects')}</span>
             <HardDrive size={15} className={isDark ? 'text-[#38BDF8]' : 'text-[#0284C7]'} />
           </div>
           <div className={`text-2xl font-black ${isDark ? 'text-white' : 'text-[#0F172A]'}`}>
             {projects.length}
           </div>
           <p className={`text-[11px] mt-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-            Active records in memory
+            {t('activeRecordsInMemory')}
           </p>
         </div>
 
         <div className={`p-5 rounded-xl border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-[#DCE5EE]'}`}>
           <div className="flex items-center justify-between text-xs font-semibold mb-2">
-            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>CANONICAL SCOPES</span>
+            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>{t('canonicalScopes')}</span>
             <Layers size={15} className={isDark ? 'text-[#C9A86A]' : 'text-[#D97706]'} />
           </div>
           <div className="flex items-baseline gap-2">
@@ -104,33 +106,33 @@ export function DataPipelinePage() {
             </span>
           </div>
           <p className={`text-[11px] mt-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-            Validated scope categories
+            {t('validatedScopeCategories')}
           </p>
         </div>
 
         <div className={`p-5 rounded-xl border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-[#DCE5EE]'}`}>
           <div className="flex items-center justify-between text-xs font-semibold mb-2">
-            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>SHIPMENTS TRACKED</span>
+            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>{t('shipmentsTracked')}</span>
             <Cpu size={15} className={isDark ? 'text-[#3FB984]' : 'text-[#16A36A]'} />
           </div>
           <div className={`text-2xl font-black ${isDark ? 'text-white' : 'text-[#0F172A]'}`}>
             {shipments.length}
           </div>
           <p className={`text-[11px] mt-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-            Logistics & transit records
+            {t('logisticsTransitRecords')}
           </p>
         </div>
 
         <div className={`p-5 rounded-xl border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-[#DCE5EE]'}`}>
           <div className="flex items-center justify-between text-xs font-semibold mb-2">
-            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>PIPELINE HEARTBEAT</span>
+            <span className={isDark ? 'text-[#85858B]' : 'text-[#64748B]'}>{t('pipelineHeartbeat')}</span>
             <RefreshCw size={14} className={isDark ? 'text-[#38BDF8]' : 'text-[#0284C7]'} />
           </div>
           <div className={`text-xs font-bold truncate ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>
             {liveDateTime || lastUpdated}
           </div>
           <p className={`text-[11px] mt-1.5 flex items-center gap-1 ${isDark ? 'text-[#3FB984]' : 'text-[#16A36A]'}`}>
-            <CheckCircle2 size={11} /> Ready for live ingestion
+            <CheckCircle2 size={11} /> {t('readyForLiveIngestion')}
           </p>
         </div>
       </div>
@@ -148,20 +150,20 @@ export function DataPipelinePage() {
             </div>
             <div>
               <h2 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-[#0F172A]'}`}>
-                Master Excel Synchronization
+                {t('masterExcelSync')}
               </h2>
               <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-                Supports canonical Kumkang project workbook (.xlsx, .xls)
+                {t('supportsCanonicalWorkbook')}
               </p>
             </div>
           </div>
 
           <p className={`text-xs leading-relaxed mb-6 ${isDark ? 'text-[#B4B4B8]' : 'text-[#475569]'}`}>
-            When you import a workbook, the system parses Project ID, Scope, Customer, Delivery Request dates, PO Status, Area, and Financial figures. Data is validated on the fly and merged into live application state without page reloads.
+            {t('excelImportDesc')}
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
-            <SyncExcelButton variant="primary" label="Select Excel File to Synchronize" />
+            <SyncExcelButton variant="primary" label={t('selectExcelFileSync')} />
             <button
               onClick={() => setIsHistoryOpen(true)}
               className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-xl border transition-colors cursor-pointer ${
@@ -169,7 +171,7 @@ export function DataPipelinePage() {
               }`}
             >
               <History size={14} />
-              <span>Review Past Ingestions</span>
+              <span>{t('reviewPastIngestions')}</span>
             </button>
           </div>
         </div>
@@ -177,7 +179,7 @@ export function DataPipelinePage() {
         {/* Schema Information Table */}
         <div className={`mt-8 pt-6 border-t ${isDark ? 'border-[#262629]' : 'border-[#E2E8F0]'}`}>
           <h3 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-            Expected Canonical Columns
+            {t('expectedCanonicalColumns')}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
             {['SCOPE', 'PROJECT ID', 'PROJECT NAME', 'CLIENT / CUSTOMER', 'PO STATUS', 'TOTAL AMOUNT (USD)'].map(col => (

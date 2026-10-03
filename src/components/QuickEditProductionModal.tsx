@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { useClientAccess } from '../context/ClientAccessContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { ProductionRecord } from '../data/projectData';
 import { validateDateChronology } from '../utils/dataValidation';
 import { X, Check, Edit3, AlertTriangle, Info, Plus } from 'lucide-react';
@@ -16,6 +17,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
   const { theme } = useApp();
   const { updateProductionRecord, addProductionEntry } = useData();
   const { activeSession } = useClientAccess();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const isClient = activeSession.role === 'Client';
   const isNew = !prodItem;
@@ -48,7 +50,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (isClient) {
-      setErrorMsg('Clients have read-only access and cannot save changes.');
+      setErrorMsg(t('clientReadOnlyWarning'));
       return;
     }
 
@@ -131,8 +133,8 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
               {isNew ? <Plus size={18} /> : <Edit3 size={18} />}
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-white">
-                {isNew ? 'RECORD DAILY PRODUCTION' : 'QUICK EDIT PRODUCTION ENTRY'}
+              <h3 className="font-extrabold text-base tracking-wide text-white uppercase">
+                {isNew ? t('recordDailyProduction') : t('quickEditProductionEntry')}
               </h3>
               <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
                 Project ID: {targetProjectId}
@@ -155,7 +157,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
             <div className={`p-3 rounded-lg text-xs font-semibold flex items-center gap-2 border ${
               isDark ? 'bg-[#322917] border-[#5B4724] text-[#E5C47A]' : 'bg-amber-50 border-amber-200 text-amber-800'
             }`}>
-              <Info size={16} /> Client accounts are restricted to view-only access.
+              <Info size={16} /> {t('clientReadOnlyWarning')}
             </div>
           )}
 
@@ -179,7 +181,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Part / Formwork Item Name
+              {t('partBlock')}
             </label>
             <input
               type="text"
@@ -198,7 +200,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Order Qty (m²)
+                {t('orderQty')} (m²)
               </label>
               <input
                 type="number"
@@ -217,7 +219,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Finished Qty (m²)
+                {t('finishedQty')} (m²)
               </label>
               <input
                 type="number"
@@ -236,7 +238,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Completion (%)
+                {t('completionPercent')}
               </label>
               <input
                 type="number"
@@ -257,7 +259,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Production Date
+                {t('productionDate')}
               </label>
               <input
                 type="text"
@@ -277,7 +279,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Production Start Date
+                {t('productionStartDate')}
               </label>
               <input
                 type="text"
@@ -295,7 +297,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Production Complete Date
+                {t('productionCompleteDate')}
               </label>
               <input
                 type="text"
@@ -314,7 +316,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Production Status
+              {t('productionStatus')}
             </label>
             <select
               disabled={isClient}
@@ -336,7 +338,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Production Remarks
+              {t('additionalRemarks')}
             </label>
             <textarea
               rows={2}
@@ -358,7 +360,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
                 isDark ? 'bg-[#18181B] text-[#85858B] hover:text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -369,7 +371,7 @@ export function QuickEditProductionModal({ prodItem, projectId, onClose }: Quick
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
               }`}
             >
-              <Check size={14} /> Save Production Record
+              <Check size={14} /> {t('saveProductionRecord')}
             </button>
           </div>
         </form>

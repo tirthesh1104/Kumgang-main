@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../data/projectData';
 import { PaymentBadge } from './ui/StatusBadge';
-import { AlertTriangle, Plus, DollarSign } from 'lucide-react';
+import { AlertTriangle, Plus, DollarSign, Download } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { RecordPaymentModal } from './RecordPaymentModal';
+import { exportReceivableReportToExcel } from '../utils/excelExport';
 
-function PaymentBar({ received, total, isDark }: { received: number; total: number; isDark: boolean }) {
+function PaymentBar({ received, total, isDark, t }: { received: number; total: number; isDark: boolean; t: (key: string) => string }) {
   const pct = total > 0 ? (received / total) * 100 : 0;
   return (
     <div className="mt-3">
       <div className="flex justify-between text-xs mb-1">
-        <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Received</span>
+        <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('receivedLabel')}</span>
         <span className={`font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{pct.toFixed(1)}%</span>
       </div>
       <div className={`h-3 rounded-full overflow-hidden border ${
@@ -30,8 +32,8 @@ function PaymentBar({ received, total, isDark }: { received: number; total: numb
         />
       </div>
       <div className={`flex justify-between text-xs mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-        <span>${received.toLocaleString()} received</span>
-        <span>${total.toLocaleString()} total</span>
+        <span>${received.toLocaleString()} {t('receivedLabel')}</span>
+        <span>${total.toLocaleString()} {t('totalLabel')}</span>
       </div>
     </div>
   );
@@ -40,6 +42,7 @@ function PaymentBar({ received, total, isDark }: { received: number; total: numb
 export function PaymentsPage() {
   const { navigate, theme } = useApp();
   const { projects, payments, getTotalOutstandingBalance } = useData();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   const [showRecordModal, setShowRecordModal] = useState(false);
@@ -60,31 +63,46 @@ export function PaymentsPage() {
     <div className={`space-y-6 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Payment Monitoring</p>
-          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>Payment Overview</h2>
+          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('paymentMonitoring')}</p>
+          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{t('paymentOverview')}</h2>
           <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-            Monitoring financial status across {activeProjects.length} signed projects.
+            {t('monitoringFinancialStatus')} {activeProjects.length} {t('signedProjectsLabel')}
           </p>
         </div>
-        <button
-          onClick={() => handleOpenRecordModal()}
-          className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm ${
-            isDark
-              ? 'bg-[#163127] text-[#70D0A8] border border-[#28523F] hover:bg-[#1E4235]'
-              : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-          }`}
-        >
-          <Plus size={15} /> Record New Payment
-        </button>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => exportReceivableReportToExcel(projects, payments)}
+            className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer transition-all shadow-2xs border ${
+              isDark
+                ? 'bg-[#1D2B3A] text-[#60A5FA] border-[#2B435E] hover:bg-[#25394E]'
+                : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+            }`}
+            title={t('exportReceivableExcel')}
+          >
+            <Download size={15} /> {t('exportReceivableExcel')}
+          </button>
+
+          <button
+            onClick={() => handleOpenRecordModal()}
+            className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm ${
+              isDark
+                ? 'bg-[#163127] text-[#70D0A8] border border-[#28523F] hover:bg-[#1E4235]'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            }`}
+          >
+            <Plus size={15} /> {t('recordNewPayment')}
+          </button>
+        </div>
       </div>
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Contract Value', value: formatCurrency(totalContract), desc: 'Derived: sum of all signed contracts', color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]', variant: 'default' },
-          { label: 'Total Received', value: formatCurrency(safeTotalReceived), desc: 'Derived: sum received', color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600', variant: 'highlight' },
-          { label: 'Outstanding Balance', value: formatCurrency(totalOutstanding), desc: 'Derived: total balance due', color: isDark ? 'text-[#D6A84F]' : 'text-amber-600', variant: 'attention' },
-          { label: 'Fully Settled', value: `${fullPaid} / ${activeProjects.length}`, desc: 'Projects fully paid', color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600', variant: 'highlight' },
+          { label: t('totalContractValue'), value: formatCurrency(totalContract), desc: t('derivedSumContracts'), color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]', variant: 'default' },
+          { label: t('totalReceived'), value: formatCurrency(safeTotalReceived), desc: t('derivedSumReceived'), color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600', variant: 'highlight' },
+          { label: t('outstandingBalance'), value: formatCurrency(totalOutstanding), desc: t('derivedTotalBalanceDue'), color: isDark ? 'text-[#D6A84F]' : 'text-amber-600', variant: 'attention' },
+          { label: t('fullySettled'), value: `${fullPaid} / ${activeProjects.length}`, desc: t('projectsFullyPaid'), color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600', variant: 'highlight' },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -156,7 +174,7 @@ export function PaymentsPage() {
                       : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
                   }`}
                 >
-                  <DollarSign size={13} /> Record Payment
+                  <DollarSign size={13} /> {t('recordPayment')}
                 </button>
                 <PaymentBadge status={project.paymentStatus} />
               </div>
@@ -164,19 +182,19 @@ export function PaymentsPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Amount</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('contractAmount')}</p>
                 <p className={`text-base font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{project.totalAmountUSD ? `$${project.totalAmountUSD.toLocaleString()}` : '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Advance Paid</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('advancePaid')}</p>
                 <p className={`text-base font-bold ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>{project.advanceUSD ? `$${project.advanceUSD.toLocaleString()}` : '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Est. Received</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('estReceived')}</p>
                 <p className={`text-base font-bold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>{project.totalAmountUSD ? `$${amountReceived.toLocaleString()}` : '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Balance Due</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('balanceDueLabel')}</p>
                 <p className={`text-base font-bold ${
                   hasBalance 
                     ? (isDark ? 'text-[#E5C47A]' : 'text-amber-600') 
@@ -188,24 +206,24 @@ export function PaymentsPage() {
             </div>
 
             {project.totalAmountUSD && (
-              <PaymentBar received={amountReceived} total={project.totalAmountUSD} isDark={isDark} />
+              <PaymentBar received={amountReceived} total={project.totalAmountUSD} isDark={isDark} t={t} />
             )}
 
             {projectPayments.length > 0 && (
               <div className={`mt-4 pt-3 border-t ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
-                <p className={`text-xs font-bold mb-2 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Detailed Tranches / Installments</p>
+                <p className={`text-xs font-bold mb-2 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>{t('detailedTranches')}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                   {projectPayments.map((pay, idx) => (
                     <div key={idx} className={`rounded p-2 text-xs border ${
                       isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
                     }`}>
-                      <p className={`font-medium truncate ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{pay.description || 'Installment'}</p>
+                      <p className={`font-medium truncate ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{pay.description || t('installment')}</p>
                       <div className="flex justify-between mt-1">
-                        <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Value:</span>
+                        <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('value')}:</span>
                         <span className={`font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{pay.amountUSD ? `$${pay.amountUSD.toLocaleString()}` : '—'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Balance:</span>
+                        <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('balance')}:</span>
                         <span className={`font-semibold ${isDark ? 'text-[#E5C47A]' : 'text-amber-600'}`}>{pay.balanceUSD ? `$${pay.balanceUSD.toLocaleString()}` : '—'}</span>
                       </div>
                     </div>
@@ -217,7 +235,7 @@ export function PaymentsPage() {
             {hasBalance && project.paymentStatus && !project.paymentStatus.toLowerCase().includes('100%') && (
               <div className={`mt-3 flex items-center gap-1.5 text-xs font-semibold ${isDark ? 'text-[#E5C47A]' : 'text-amber-600'}`}>
                 <AlertTriangle size={12} />
-                Outstanding: ${project.balanceUSD?.toLocaleString()}
+                {t('outstandingLabel')}: ${project.balanceUSD?.toLocaleString()}
               </div>
             )}
           </motion.div>

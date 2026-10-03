@@ -3,11 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FolderKanban, Paintbrush, Factory,
   Truck, AlertTriangle, User, ChevronRight, Menu, X, 
-  Building2, History, Sun, Moon, Database, CreditCard
+  Building2, History, Sun, Moon, Database, CreditCard, FileBarChart, UserCheck, FileCheck
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { SyncExcelButton } from '../ui/SyncExcelButton';
+import { GoogleDriveButton } from '../ui/GoogleDriveButton';
 import { UpdateHistoryModal } from '../UpdateHistoryModal';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
+import { NotificationCenter } from '../ui/NotificationCenter';
 
 interface NavItem {
   id: string;
@@ -22,55 +26,61 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const navGroups: NavGroup[] = [
-  {
-    title: 'OVERVIEW',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    ]
-  },
-  {
-    title: 'PORTFOLIO',
-    items: [
-      { id: 'projects', label: 'Projects', icon: FolderKanban },
-    ]
-  },
-  {
-    title: 'OPERATIONS',
-    isOperations: true,
-    items: [
-      { id: 'design', label: 'Design', icon: Paintbrush },
-      { id: 'production', label: 'Production', icon: Factory },
-      { id: 'shipment', label: 'Shipment', icon: Truck },
-      { id: 'payments', label: 'Payments', icon: CreditCard },
-    ]
-  },
-  {
-    title: 'RISK',
-    items: [
-      { id: 'delays', label: 'Delays & Risk', icon: AlertTriangle },
-    ]
-  },
-  {
-    title: 'DATA',
-    items: [
-      { id: 'pipeline', label: 'Live Data Pipeline', icon: Database },
-    ]
-  },
-  {
-    title: 'SYSTEM',
-    items: [
-      { id: 'audit-log', label: 'Audit Log History', icon: History, isAction: true },
-      { id: 'admin', label: 'Administrator', icon: User, isAction: true },
-    ]
-  }
-];
+
 
 function SidebarContent() {
   const { currentPage, navigate, theme, setIsEditModalOpen } = useApp();
+  const { t } = useLanguage();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const isDark = theme === 'dark';
+
+  const navGroups: NavGroup[] = [
+    {
+      title: t('overview'),
+      items: [
+        { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+      ]
+    },
+    {
+      title: t('portfolio'),
+      items: [
+        { id: 'projects', label: t('projects'), icon: FolderKanban },
+      ]
+    },
+    {
+      title: t('operations'),
+      isOperations: true,
+      items: [
+        { id: 'design', label: t('design'), icon: Paintbrush },
+        { id: 'production', label: t('production'), icon: Factory },
+        { id: 'shipment', label: t('shipment'), icon: Truck },
+        { id: 'site-execution', label: t('siteExecution'), icon: UserCheck },
+        { id: 'payments', label: t('payments'), icon: CreditCard },
+        { id: 'reports', label: t('reportCenter'), icon: FileBarChart },
+        { id: 'pi-approvals', label: t('piApprovalsWorkflow'), icon: FileCheck },
+      ]
+    },
+    {
+      title: t('risk'),
+      items: [
+        { id: 'delays', label: t('delaysAndRisk'), icon: AlertTriangle },
+      ]
+    },
+    {
+      title: t('data'),
+      items: [
+        { id: 'pipeline', label: t('liveDataPipeline'), icon: Database },
+      ]
+    },
+    {
+      title: t('system'),
+      items: [
+        { id: 'audit-log', label: t('auditLogHistory'), icon: History, isAction: true },
+        { id: 'admin', label: t('administrator'), icon: User, isAction: true },
+      ]
+    }
+  ];
 
   const categoryColors: Record<string, string> = {
     dashboard: isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]',
@@ -78,7 +88,10 @@ function SidebarContent() {
     design: isDark ? 'text-[#9A82D4]' : 'text-[#C084FC]',
     production: isDark ? 'text-[#4BA7A7]' : 'text-[#2DD4BF]',
     shipment: isDark ? 'text-[#56A9C7]' : 'text-[#38BDF8]',
+    'site-execution': isDark ? 'text-amber-400' : 'text-amber-600',
     payments: isDark ? 'text-[#70D0A8]' : 'text-[#10B981]',
+    reports: isDark ? 'text-[#E5C47A]' : 'text-[#D97706]',
+    'pi-approvals': isDark ? 'text-indigo-400' : 'text-indigo-500',
     delays: isDark ? 'text-[#E05A5A]' : 'text-[#F87171]',
     pipeline: isDark ? 'text-[#3FB984]' : 'text-[#34D399]',
     'audit-log': isDark ? 'text-[#85858B]' : 'text-slate-400',
@@ -180,7 +193,7 @@ function SidebarContent() {
           {/* Subtitle & Live Status */}
           <div className="flex items-center gap-2 mt-2 pl-0.5">
             <span className={`text-sm font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-white'}`}>
-              Management Dashboard
+              {t('managementDashboard')}
             </span>
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_rgba(16,185,129,0.8)]" title="System Connected & Live" />
           </div>
@@ -273,6 +286,7 @@ export function MobileNav() {
 
 export function TopBar() {
   const { setSidebarOpen, liveDateTime, theme, toggleTheme } = useApp();
+  const { t } = useLanguage();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const isDark = theme === 'dark';
 
@@ -300,6 +314,10 @@ export function TopBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-2 sm:gap-2.5 flex-wrap">
+        {/* Phase 4 Language Switcher & Notification Center */}
+        <LanguageSwitcher />
+        <NotificationCenter />
+
         {/* Theme Toggle Button */}
         <motion.button
           whileTap={{ scale: 0.95 }}
@@ -337,7 +355,8 @@ export function TopBar() {
           </AnimatePresence>
         </motion.button>
 
-        {/* Sync Excel Action Button in Header */}
+        {/* Google Drive & Sync Excel Action Buttons in Header */}
+        <GoogleDriveButton variant="secondary" />
         <SyncExcelButton variant="secondary" label="Sync Excel" />
 
         <button
@@ -350,7 +369,7 @@ export function TopBar() {
           title="View update audit trail history"
         >
           <History size={13} className={`group-hover:rotate-12 transition-transform duration-150 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`} />
-          <span>Audit Log</span>
+          <span>{t('auditLog')}</span>
         </button>
 
         <div className="hidden sm:flex items-center gap-2">

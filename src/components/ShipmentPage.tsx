@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { StatusBadge } from './ui/StatusBadge';
 import { QuickEditShipmentModal } from './QuickEditShipmentModal';
 import type { ShipmentRecord } from '../data/projectData';
-import { Edit3 } from 'lucide-react';
+import { Edit3, Download, FileText } from 'lucide-react';
+import { exportDispatchReportToExcel } from '../utils/excelExport';
 
 function ShipmentJourneyBar({ shipment, isDark }: { shipment: ShipmentRecord; isDark: boolean }) {
   const steps = [
@@ -48,13 +50,14 @@ function ShipmentJourneyBar({ shipment, isDark }: { shipment: ShipmentRecord; is
 export function ShipmentPage() {
   const { theme } = useApp();
   const { projects, shipments } = useData();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   const [editingShipment, setEditingShipment] = useState<ShipmentRecord | null>(null);
 
-  const inTransit = shipments.filter(s => s.status === 'In Transit').length;
-  const delivered = shipments.filter(s => s.status === 'Delivered').length;
-  const pending = shipments.filter(s => s.status === 'Planned').length;
+  const inTransitCount = shipments.filter(s => s.status === 'In Transit').length;
+  const deliveredCount = shipments.filter(s => s.status === 'Delivered').length;
+  const pendingCount = shipments.filter(s => s.status === 'Planned').length;
 
   // Calculate Overall Total Dispatch Qty (m²)
   const totalDispatchQty = shipments.reduce((sum, s) => sum + (s.dispatchQtyM2 || 0), 0);
@@ -72,24 +75,131 @@ export function ShipmentPage() {
     fyDispatchMap[fy] = (fyDispatchMap[fy] || 0) + qty;
   });
 
+  const exportShipmentsPDF = () => {
+    const printWindow = window.open('', '_blank', 'width=1100,height=800');
+    if (!printWindow) {
+      alert('Please allow popups to export PDF report.');
+      return;
+    }
+
+    const rowsHtml = shipments.map((s) => `
+      <tr>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.projectId}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.invoiceNumber || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.invoiceDate || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.unitPrice ? `$${s.unitPrice}` : '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.dispatchQtyM2 ? `${s.dispatchQtyM2} m²` : '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.invoiceAmount ? `$${s.invoiceAmount.toLocaleString()}` : '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.containerSize || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.containerTotal || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.netWeightKg ? `${s.netWeightKg} kg` : '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.grossWeightKg ? `${s.grossWeightKg} kg` : '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.pcs || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.bcsQty || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.acsQty || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.kgbhQty || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.ksbhQty || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.aluformQty || '—'}</td>
+        <td style="padding:5px;border:1px solid #cbd5e1;">${s.status || 'Planned'}</td>
+      </tr>
+    `).join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Shipment & Dispatch Tracking Report</title>
+        <style>
+          body { font-family: sans-serif; font-size: 10px; color: #0f172a; padding: 15px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th { background: #0b2239; color: white; padding: 6px; border: 1px solid #0b2239; text-align: left; }
+        </style>
+      </head>
+      <body>
+        <h2>KUMKANG SHIPMENT & DISPATCH TRACKING REPORT</h2>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Project ID</th>
+              <th>Inv No</th>
+              <th>Inv Date</th>
+              <th>Unit Price</th>
+              <th>Qty (m²)</th>
+              <th>Inv Amt</th>
+              <th>Cont Size</th>
+              <th>Cont Total</th>
+              <th>Net Wt (KG)</th>
+              <th>Gross Wt (KG)</th>
+              <th>PCS</th>
+              <th>BCS</th>
+              <th>ACS</th>
+              <th>KGBH</th>
+              <th>KSBH</th>
+              <th>Aluform</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+        <script>
+          window.onload = function() { window.print(); window.close(); };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   return (
     <div className={`space-y-6 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
-      <div>
-        <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Shipment Monitoring</p>
-        <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>Shipment Tracking</h2>
-        <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-          {shipments.length} shipment records linked to active projects.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('shipmentMonitoring')}</p>
+          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{t('shipmentTracking')}</h2>
+          <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
+            {shipments.length} {t('shipmentRecordsLinked')}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => exportDispatchReportToExcel(shipments, projects)}
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs border ${
+              isDark
+                ? 'bg-[#132338] text-[#38BDF8] border-[#1D3B5E] hover:bg-[#183250]'
+                : 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100'
+            }`}
+            title={t('exportExcel')}
+          >
+            <Download size={14} /> {t('exportExcel')}
+          </button>
+          <button
+            onClick={exportShipmentsPDF}
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs border ${
+              isDark
+                ? 'bg-rose-950/40 text-rose-300 border-rose-800 hover:bg-rose-900/50'
+                : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+            }`}
+            title={t('exportPdf')}
+          >
+            <FileText size={14} /> {t('exportPdf')}
+          </button>
+        </div>
       </div>
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         {[
-          { label: 'Total Shipments', value: shipments.length, color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]' },
-          { label: 'Delivered', value: delivered, color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600' },
-          { label: 'In Transit', value: inTransit, color: isDark ? 'text-[#89C9DF]' : 'text-sky-600' },
-          { label: 'Planned / Pending', value: pending, color: isDark ? 'text-[#E5C47A]' : 'text-amber-600' },
-          { label: 'Total Dispatch Qty', value: totalDispatchQty > 0 ? `${totalDispatchQty.toLocaleString()} m²` : '—', color: isDark ? 'text-[#C9A86A]' : 'text-indigo-600' },
+          { label: t('totalShipments'), value: shipments.length, color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]' },
+          { label: t('delivered'), value: deliveredCount, color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600' },
+          { label: t('inTransit'), value: inTransitCount, color: isDark ? 'text-[#89C9DF]' : 'text-sky-600' },
+          { label: t('plannedPending'), value: pendingCount, color: isDark ? 'text-[#E5C47A]' : 'text-amber-600' },
+          { label: t('totalDispatchQty'), value: totalDispatchQty > 0 ? `${totalDispatchQty.toLocaleString()} m²` : '—', color: isDark ? 'text-[#C9A86A]' : 'text-indigo-600' },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -108,7 +218,7 @@ export function ShipmentPage() {
       {Object.keys(fyDispatchMap).length > 0 && (
         <div className={`p-4 rounded-xl border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
           <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-[#C9A86A]' : 'text-sky-700'}`}>
-            Financial Year (F.Y.)-wise Dispatch Summary
+            {t('fyDispatchSummary')}
           </h4>
           <div className="flex flex-wrap gap-4 text-xs font-medium">
             {Object.entries(fyDispatchMap).map(([fy, qty]) => (
@@ -164,41 +274,47 @@ export function ShipmentPage() {
                       : 'bg-slate-100 text-sky-700 border-slate-200 hover:bg-slate-200'
                   }`}
                 >
-                  <Edit3 size={13} /> Edit Logistics
+                  <Edit3 size={13} /> {t('editLogistics')}
                 </button>
                 <StatusBadge status={shipment.status} />
               </div>
             </div>
 
-            <div className={`grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 text-sm mb-4 border-y py-3 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
+            <div className={`grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 text-sm mb-4 border-y py-3 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>FWD (Forwarder)</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('fwdForwarder')}</p>
                 <p className={`font-mono font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.fwd ?? '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>ETD (Origin)</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('etdOrigin')}</p>
                 <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.etd ?? '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>ETA (Destination)</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('etaDestination')}</p>
                 <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.eta ?? '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Container Size / Total</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('containerSizeTotal')}</p>
                 <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>
                   {shipment.containerSize || '—'} {shipment.containerTotal ? `(${shipment.containerTotal} units)` : ''}
                 </p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Invoice Amount</p>
-                <p className={`font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>
-                  {shipment.invoiceAmount ? `$${shipment.invoiceAmount.toLocaleString()}` : '—'}
-                </p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('netWeightKg')}</p>
+                <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.netWeightKg ? `${shipment.netWeightKg.toLocaleString()} kg` : '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Delivery Timeline</p>
-                <p className={`font-medium ${!shipment.deliveryTimeline ? (isDark ? 'text-[#85858B]' : 'text-slate-400') : (isDark ? 'text-[#F5F5F3]' : 'text-slate-800')}`}>
-                  {shipment.deliveryTimeline || '—'}
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('grossWeightKg')}</p>
+                <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.grossWeightKg ? `${shipment.grossWeightKg.toLocaleString()} kg` : '—'}</p>
+              </div>
+              <div>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('pcs')}</p>
+                <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{shipment.pcs ? shipment.pcs.toLocaleString() : '—'}</p>
+              </div>
+              <div>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('invoiceAmount')}</p>
+                <p className={`font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}`}>
+                  {shipment.invoiceAmount ? `$${shipment.invoiceAmount.toLocaleString()}` : '—'}
                 </p>
               </div>
             </div>
@@ -208,11 +324,11 @@ export function ShipmentPage() {
               <div className={`p-3 rounded-lg mb-4 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs border ${
                 isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
               }`}>
-                <div><span className="text-slate-400 block">BCS Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.bcsQty ?? '—'}</strong></div>
-                <div><span className="text-slate-400 block">ACS Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.acsQty ?? '—'}</strong></div>
-                <div><span className="text-slate-400 block">KGBH Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.kgbhQty ?? '—'}</strong></div>
-                <div><span className="text-slate-400 block">KSBH Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.ksbhQty ?? '—'}</strong></div>
-                <div><span className="text-slate-400 block">Aluform Qty:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.aluformQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">{t('bcsQty')}:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.bcsQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">{t('acsQty')}:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.acsQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">{t('kgbhQty')}:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.kgbhQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">{t('ksbhQty')}:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.ksbhQty ?? '—'}</strong></div>
+                <div><span className="text-slate-400 block">{t('aluformQty')}:</span> <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{shipment.aluformQty ?? '—'}</strong></div>
               </div>
             )}
 
@@ -235,7 +351,7 @@ export function ShipmentPage() {
               <StatusBadge status={project.contractStatus} />
             </div>
             <p className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{project.project}</p>
-            <p className={`text-sm mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No shipment records mapped.</p>
+            <p className={`text-sm mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('noShipmentRecords')}</p>
           </div>
         ))}
 

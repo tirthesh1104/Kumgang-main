@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { useClientAccess } from '../context/ClientAccessContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { PaymentRecord } from '../data/projectData';
 import { X, Check, DollarSign, AlertTriangle, Info } from 'lucide-react';
 
@@ -14,6 +15,7 @@ export function RecordPaymentModal({ defaultProjectId, onClose }: RecordPaymentM
   const { theme } = useApp();
   const { projects, recordNewPayment } = useData();
   const { activeSession } = useClientAccess();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const isClient = activeSession.role === 'Client';
 
@@ -99,7 +101,7 @@ export function RecordPaymentModal({ defaultProjectId, onClose }: RecordPaymentM
               <DollarSign size={18} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-white">RECORD NEW PAYMENT</h3>
+              <h3 className="font-extrabold text-base tracking-wide text-white uppercase">{t('recordPayment')}</h3>
               <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
                 Record financial transaction & update project balance
               </p>
@@ -137,7 +139,7 @@ export function RecordPaymentModal({ defaultProjectId, onClose }: RecordPaymentM
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Target Project
+              {t('targetProject')}
             </label>
             <select
               disabled={isClient}
@@ -303,7 +305,7 @@ export function RecordPaymentModal({ defaultProjectId, onClose }: RecordPaymentM
                 isDark ? 'bg-[#18181B] text-[#85858B] hover:text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -314,7 +316,7 @@ export function RecordPaymentModal({ defaultProjectId, onClose }: RecordPaymentM
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
               }`}
             >
-              <Check size={14} /> Confirm & Record Payment
+              <Check size={14} /> {t('confirmRecordPayment')}
             </button>
           </div>
         </form>

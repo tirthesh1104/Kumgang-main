@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AppProvider, useApp } from './context/AppContext';
 import { DataProvider } from './context/DataContext';
 import { ClientAccessProvider, useClientAccess } from './context/ClientAccessContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { Sidebar, MobileNav, TopBar } from './components/layout/Navigation';
 import { Dashboard } from './components/Dashboard';
 import { ProjectsPage } from './components/ProjectsPage';
@@ -13,6 +14,8 @@ import { ShipmentPage } from './components/ShipmentPage';
 import { PaymentsPage } from './components/PaymentsPage';
 import { DelaysPage } from './components/DelaysPage';
 import { ReportsPage } from './components/ReportsPage';
+import { SiteExecutionPage } from './components/SiteExecutionPage';
+import { ProformaInvoicePage } from './components/pi/ProformaInvoicePage';
 import { ClientAccessPage } from './components/crm/ClientAccessPage';
 import { ClientDashboardView } from './components/crm/ClientDashboardView';
 import { DataPipelinePage } from './components/DataPipelinePage';
@@ -37,9 +40,11 @@ function PageContent() {
     design: <DesignPage />,
     production: <ProductionPage />,
     shipment: <ShipmentPage />,
+    'site-execution': <SiteExecutionPage />,
     payments: <PaymentsPage />,
     delays: <DelaysPage />,
     reports: <ReportsPage />,
+    'pi-approvals': <ProformaInvoicePage />,
     crm: <ClientAccessPage />,
     pipeline: <DataPipelinePage />,
   };
@@ -107,13 +112,15 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <DataProvider>
-      <AppProvider>
-        <ClientAccessProvider>
-          <AppLayout />
-        </ClientAccessProvider>
-      </AppProvider>
-    </DataProvider>
+    <LanguageProvider>
+      <DataProvider>
+        <AppProvider>
+          <ClientAccessProvider>
+            <AppLayout />
+          </ClientAccessProvider>
+        </AppProvider>
+      </DataProvider>
+    </LanguageProvider>
   );
 }
 

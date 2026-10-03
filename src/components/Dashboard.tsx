@@ -1,8 +1,13 @@
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { ProjectManagerCard } from './ProjectManagerCard';
 import { SyncExcelButton } from './ui/SyncExcelButton';
+import { GoogleDriveButton } from './ui/GoogleDriveButton';
 import { ScopeWiseSummary } from './ScopeWiseSummary';
 import { PortfolioOverviewMetrics } from './PortfolioOverviewMetrics';
+import { DashboardKeyPriorities } from './DashboardKeyPriorities';
+import { DashboardProjectStages } from './DashboardProjectStages';
+import { DashboardLatestShellPlan } from './DashboardLatestShellPlan';
 import { BarChart3 } from 'lucide-react';
 
 function SkylineIllustration({ isDark }: { isDark: boolean }) {
@@ -45,6 +50,7 @@ function SkylineIllustration({ isDark }: { isDark: boolean }) {
 
 export function Dashboard() {
   const { theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   return (
@@ -70,16 +76,17 @@ export function Dashboard() {
 
           <div>
             <h1 className={`text-xl sm:text-2xl lg:text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-              Project Summary
+              {t('projectSummary')}
             </h1>
             <p className={`text-xs sm:text-sm mt-0.5 font-medium ${isDark ? 'text-[#94A3B8]' : 'text-[#64748B]'}`}>
-              Operational portfolio and live project status across all scopes.
+              {t('projectSummaryDesc')}
             </p>
           </div>
         </div>
 
-        {/* Right: Sync Excel Button Card */}
-        <div className="relative z-10">
+        {/* Right: Sync Excel & Google Drive Action Buttons */}
+        <div className="relative z-10 flex items-center gap-2.5 flex-wrap">
+          <GoogleDriveButton variant="banner" />
           <SyncExcelButton variant="banner" />
         </div>
       </div>
@@ -87,11 +94,22 @@ export function Dashboard() {
       {/* 2. Project Manager Row */}
       <ProjectManagerCard />
 
-      {/* 3. Scope Section */}
+      {/* 3. Scope Section (SCREENSHOT 2 Top) */}
       <ScopeWiseSummary />
 
-      {/* 4. Portfolio Overview & Key Metrics */}
+      {/* 4. Portfolio Overview & Key Metrics (SCREENSHOT 2 Bottom) */}
       <PortfolioOverviewMetrics />
+
+      {/* 5. Phase 1 Key Action Priorities (SCREENSHOT 1) */}
+      <DashboardKeyPriorities />
+
+      {/* 6. Phase 1 Project Stage & Workflow Pipeline (8 Stages) */}
+      <DashboardProjectStages />
+
+      {/* 7. Phase 1 Latest Approved Shell Plan Section */}
+      <DashboardLatestShellPlan />
     </div>
   );
 }
+
+

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { exportPortfolioAnalysisPDF } from '../utils/pdfExport';
 import { validateProjectMaster } from '../utils/dataValidation';
 import { StatusBadge } from './ui/StatusBadge';
@@ -18,6 +19,7 @@ interface PortfolioAnalysisDrawerProps {
 
 export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDrawerProps) {
   const { navigate, theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   const {
@@ -142,15 +144,15 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-extrabold text-lg tracking-tight text-white">PORTFOLIO ANALYSIS</h2>
+                  <h2 className="font-extrabold text-lg tracking-tight text-white">{t('portfolioAnalysis')}</h2>
                   <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full font-mono border ${
                     isDark ? 'bg-[#163127] text-[#70D0A8] border-[#28523F]' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                   }`}>
-                    CANONICAL DATA SYNCHRONIZED
+                    {t('canonicalDataSynchronized')}
                   </span>
                 </div>
                 <p className={`text-xs font-medium mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
-                  Comprehensive performance analysis of active contracts, risk distribution & financial KPIs
+                  {t('portfolioDrawerSubtitle')}
                 </p>
               </div>
             </div>
@@ -164,7 +166,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                     : 'bg-[#1688D4] hover:bg-[#0D73B8] text-white'
                 }`}
               >
-                <Printer size={14} /> EXPORT PDF
+                <Printer size={14} /> {t('exportPdf')}
               </button>
               <button
                 onClick={onClose}
@@ -192,17 +194,17 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
               }`}>
                 <span className="flex items-center gap-1.5">
                   <FolderKanban size={15} className={isDark ? 'text-[#C9A86A]' : 'text-amber-600'} />
-                  <strong>{projects.length}</strong> Projects Analysed
+                  <strong>{projects.length}</strong> {t('projectsAnalysed')}
                 </span>
                 <span className={isDark ? 'text-[#303035]' : 'text-slate-300'}>•</span>
                 <span className="flex items-center gap-1.5">
                   <Layers size={15} className={isDark ? 'text-[#4BA7A7]' : 'text-teal-600'} />
-                  <strong>{Object.keys(countryMap).length}</strong> Country Regions
+                  <strong>{Object.keys(countryMap).length}</strong> {t('countryRegions')}
                 </span>
                 <span className={isDark ? 'text-[#303035]' : 'text-slate-300'}>•</span>
                 <span className="flex items-center gap-1.5">
                   <Clock size={15} className={isDark ? 'text-[#85858B]' : 'text-slate-400'} />
-                  Updated: <span className={`font-mono ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                  {t('updated')}: <span className={`font-mono ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                 </span>
               </div>
             </div>
@@ -222,16 +224,16 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                 <p className={`text-[10px] font-extrabold uppercase tracking-widest ${
                   isDark ? 'text-[#85858B]' : 'text-slate-500'
                 }`}>
-                  EXECUTIVE SUMMARY · MANAGEMENT REPORT
+                  {t('executiveSummaryManagementReport')}
                 </p>
                 <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                   isDark ? 'text-[#E8D6AE] bg-[#2A2419] border-[#55462C]' : 'text-sky-800 bg-sky-50 border-sky-200'
                 }`}>
-                  Real-Time Calculation
+                  {t('realTimeCalculation')}
                 </span>
               </div>
               <h3 className={`text-base font-extrabold ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-                Portfolio Operating Health & Status Statement
+                {t('portfolioHealthStatement')}
               </h3>
               <p className={`text-xs font-medium leading-relaxed ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
                 Currently monitoring <strong className={isDark ? 'text-white' : 'text-slate-900'}>{projects.length} projects</strong> across <strong className={isDark ? 'text-white' : 'text-slate-900'}>{Object.keys(countryMap).length} regional markets</strong>. 
@@ -253,49 +255,49 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
               className="space-y-3"
             >
               <h3 className={`text-xs font-extrabold uppercase tracking-wider ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-                Key Performance Analysis
+                {t('keyPerformanceMetrics')}
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Total Contracts</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('totalProjects')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{kpis.totalProjects}</p>
                   <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>Monitored dataset</p>
                 </div>
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#172531] border-[#2B455A]' : 'bg-sky-50 border-sky-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#9BC5E8]' : 'text-sky-700'}`}>Signed / Active</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#9BC5E8]' : 'text-sky-700'}`}>{t('signedProjects')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#6EA8D9]' : 'text-sky-800'}`}>{signedProjects.length}</p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#9BC5E8]/80' : 'text-sky-600'}`}>Active execution</p>
+                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#9BC5E8]/80' : 'text-sky-600'}`}>{t('activeExecution')}</p>
                 </div>
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#34191B] border-[#5A292B]' : 'bg-red-50 border-red-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#F08A8A]' : 'text-red-700'}`}>At Risk</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#F08A8A]' : 'text-red-700'}`}>{t('atRisk')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#E05A5A]' : 'text-red-700'}`}>{delayedProjects.length}</p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#F08A8A]/80' : 'text-red-600'}`}>Critical issues</p>
+                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#F08A8A]/80' : 'text-red-600'}`}>{t('attentionRequired')}</p>
                 </div>
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Value</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('totalContractValue')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#C9A86A]' : 'text-amber-700'}`}>${(totalValueUSD / 1000000).toFixed(1)}M</p>
                   <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>Signed total</p>
                 </div>
 
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Average Progress</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('averageDesignProgress')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#D9DCE0]' : 'text-slate-800'}`}>{avgProgressPct}%</p>
                   <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>Design & execution</p>
                 </div>
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#163127] border-[#28523F]' : 'bg-emerald-50 border-emerald-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>Advance Collected</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>{t('advanceReceived')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#3FB984]' : 'text-emerald-700'}`}>${(totalAdvanceUSD / 1000000).toFixed(1)}M</p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#70D0A8]/80' : 'text-emerald-600'}`}>{collectionRatePct}% collection rate</p>
+                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#70D0A8]/80' : 'text-emerald-600'}`}>{collectionRatePct}% {t('collectionRate')}</p>
                 </div>
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#322917] border-[#5B4724]' : 'bg-amber-50 border-amber-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#E5C47A]' : 'text-amber-800'}`}>Outstanding Balance</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#E5C47A]' : 'text-amber-800'}`}>{t('outstandingBalance')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#D6A84F]' : 'text-amber-800'}`}>${(outstandingBalance / 1000000).toFixed(1)}M</p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#E5C47A]/80' : 'text-amber-700'}`}>Payment pending</p>
+                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#E5C47A]/80' : 'text-amber-700'}`}>{t('payment')}</p>
                 </div>
                 <div className={`border rounded-xl p-4 shadow-2xs ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
-                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Completed</p>
+                  <p className={`text-[10px] font-extrabold uppercase ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('siteStatusCompleted')}</p>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>{completedProjects.length}</p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>100% finished</p>
+                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>100%</p>
                 </div>
               </div>
             </motion.div>
@@ -312,14 +314,14 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className={`text-sm font-extrabold uppercase tracking-wider ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-                    Project Health Distribution
+                    {t('portfolioHealthDistribution')}
                   </h3>
                   <p className={`text-xs mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
                     Categorized by commercial status, payment collection and operational risk factors
                   </p>
                 </div>
                 <span className={`text-xs font-bold ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>
-                  {projects.length} Total Projects
+                  {projects.length} {t('totalProjects')}
                 </span>
               </div>
 
@@ -330,7 +332,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                   <div className={`flex justify-between items-center text-xs font-extrabold ${
                     isDark ? 'text-[#70D0A8]' : 'text-emerald-700'
                   }`}>
-                    <span>Healthy</span>
+                    <span>{t('healthy')}</span>
                     <span>{Math.round((healthyProjects.length / projects.length) * 100)}%</span>
                   </div>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#3FB984]' : 'text-emerald-700'}`}>{healthyProjects.length} Projects</p>
@@ -343,11 +345,11 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                   <div className={`flex justify-between items-center text-xs font-extrabold ${
                     isDark ? 'text-[#E5C47A]' : 'text-amber-800'
                   }`}>
-                    <span>Attention Required</span>
+                    <span>{t('attentionRequired')}</span>
                     <span>{Math.round((attentionProjects.length / projects.length) * 100)}%</span>
                   </div>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#D6A84F]' : 'text-amber-800'}`}>{attentionProjects.length} Projects</p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#E5C47A]/80' : 'text-amber-700'}`}>Outstanding balance due</p>
+                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#E5C47A]/80' : 'text-amber-700'}`}>{t('outstandingBalance')}</p>
                 </div>
 
                 <div className={`p-3.5 border rounded-xl ${
@@ -356,7 +358,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                   <div className={`flex justify-between items-center text-xs font-extrabold ${
                     isDark ? 'text-[#F08A8A]' : 'text-red-700'
                   }`}>
-                    <span>At Risk / Delayed</span>
+                    <span>{t('atRisk')} / {t('delayed')}</span>
                     <span>{Math.round((delayedProjects.length / projects.length) * 100)}%</span>
                   </div>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#E05A5A]' : 'text-red-700'}`}>{delayedProjects.length} Projects</p>
@@ -369,11 +371,11 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                   <div className={`flex justify-between items-center text-xs font-extrabold ${
                     isDark ? 'text-[#D5D5D8]' : 'text-slate-700'
                   }`}>
-                    <span>Completed</span>
+                    <span>{t('siteStatusCompleted')}</span>
                     <span>{Math.round((completedProjects.length / projects.length) * 100)}%</span>
                   </div>
                   <p className={`text-2xl font-extrabold mt-1 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{completedProjects.length} Projects</p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Fully executed</p>
+                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>100%</p>
                 </div>
               </div>
             </motion.div>
@@ -393,7 +395,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={18} className="text-red-500" />
                   <h3 className={`text-sm font-extrabold uppercase tracking-wider ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-                    Attention Required Priority List ({attentionProjects.length})
+                    {t('criticalPathAttention')} ({attentionProjects.length})
                   </h3>
                 </div>
                 <span className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Sorted by financial risk & severity</span>
@@ -453,15 +455,15 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs mb-2">
                           <div>
-                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Contract Amount:</span>{' '}
+                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('contractValue')}:</span>{' '}
                             <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}>{p.totalAmountUSD ? `$${p.totalAmountUSD.toLocaleString()}` : '—'}</strong>
                           </div>
                           <div>
-                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Outstanding Balance:</span>{' '}
+                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('outstandingBalance')}:</span>{' '}
                             <strong className={isDark ? 'text-[#F08A8A]' : 'text-red-600'}>{p.balanceUSD ? `$${p.balanceUSD.toLocaleString()}` : '$0'}</strong>
                           </div>
                           <div>
-                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Payment Status:</span>{' '}
+                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('payment')}:</span>{' '}
                             <strong className={isDark ? 'text-[#E5C47A]' : 'text-amber-700'}>{p.paymentStatus || '—'}</strong>
                           </div>
                         </div>
@@ -471,7 +473,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                         }`}>
                           <Sparkles size={14} className={`flex-shrink-0 mt-0.5 ${isDark ? 'text-[#C9A86A]' : 'text-amber-600'}`} />
                           <div>
-                            <strong className={isDark ? 'text-[#E8D6AE]' : 'text-slate-900'}>Recommended Action:</strong>{' '}
+                            <strong className={isDark ? 'text-[#E8D6AE]' : 'text-slate-900'}>Action:</strong>{' '}
                             <span className={isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}>{actionRecommendation}</span>
                           </div>
                         </div>
@@ -494,7 +496,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className={`text-sm font-extrabold uppercase tracking-wider ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-                    Country Portfolio Analysis
+                    {t('regionalPerformanceBreakdown')}
                   </h3>
                   <p className={`text-xs mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
                     Click any country card to expand member project contracts
@@ -503,7 +505,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                 <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                   isDark ? 'text-[#E8D6AE] bg-[#2A2419] border-[#55462C]' : 'text-sky-800 bg-sky-50 border-sky-200'
                 }`}>
-                  {Object.keys(countryMap).length} Regional Markets
+                  {Object.keys(countryMap).length} {t('countryRegions')}
                 </span>
               </div>
 
@@ -526,24 +528,24 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                             isDark ? 'text-[#B4B4B8] bg-[#18181B] border-[#303035]' : 'text-slate-700 bg-white border-slate-300'
                           }`}>
-                            {data.count} Projects
+                            {data.count} {t('projects')}
                           </span>
                           {data.atRiskCount > 0 && (
                             <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
                               isDark ? 'text-[#F08A8A] bg-[#34191B] border-[#5A292B]' : 'text-red-700 bg-red-100 border-red-200'
                             }`}>
-                              {data.atRiskCount} At Risk
+                              {data.atRiskCount} {t('atRisk')}
                             </span>
                           )}
                         </div>
 
                         <div className="flex items-center gap-4 text-xs font-semibold">
                           <div>
-                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Contract Value:</span>{' '}
+                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('contractValue')}:</span>{' '}
                             <strong className={isDark ? 'text-[#C9A86A]' : 'text-amber-700'}>${(data.totalValue / 1000000).toFixed(2)}M</strong>
                           </div>
                           <div>
-                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Outstanding:</span>{' '}
+                            <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('outstanding')}:</span>{' '}
                             <strong className={isDark ? 'text-[#E5C47A]' : 'text-amber-700'}>${(data.totalBalance / 1000000).toFixed(2)}M</strong>
                           </div>
                           {isExpanded ? <ChevronUp size={16} className={isDark ? 'text-[#85858B]' : 'text-slate-400'} /> : <ChevronDown size={16} className={isDark ? 'text-[#85858B]' : 'text-slate-400'} />}
@@ -609,23 +611,23 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                   isDark ? 'text-white' : 'text-[#0B2239]'
                 }`}>
                   <DollarSign size={16} className={isDark ? 'text-[#C9A86A]' : 'text-amber-600'} />
-                  Financial Analysis & Exposure
+                  {t('financialCommercialOverview')}
                 </h3>
                 <div className="space-y-2 text-xs">
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Total Contract Value:</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('totalContractValue')}:</span>
                     <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}>${totalValueUSD.toLocaleString()}</strong>
                   </div>
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Total Advance Collected:</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('advanceReceived')}:</span>
                     <strong className={isDark ? 'text-[#70D0A8]' : 'text-emerald-600'}>${totalAdvanceUSD.toLocaleString()}</strong>
                   </div>
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Total Outstanding Balance:</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('outstandingBalance')}:</span>
                     <strong className={isDark ? 'text-[#F08A8A]' : 'text-red-600'}>${outstandingBalance.toLocaleString()}</strong>
                   </div>
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Overall Collection Rate:</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('collectionRate')}:</span>
                     <strong className={isDark ? 'text-[#C9A86A]' : 'text-amber-700'}>{collectionRatePct}%</strong>
                   </div>
                 </div>
@@ -662,19 +664,19 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                 </h3>
                 <div className="space-y-2 text-xs">
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Portfolio Avg Design Progress:</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('averageDesignProgress')}:</span>
                     <strong className={isDark ? 'text-[#C9A86A]' : 'text-amber-700'}>{avgProgressPct}%</strong>
                   </div>
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Fully Finished Projects (100%):</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('siteStatusCompleted')}:</span>
                     <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}>{completedProjects.length} Projects</strong>
                   </div>
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Active Factory Work Orders:</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('production')}:</span>
                     <strong className={isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}>{productionRecords.length} Work Orders</strong>
                   </div>
                   <div className={`flex justify-between border-b pb-1.5 ${isDark ? 'border-[#262629]' : 'border-slate-100'}`}>
-                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>Live Shipments In Transit:</span>
+                    <span className={isDark ? 'text-[#85858B]' : 'text-slate-500'}>{t('shipment')}:</span>
                     <strong className={isDark ? 'text-[#89C9DF]' : 'text-sky-700'}>
                       {shipments.filter(s => s.status === 'In Transit').length} Shipments
                     </strong>
@@ -710,7 +712,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={18} className={isDark ? 'text-[#3FB984]' : 'text-emerald-600'} />
                   <h3 className={`text-sm font-extrabold uppercase tracking-wider ${isDark ? 'text-white' : 'text-[#0B2239]'}`}>
-                    Data Quality & System Integrity
+                    {t('dataQualitySchema')}
                   </h3>
                 </div>
                 <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
@@ -820,7 +822,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                   isDark ? 'text-[#B4B4B8] hover:text-white' : 'text-slate-300 hover:text-white'
                 }`}
               >
-                Close Analysis
+                {t('close')}
               </button>
               <button
                 onClick={handleExportPDF}
@@ -830,7 +832,7 @@ export function PortfolioAnalysisDrawer({ isOpen, onClose }: PortfolioAnalysisDr
                     : 'bg-[#1688D4] hover:bg-[#0D73B8] text-white'
                 }`}
               >
-                <Printer size={15} /> PRINT / EXPORT PDF REPORT
+                <Printer size={15} /> {t('exportToPdf')}
               </button>
             </div>
           </div>

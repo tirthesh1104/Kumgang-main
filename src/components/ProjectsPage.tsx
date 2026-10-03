@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { StatusBadge, PaymentBadge } from './ui/StatusBadge';
 import { ProgressBar } from './ui/ProgressBar';
 import { EditProjectModal } from './EditProjectModal';
@@ -9,6 +10,7 @@ import { Search, X, ArrowRight, AlertTriangle, Globe, Plus, Edit3 } from 'lucide
 
 export function ProjectsPage() {
   const { navigate, theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const {
     projects: allProjects,
@@ -71,10 +73,10 @@ export function ProjectsPage() {
     <div className={`space-y-5 ${isDark ? 'text-[#F5F5F3]' : 'text-[#0F172A]'}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Portfolio</p>
-          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>All Projects</h2>
+          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>{t('portfolio')}</p>
+          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{t('allProjects')}</h2>
           <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-            {allProjects.length} projects · Click any project to open its workspace.
+            {allProjects.length} {t('projectsShown')} · {t('clickToOpenWorkspace')}
           </p>
         </div>
 
@@ -83,7 +85,7 @@ export function ProjectsPage() {
           className="btn-primary"
         >
           <Plus size={15} className="btn-icon-edit" />
-          ADD NEW PROJECT
+          {t('addProject')}
         </button>
       </div>
 
@@ -93,7 +95,7 @@ export function ProjectsPage() {
           <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-[#85858B]' : 'text-[#94A3B8]'}`} />
           <input
             type="text"
-            placeholder="Search by ID, customer, project..."
+            placeholder={t('searchByIdCustomer')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:outline-none ${
@@ -115,7 +117,7 @@ export function ProjectsPage() {
               ? 'border-[#303035] bg-[#111113] text-[#F5F5F3] focus:border-[#C9A86A]' 
               : 'border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] focus:border-[#1688D4]'
           }`}>
-          <option value="all">All Status</option>
+          <option value="all">{t('allStatus')}</option>
           {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={filterCountry} onChange={e => setFilterCountry(e.target.value)}
@@ -124,7 +126,7 @@ export function ProjectsPage() {
               ? 'border-[#303035] bg-[#111113] text-[#F5F5F3] focus:border-[#C9A86A]' 
               : 'border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] focus:border-[#1688D4]'
           }`}>
-          <option value="all">All Countries</option>
+          <option value="all">{t('allCountries')}</option>
           {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <select value={filterPayment} onChange={e => setFilterPayment(e.target.value)}
@@ -133,11 +135,11 @@ export function ProjectsPage() {
               ? 'border-[#303035] bg-[#111113] text-[#F5F5F3] focus:border-[#C9A86A]' 
               : 'border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] focus:border-[#1688D4]'
           }`}>
-          <option value="all">All Payments</option>
-          <option value="100%">100% Paid</option>
-          <option value="50%">50% Paid</option>
-          <option value="30%">30% Paid</option>
-          <option value="10%">10% Paid</option>
+          <option value="all">{t('allPayments')}</option>
+          <option value="100%">{t('paid100')}</option>
+          <option value="50%">{t('paid50')}</option>
+          <option value="30%">{t('paid30')}</option>
+          <option value="10%">{t('paid10')}</option>
         </select>
         <select value={filterDelay} onChange={e => setFilterDelay(e.target.value)}
           className={`text-sm border rounded-lg px-3 py-2 focus:outline-none ${
@@ -145,8 +147,8 @@ export function ProjectsPage() {
               ? 'border-[#303035] bg-[#111113] text-[#F5F5F3] focus:border-[#C9A86A]' 
               : 'border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] focus:border-[#1688D4]'
           }`}>
-          <option value="all">All Risk Levels</option>
-          <option value="delayed">Balance Due</option>
+          <option value="all">{t('allRiskLevels')}</option>
+          <option value="delayed">{t('balanceDue')}</option>
         </select>
         {hasFilters && (
           <button
@@ -157,17 +159,17 @@ export function ProjectsPage() {
                 : 'text-[#64748B] hover:text-[#0F172A] border-[#CBD5E1] hover:bg-[#F8FAFC]'
             }`}
           >
-            <X size={12} /> Clear Filters
+            <X size={12} /> {t('clearFilters')}
           </button>
         )}
       </div>
 
       {/* Results */}
-      <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>{projects.length} project{projects.length !== 1 ? 's' : ''} shown</p>
+      <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>{projects.length} {t('projectsShown')}</p>
 
       {projects.length === 0 ? (
         <div className={`text-center py-16 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>
-          <p className="font-medium text-sm">No projects match the current filters.</p>
+          <p className="font-medium text-sm">{t('noProjectsMatch')}</p>
         </div>
       ) : (
         <div className="space-y-3 px-1 py-1">
@@ -247,7 +249,7 @@ export function ProjectsPage() {
                     <div className="flex items-center gap-4">
                       {progress != null ? (
                         <div className="text-right flex flex-col items-end">
-                          <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Design Progress</p>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>{t('designProgressLabel')}</p>
                           <p className={`text-base font-extrabold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0F172A]'}`}>{Math.round(progress)}%</p>
                           <div className="w-24 mt-1">
                             <ProgressBar value={progress} color={needsAttention ? 'orange' : 'forest'} size="sm" />
@@ -255,8 +257,8 @@ export function ProjectsPage() {
                         </div>
                       ) : (
                         <div className="text-right flex flex-col items-end">
-                          <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>Design Progress</p>
-                          <span className={`text-[11px] font-semibold ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>Progress not available</span>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#85858B]' : 'text-[#64748B]'}`}>{t('designProgressLabel')}</p>
+                          <span className={`text-[11px] font-semibold ${isDark ? 'text-[#65656B]' : 'text-slate-400'}`}>{t('progressNotAvailable')}</span>
                         </div>
                       )}
 

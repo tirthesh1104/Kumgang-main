@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { StatusBadge, PaymentBadge } from './ui/StatusBadge';
 import { ProgressBar, PlannedActualBar } from './ui/ProgressBar';
 import { ProjectJourney, buildProjectStages } from './projects/ProjectJourney';
@@ -8,6 +9,9 @@ import { exportProjectPDF } from '../utils/pdfExport';
 import { addWeeksToDate } from '../data/projectData';
 import { EditProjectModal } from './EditProjectModal';
 import { QuickEditDesignModal } from './QuickEditDesignModal';
+import { ProjectDocumentsSection } from './documents/ProjectDocumentsSection';
+import { DesignAreaSection } from './phase3/DesignAreaSection';
+import { SiteExecutionSection } from './phase3/SiteExecutionSection';
 import { useState } from 'react';
 import {
   ArrowLeft, AlertTriangle, ChevronDown, ChevronUp, FileText, Printer, X, Edit3
@@ -70,6 +74,7 @@ function ExportPreviewModal({
   onClose: () => void;
 }) {
   const { liveDateTime, theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const {
     getShipmentForProject,
@@ -102,10 +107,10 @@ function ExportPreviewModal({
           <div>
             <div className="flex items-center gap-2">
               <FileText size={18} className={isDark ? 'text-[#C9A86A]' : 'text-sky-400'} />
-              <h3 className="font-extrabold text-base tracking-wide text-white">KUMKANG PROJECT REPORT PREVIEW</h3>
+              <h3 className="font-extrabold text-base tracking-wide text-white">{t('projectReportPreview')}</h3>
             </div>
             <p className={`text-xs mt-0.5 font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
-              Confidential Executive Summary • Ref: <span className={`font-mono ${isDark ? 'text-[#C9A86A]' : 'text-sky-300'}`}>{project.projectId}</span>
+              {t('confidentialSummary')} • Ref: <span className={`font-mono ${isDark ? 'text-[#C9A86A]' : 'text-sky-300'}`}>{project.projectId}</span>
             </p>
           </div>
 
@@ -118,7 +123,7 @@ function ExportPreviewModal({
                   : 'bg-[#1688D4] hover:bg-[#1272B2] text-white'
               }`}
             >
-              <Printer size={14} /> EXPORT TO PDF
+              <Printer size={14} /> {t('exportToPdf')}
             </button>
             <button
               onClick={onClose}
@@ -436,6 +441,7 @@ function ExportPreviewModal({
 
 export function ProjectDetail() {
   const { selectedProjectId, selectedFolder, navigate, theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const {
     getProjectById, getDesignForProject, getProductionForProject,
@@ -454,7 +460,7 @@ export function ProjectDetail() {
         <AlertTriangle size={32} className="mb-3" />
         <p className="font-medium">Project not found.</p>
         <button onClick={() => navigate('projects')} className="mt-4 btn-primary">
-          Back to Projects
+          {t('backToProjectsList')}
         </button>
       </div>
     );
@@ -488,7 +494,7 @@ export function ProjectDetail() {
                 isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#222226]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
               }`}
             >
-              <ArrowLeft size={14} className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'} /> Back to {selectedFolder} Folder
+              <ArrowLeft size={14} className={isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'} /> {t('backToFolder')} {selectedFolder}
             </button>
           ) : null}
           <button
@@ -497,7 +503,7 @@ export function ProjectDetail() {
               isDark ? 'bg-[#18181B] text-[#D5D5D8] border-[#303035] hover:bg-[#222226]' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
           >
-            <ArrowLeft size={14} className={isDark ? 'text-[#85858B]' : 'text-slate-500'} /> Back to Projects List
+            <ArrowLeft size={14} className={isDark ? 'text-[#85858B]' : 'text-slate-500'} /> {t('backToProjectsList')}
           </button>
         </div>
 
@@ -509,7 +515,7 @@ export function ProjectDetail() {
             }`}
           >
             <Edit3 size={15} />
-            EDIT PROJECT
+            {t('editProject')}
           </button>
 
           <button
@@ -519,7 +525,7 @@ export function ProjectDetail() {
             }`}
           >
             <FileText size={15} />
-            EXPORT
+            {t('export')}
           </button>
         </div>
       </div>
@@ -583,7 +589,7 @@ export function ProjectDetail() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <div className="xl:col-span-1">
-          <SectionCard title="Project Journey" label="Lifecycle">
+          <SectionCard title={t('projectJourney')} label={t('lifecycle')}>
             <ProjectJourney stages={stages} />
           </SectionCard>
         </div>
@@ -591,7 +597,7 @@ export function ProjectDetail() {
         <div className="xl:col-span-2 space-y-5">
 
           {/* Project Information */}
-          <SectionCard title="Project Information" label="Core Details">
+          <SectionCard title={t('projectInformation')} label={t('coreDetails')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Project ID" value={project.projectId} />
               <FieldRow label="Vendor Company Name" value={project.vendorCompany || (['TOTAL ENVIROMENT', 'BREN', 'TRIFECTA', 'KANWARJI  CONSTRUCTION'].includes(project.customer) ? 'KKV' : 'KKI')} />
@@ -617,7 +623,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Project Overview */}
-          <SectionCard title="Project Overview" label="Contract & Quantities">
+          <SectionCard title={t('projectOverview')} label={t('contractAndQuantities')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Contract Date" value={project.contractDate} />
               <FieldRow label="Country" value={project.country} />
@@ -669,7 +675,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Schedule & Milestone Dates */}
-          <SectionCard title="Schedule & Milestone Dates" label="Milestone Tracking">
+          <SectionCard title={t('scheduleMilestoneDates')} label={t('milestoneTracking')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Shell Plan Confirmation Date" value={project.shellPlanConfirmation} />
               <FieldRow label="Payment Received Date (Shell Plan)" value={project.paymentReceivedShellPlanDate} />
@@ -693,7 +699,7 @@ export function ProjectDetail() {
               isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
             }`}>
               <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#C9A86A]' : 'text-slate-700'}`}>
-                Factory Visit Details (After Production / Before Packaging)
+                {t('factoryVisitDetails')}
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
                 <FieldRow label="Visit Type" value={project.factoryVisitType || 'NA'} />
@@ -705,7 +711,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Design Elements & Area Breakdown */}
-          <SectionCard title="Design Elements & Area Breakdown" label="Area Specifications">
+          <SectionCard title={t('designElementsAreaBreakdown')} label={t('areaSpecifications')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Typical Floor Area" value={project.typicalFloorArea ? `${project.typicalFloorArea.toLocaleString()} ${project.typicalFloorAreaUom || 'Sqm'}` : null} />
               <FieldRow label="Basement Floor Area" value={project.basementFloorArea ? `${project.basementFloorArea.toLocaleString()} ${project.basementFloorAreaUom || 'Sqm'}` : null} />
@@ -759,7 +765,7 @@ export function ProjectDetail() {
 
           {/* Production */}
           {productionList.length > 0 && (
-            <SectionCard title="Production Parts" label="Production Monitoring">
+            <SectionCard title={t('productionParts')} label={t('productionMonitoring')}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm" aria-label="Production table">
                   <thead>
@@ -795,7 +801,7 @@ export function ProjectDetail() {
           )}
 
           {/* Shipment Details */}
-          <SectionCard title="Shipment Tracking & Logistics" label="Shipment Monitoring">
+          <SectionCard title={t('shipmentTrackingLogistics')} label={t('shipmentMonitoring')}>
             {shipment ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
@@ -900,7 +906,7 @@ export function ProjectDetail() {
 
           {/* Payment */}
           {(project.totalAmountUSD || payments.length > 0) ? (
-            <SectionCard title="Commercial & Payments" label="Financial Monitoring">
+            <SectionCard title={t('commercialPayments')} label={t('financialMonitoring')}>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
                 <div>
                   <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Amount</p>
@@ -956,7 +962,7 @@ export function ProjectDetail() {
               
               {payments.length > 0 && (
                 <div className={`mt-6 border-t pt-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
-                  <p className={`text-sm font-extrabold mb-3 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>Payment Schedule Breakdown</p>
+                  <p className={`text-sm font-extrabold mb-3 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{t('paymentScheduleBreakdown')}</p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
@@ -983,13 +989,13 @@ export function ProjectDetail() {
               )}
             </SectionCard>
           ) : (
-            <SectionCard title="Commercial & Payments" label="Financial Monitoring">
+            <SectionCard title={t('commercialPayments')} label={t('financialMonitoring')}>
               <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No payment data available for this project.</p>
             </SectionCard>
           )}
 
           {/* PO Terms & Special Compliance */}
-          <SectionCard title="PO Compliance & Special Terms" label="Force Majeure, Packing & POD">
+          <SectionCard title={t('poComplianceSpecialTerms')} label="Force Majeure, Packing & POD">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-4">
               <FieldRow label="Force Majeure App" value={project.forceMajeureApplies || 'NA'} />
               <FieldRow label="Force Majeure Reason" value={project.forceMajeureReason} />
@@ -1009,7 +1015,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Logistics, RTO & Vehicle Inspection */}
-          <SectionCard title="Logistics & RTO Compliance" label="Transport & Safety Rules">
+          <SectionCard title={t('logisticsRtoCompliance')} label={t('transportSafetyRules')}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
               <FieldRow label="Vehicle Number" value={project.vehicleNumber} />
               <FieldRow label="Transporter" value={project.transporterDetails} />
@@ -1057,7 +1063,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* HSE & Safety Tracking */}
-          <SectionCard title="HSE & Safety Monitoring" label="Incident & Accident Logs">
+          <SectionCard title={t('hseSafetyMonitoring')} label={t('incidentAccidentLogs')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <FieldRow label="HSE Violation Status" value={project.hseViolationStatus || 'No Incident / No Violation'} />
               <FieldRow label="Accident Record" value={project.accidentStatus || 'No Accident Reported'} />
@@ -1069,7 +1075,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Statutory Tax & GST Compliance */}
-          <SectionCard title="Statutory Tax & GST Compliance" label="TDS, GST, GSTR-1 & GSTR-3B">
+          <SectionCard title={t('statutoryTaxGst')} label={t('tdsGstReturns')}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
               <FieldRow label="TDS Applicability" value={project.tdsApplicability || 'Applicable'} />
               <FieldRow label="TDS Rate" value={project.tdsPercentage ? `${project.tdsPercentage}%` : null} />
@@ -1095,6 +1101,15 @@ export function ProjectDetail() {
               </div>
             </div>
           </SectionCard>
+
+          {/* Phase 2: Project Documents & File Management */}
+          <ProjectDocumentsSection projectId={project.projectId} />
+
+          {/* Phase 3: Design Elements Breakdown */}
+          <DesignAreaSection projectId={project.projectId} />
+
+          {/* Phase 3: Site Execution, Photos & Progress */}
+          <SiteExecutionSection projectId={project.projectId} />
 
           {/* Derived Risk (replacing old ML data) */}
           {needsAttention && (

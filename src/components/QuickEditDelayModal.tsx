@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
 import { useClientAccess } from '../context/ClientAccessContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { ProjectMaster } from '../data/projectData';
 import { X, Check, AlertTriangle, Info } from 'lucide-react';
 
@@ -14,6 +15,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
   const { theme } = useApp();
   const { updateProjectManual } = useData();
   const { activeSession } = useClientAccess();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const isClient = activeSession.role === 'Client';
 
@@ -31,7 +33,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (isClient) {
-      setErrorMsg('Clients have read-only access and cannot save changes.');
+      setErrorMsg(t('clientReadOnlyWarning'));
       return;
     }
 
@@ -68,7 +70,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
               <AlertTriangle size={18} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-white">UPDATE DELAY & RISK ACTION PLAN</h3>
+              <h3 className="font-extrabold text-base tracking-wide text-white uppercase">{t('updateDelayRiskActionPlan')}</h3>
               <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-300'}`}>
                 {project.projectId} · {project.project}
               </p>
@@ -90,7 +92,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
             <div className={`p-3 rounded-lg text-xs font-semibold flex items-center gap-2 border ${
               isDark ? 'bg-[#322917] border-[#5B4724] text-[#E5C47A]' : 'bg-amber-50 border-amber-200 text-amber-800'
             }`}>
-              <Info size={16} /> Client accounts are restricted to view-only access.
+              <Info size={16} /> {t('clientReadOnlyWarning')}
             </div>
           )}
 
@@ -107,7 +109,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Delay Category / Code
+                {t('delayCategoryCode')}
               </label>
               <select
                 disabled={isClient}
@@ -132,7 +134,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Action Owner
+                {t('actionOwner')}
               </label>
               <input
                 type="text"
@@ -151,7 +153,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Qualitative Delay Reason
+              {t('delayReason')}
             </label>
             <textarea
               rows={2}
@@ -169,7 +171,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Corrective Action Plan
+              {t('correctiveActionPlan')}
             </label>
             <textarea
               rows={2}
@@ -188,7 +190,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Expected Date
+                {t('expectedDate')}
               </label>
               <input
                 type="text"
@@ -206,7 +208,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Target Date
+                {t('targetDate')}
               </label>
               <input
                 type="text"
@@ -224,7 +226,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
               <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
                 isDark ? 'text-[#85858B]' : 'text-slate-600'
               }`}>
-                Risk Status
+                {t('riskStatus')}
               </label>
               <select
                 disabled={isClient}
@@ -248,7 +250,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
             <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
               isDark ? 'text-[#85858B]' : 'text-slate-600'
             }`}>
-              Additional Remarks
+              {t('additionalRemarks')}
             </label>
             <input
               type="text"
@@ -270,7 +272,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
                 isDark ? 'bg-[#18181B] text-[#85858B] hover:text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -281,7 +283,7 @@ export function QuickEditDelayModal({ project, onClose }: QuickEditDelayModalPro
                   : 'bg-red-600 hover:bg-red-700 text-white shadow-md'
               }`}
             >
-              <Check size={14} /> Save Risk Action Plan
+              <Check size={14} /> {t('saveRiskActionPlan')}
             </button>
           </div>
         </form>

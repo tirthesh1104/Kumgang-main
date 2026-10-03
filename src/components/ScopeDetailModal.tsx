@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   X, CheckCircle2, Clock, AlertTriangle, FileText,
   Search, Download, Building2, ChevronLeft, ChevronRight,
@@ -71,11 +72,14 @@ function MiniAscendingBars({ colorClass }: { colorClass: string }) {
 }
 
 function TablePOStatusBadge({ status }: { status: POStatus }) {
+  const { t } = useLanguage();
+  const label = status === 'Signed PO' ? t('signedPO') : status === 'Not Signed PO' ? t('notSignedPO') : status === 'Under Review PO' ? t('underReviewPO') : t('upcomingPO');
+
   if (status === 'Signed PO') {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/90 dark:bg-[#132A20] dark:text-[#70D0A8] dark:border-[#244E3B]">
         <CheckCircle2 size={12} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-        <span>{status}</span>
+        <span>{label}</span>
       </span>
     );
   }
@@ -83,7 +87,7 @@ function TablePOStatusBadge({ status }: { status: POStatus }) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200/90 dark:bg-[#132338] dark:text-[#7DB3FC] dark:border-[#1D3B5E]">
         <FileText size={12} className="text-sky-600 dark:text-sky-400 shrink-0" />
-        <span>{status}</span>
+        <span>{label}</span>
       </span>
     );
   }
@@ -91,14 +95,14 @@ function TablePOStatusBadge({ status }: { status: POStatus }) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/90 dark:bg-[#2D2211] dark:text-[#FBBF24] dark:border-[#55401C]">
         <Clock size={12} className="text-amber-600 dark:text-amber-400 shrink-0" />
-        <span>{status}</span>
+        <span>{label}</span>
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200/90 dark:bg-[#341618] dark:text-[#F87171] dark:border-[#5E2529]">
       <AlertTriangle size={12} className="text-rose-600 dark:text-rose-400 shrink-0" />
-      <span>{status}</span>
+      <span>{label}</span>
     </span>
   );
 }
@@ -461,16 +465,18 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
     },
   ];
 
+  const { t } = useLanguage();
+
   const filterTabs: {
     key: 'All' | POStatus;
     label: string;
     dotColor?: string;
   }[] = [
-    { key: 'All', label: 'All' },
-    { key: 'Signed PO', label: 'Signed PO', dotColor: 'bg-emerald-500' },
-    { key: 'Not Signed PO', label: 'Not Signed PO', dotColor: 'bg-sky-500' },
-    { key: 'Under Review PO', label: 'Under Review PO', dotColor: 'bg-amber-500' },
-    { key: 'Upcoming PO', label: 'Upcoming PO', dotColor: 'bg-rose-500' },
+    { key: 'All', label: t('allProjects') || 'All' },
+    { key: 'Signed PO', label: t('signedPO') || 'Signed PO', dotColor: 'bg-emerald-500' },
+    { key: 'Not Signed PO', label: t('notSignedPO') || 'Not Signed PO', dotColor: 'bg-sky-500' },
+    { key: 'Under Review PO', label: t('underReviewPO') || 'Under Review PO', dotColor: 'bg-amber-500' },
+    { key: 'Upcoming PO', label: t('upcomingPO') || 'Upcoming PO', dotColor: 'bg-rose-500' },
   ];
 
   return (
@@ -512,12 +518,12 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                 <h2 className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${
                   isDark ? 'text-white' : 'text-slate-900'
                 }`}>
-                  <span>Project Details</span>
+                  <span>{t('scopeDetailsTitle')}</span>
                 </h2>
                 <p className={`text-sm mt-0.5 font-semibold ${
                   isDark ? 'text-slate-300' : 'text-slate-700'
                 }`}>
-                  Complete project information for {scope} scope
+                  {t('scopeDetailsSubtitle')} {scope}
                 </p>
               </div>
             </div>
@@ -527,7 +533,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                 isDark ? 'bg-[#18181B] border-[#303035] text-slate-300' : 'bg-white border-slate-200 text-slate-900'
               }`}>
                 <Calendar size={13} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
-                <span>Last Updated: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{liveDateTime}</strong></span>
+                <span>{t('lastRefreshed')}: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{liveDateTime}</strong></span>
               </div>
 
               <button
@@ -698,7 +704,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    placeholder="Search projects..."
+                    placeholder={t('searchByProjectCustomer')}
                     className={`w-full pl-9 pr-7 py-1.5 text-xs sm:text-sm rounded-lg border outline-none font-medium transition-colors ${
                       isDark
                         ? 'bg-[#18181B] border-[#2D2D32] text-white placeholder-slate-500 focus:border-sky-500'
@@ -725,7 +731,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                   title="Download CSV"
                 >
                   <Download size={13} className="text-sky-600 dark:text-sky-400" />
-                  <span>Download</span>
+                  <span>{t('download')}</span>
                 </button>
               </div>
             </div>
@@ -752,24 +758,24 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                         isDark ? 'bg-[#1B1B1F] text-slate-200 border-[#262629]' : 'bg-slate-100/90 text-slate-900 border-slate-300'
                       }`}>
                         <SortHeader
-                          label="Project ID"
+                          label={t('project_id')}
                           field="projectId"
                           currentField={sortField}
                           direction={sortDirection}
                           onSort={handleSort}
                         />
-                        <th className="py-3 px-3.5">Project Name</th>
-                        <th className="py-3 px-3.5">Client</th>
+                        <th className="py-3 px-3.5">{t('project_name')}</th>
+                        <th className="py-3 px-3.5">{t('customer') || 'Client'}</th>
                         <th className="py-3 px-3.5 whitespace-nowrap">PO Number</th>
                         <SortHeader
-                          label="PO Date"
+                          label={t('dateLabel')}
                           field="poDate"
                           currentField={sortField}
                           direction={sortDirection}
                           onSort={handleSort}
                         />
                         <SortHeader
-                          label="Area (m²)"
+                          label={`${t('areaSpecifications')} (m²)`}
                           field="area"
                           currentField={sortField}
                           direction={sortDirection}
@@ -777,7 +783,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                           align="right"
                         />
                         <SortHeader
-                          label={`Amount (${scope === 'KKI' ? 'INR' : 'USD'})`}
+                          label={`${t('contractValue')} (${scope === 'KKI' ? 'INR' : 'USD'})`}
                           field="amount"
                           currentField={sortField}
                           direction={sortDirection}
@@ -785,13 +791,13 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                           align="right"
                         />
                         <SortHeader
-                          label="Status"
+                          label={t('status')}
                           field="status"
                           currentField={sortField}
                           direction={sortDirection}
                           onSort={handleSort}
                         />
-                        <th className="py-3 px-3.5">Site Location</th>
+                        <th className="py-3 px-3.5">{t('country')}</th>
                         <th className="py-3 px-3 text-center whitespace-nowrap w-10"></th>
                       </tr>
                     </thead>
@@ -809,7 +815,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
                           <td colSpan={10} className={`py-14 text-center font-bold text-sm ${
                             isDark ? 'text-slate-100' : 'text-slate-900'
                           }`}>
-                            No projects found matching the selected filters.
+                            {t('noProjectsMatch')}
                           </td>
                         </motion.tr>
                       ) : (

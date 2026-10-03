@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   CheckCircle2,
   Clock,
@@ -92,6 +93,7 @@ function MiniWaveVisual({ color }: { color: string }) {
 
 export function PortfolioOverviewMetrics() {
   const { theme, navigate } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const { projects } = useData();
 
@@ -245,8 +247,8 @@ export function PortfolioOverviewMetrics() {
   }[] = [
     {
       status: 'Signed PO',
-      displayName: 'Signed PO',
-      description: 'Active project execution',
+      displayName: t('signedPO'),
+      description: t('activeExecution'),
       icon: CheckCircle2,
       cardBg: isDark 
         ? 'bg-gradient-to-br from-[#12221B] via-[#151517] to-[#12221B] border-[#244636] hover:border-[#70D0A8]/40' 
@@ -263,8 +265,8 @@ export function PortfolioOverviewMetrics() {
     },
     {
       status: 'Under Review PO',
-      displayName: 'Under Review',
-      description: 'Projects under review',
+      displayName: t('underReviewPO'),
+      description: t('underReviewDesc'),
       icon: Clock,
       cardBg: isDark 
         ? 'bg-gradient-to-br from-[#101F30] via-[#151517] to-[#101F30] border-[#1E3B5C] hover:border-[#38BDF8]/40' 
@@ -281,8 +283,8 @@ export function PortfolioOverviewMetrics() {
     },
     {
       status: 'Upcoming PO',
-      displayName: 'Upcoming PO',
-      description: 'Upcoming pipeline contracts',
+      displayName: t('upcomingPO'),
+      description: t('upcomingDesc'),
       icon: Calendar,
       cardBg: isDark 
         ? 'bg-gradient-to-br from-[#241E14] via-[#151517] to-[#241E14] border-[#443823] hover:border-[#C9A86A]/40' 

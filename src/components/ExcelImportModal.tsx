@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useData } from '../context/DataContext';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { parseAndPreviewExcel, type ExcelParseResult } from '../utils/excelParser';
 import {
   FileSpreadsheet, Upload, CheckCircle2, AlertTriangle, X,
@@ -16,6 +17,7 @@ interface ExcelImportModalProps {
 
 export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) {
   const { theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const { projects, commitExcelImport } = useData();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -113,9 +115,9 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
               <FileSpreadsheet size={20} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base tracking-wide text-white">EXCEL DATA UPDATE & SYNCHRONIZATION</h3>
+              <h3 className="font-extrabold text-base tracking-wide text-white">{t('excelSyncTitle')}</h3>
               <p className="text-xs text-slate-400 font-medium">
-                Import updated Excel workbook to synchronize canonical project data
+                {t('excelSyncSubtitle')}
               </p>
             </div>
           </div>
@@ -140,7 +142,7 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                   : (isDark ? 'bg-[#111113] text-[#85858B]' : 'bg-slate-100 text-slate-500')
               }`}>
                 <span className="w-4 h-4 rounded-full bg-black/20 text-[10px] flex items-center justify-center font-mono">1</span>
-                <span>UPLOAD</span>
+                <span>{t('uploadWorkbook')}</span>
               </div>
               <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
                 step === 'preview' 
@@ -148,7 +150,7 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                   : (isDark ? 'bg-[#111113] text-[#85858B]' : 'bg-slate-100 text-slate-500')
               }`}>
                 <span className="w-4 h-4 rounded-full bg-black/20 text-[10px] flex items-center justify-center font-mono">2</span>
-                <span>PREVIEW</span>
+                <span>{t('reviewPreview')}</span>
               </div>
               <div className={`py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
                 loading && step === 'preview' 
@@ -164,7 +166,7 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                   : (isDark ? 'bg-[#111113] text-[#85858B]' : 'bg-slate-100 text-slate-500')
               }`}>
                 <span className="w-4 h-4 rounded-full bg-black/20 text-[10px] flex items-center justify-center font-mono">4</span>
-                <span>SYNCED</span>
+                <span>{t('complete')}</span>
               </div>
             </div>
           </div>
@@ -205,10 +207,10 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                   </div>
                   <div>
                     <p className={`font-extrabold text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      Click to upload or drag & drop Excel workbook
+                      {t('dragDropExcel')}
                     </p>
                     <p className={`text-xs font-medium mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-                      Supports <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xlsx</span> and <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xls</span> files (e.g. <em>260908 KKI PROJECT FOLLOW UP.xlsx</em>)
+                      {t('orBrowseFiles')} — <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xlsx</span> / <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xls</span>
                     </p>
                   </div>
                   <input
@@ -225,7 +227,7 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                     isDark ? 'text-[#C9A86A]' : 'text-[#1688D4]'
                   }`}>
                     <RefreshCw size={14} className="animate-spin" />
-                    Parsing workbook sheets and validating schema...
+                    {t('parsingWorkbook')}
                   </div>
                 )}
               </div>
@@ -494,14 +496,14 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                 onClick={() => setStep('upload')}
                 className="text-xs font-bold text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
               >
-                Back to Upload
+                {t('backToUpload')}
               </button>
               <div className="flex items-center gap-3">
                 <button
                   onClick={onClose}
                   className="text-xs font-bold text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleConfirmCommit}
@@ -509,7 +511,7 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                   className="btn-primary"
                 >
                   {loading ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={15} />}
-                  CONFIRM & COMMIT IMPORT
+                  {t('synchronizeDatabase')}
                 </button>
               </div>
             </>
@@ -518,14 +520,14 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
               onClick={onClose}
               className="ml-auto btn-primary"
             >
-              Close & View Dashboard
+              {t('close')}
             </button>
           ) : (
             <button
               onClick={onClose}
               className="ml-auto text-xs font-bold text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-colors cursor-pointer"
             >
-              Close
+              {t('close')}
             </button>
           )}
         </div>

@@ -269,6 +269,15 @@ export interface ProjectMaster {
   correctiveAction?: string | null;
   delayStatus?: string | null;
   delayRemarks?: string | null;
+
+  // Phase 3 Site Execution & Status fields
+  siteRequirementDate?: string | null;
+  siteStatus?: string | null;
+  siteRemarks?: string | null;
+  supervisorName?: string | null;
+  supervisorContact?: string | null;
+  supervisorAllocationDate?: string | null;
+  supportDuration?: string | null;
 }
 
 export interface DesignSchedule {
@@ -334,6 +343,9 @@ export interface ShipmentRecord {
   ksbhQty?: number | null;
   aluformQty?: number | null;
   dispatchQtyM2?: number | null;
+  netWeightKg?: number | null;
+  grossWeightKg?: number | null;
+  pcs?: number | null;
 }
 
 export function addWeeksToDate(dateStr: string | null | undefined, weeks = 13): string | null {

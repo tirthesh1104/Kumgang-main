@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { StatusBadge } from './ui/StatusBadge';
 import { QuickEditDesignModal } from './QuickEditDesignModal';
 import type { DesignSchedule } from '../data/projectData';
@@ -10,6 +11,7 @@ import { Edit3 } from 'lucide-react';
 export function DesignPage() {
   const { navigate, theme } = useApp();
   const { projects, designSchedules } = useData();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   const [editingDesign, setEditingDesign] = useState<DesignSchedule | null>(null);
@@ -21,20 +23,20 @@ export function DesignPage() {
   return (
     <div className={`space-y-6 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
       <div>
-        <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Design Monitoring</p>
-        <h2 className={`text-2xl font-extrabold tracking-tight ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>Design Elements</h2>
+        <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('designMonitoring')}</p>
+        <h2 className={`text-2xl font-extrabold tracking-tight ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{t('designElements')}</h2>
         <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-          {totalCount} design activities across {new Set(designSchedules.map(d => d.projectId)).size} projects.
+          {totalCount} {t('designActivitiesAcross')} {new Set(designSchedules.map(d => d.projectId)).size} {t('projectsLabel')}.
         </p>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Total Elements', value: totalCount, color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]' },
-          { label: 'Completed', value: completedCount, color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600' },
-          { label: 'In Progress', value: inProgressCount, color: isDark ? 'text-[#BBA8E8]' : 'text-indigo-600' },
-          { label: 'Pending', value: totalCount - completedCount - inProgressCount, color: isDark ? 'text-[#85858B]' : 'text-slate-400' },
+          { label: t('totalElements'), value: totalCount, color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]' },
+          { label: t('completed'), value: completedCount, color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600' },
+          { label: t('inProgress'), value: inProgressCount, color: isDark ? 'text-[#BBA8E8]' : 'text-indigo-600' },
+          { label: t('pending'), value: totalCount - completedCount - inProgressCount, color: isDark ? 'text-[#85858B]' : 'text-slate-400' },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -85,12 +87,12 @@ export function DesignPage() {
               <table className="w-full text-sm" aria-label={`Design schedule for ${project.project}`}>
                 <thead>
                   <tr className={`border-b text-xs font-semibold uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
-                    <th className="text-left py-2.5 px-3">ID</th>
-                    <th className="text-left py-2.5 px-3">Element</th>
-                    <th className="text-left py-2.5 px-3">Planned</th>
-                    <th className="text-left py-2.5 px-3">Actual</th>
-                    <th className="text-left py-2.5 px-3">Status</th>
-                    <th className="text-right py-2.5 px-3">Actions</th>
+                    <th className="text-left py-2.5 px-3">{t('id')}</th>
+                    <th className="text-left py-2.5 px-3">{t('element')}</th>
+                    <th className="text-left py-2.5 px-3">{t('planned')}</th>
+                    <th className="text-left py-2.5 px-3">{t('actual')}</th>
+                    <th className="text-left py-2.5 px-3">{t('status')}</th>
+                    <th className="text-right py-2.5 px-3">{t('actions')}</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDark ? 'divide-[#262629] bg-[#151517]' : 'divide-slate-200 bg-white'}`}>
@@ -110,7 +112,7 @@ export function DesignPage() {
                               : 'bg-slate-100 text-[#1688D4] border-slate-200 hover:bg-slate-200'
                           }`}
                         >
-                          <Edit3 size={12} /> Edit
+                          <Edit3 size={12} /> {t('edit')}
                         </button>
                       </td>
                     </tr>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useData } from '../context/DataContext';
+import { useLanguage } from '../context/LanguageContext';
 import { StatusBadge } from './ui/StatusBadge';
 import { ProgressBar } from './ui/ProgressBar';
 import { QuickEditProductionModal } from './QuickEditProductionModal';
@@ -11,6 +12,7 @@ import { Edit3, Plus } from 'lucide-react';
 export function ProductionPage() {
   const { theme } = useApp();
   const { projects, productionRecords } = useData();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   const [editingProd, setEditingProd] = useState<ProductionRecord | null>(null);
@@ -23,10 +25,10 @@ export function ProductionPage() {
     <div className={`space-y-6 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Production Monitoring</p>
-          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>Production Status</h2>
+          <p className={`kpi-label mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('productionMonitoring')}</p>
+          <h2 className={`text-xl font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{t('productionStatus')}</h2>
           <p className={`text-sm mt-0.5 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-            {productionRecords.length} production parts across the portfolio.
+            {productionRecords.length} {t('productionPartsAcross')}
           </p>
         </div>
       </div>
@@ -34,10 +36,10 @@ export function ProductionPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Total Parts', value: productionRecords.length, color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]' },
-          { label: 'Completed Parts', value: completedCount, color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600' },
-          { label: 'In Progress Parts', value: inProgressCount, color: isDark ? 'text-[#83CACA]' : 'text-cyan-600' },
-          { label: 'Not Started', value: productionRecords.length - completedCount - inProgressCount, color: isDark ? 'text-[#85858B]' : 'text-slate-400' },
+          { label: t('totalParts'), value: productionRecords.length, color: isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]' },
+          { label: t('completedParts'), value: completedCount, color: isDark ? 'text-[#70D0A8]' : 'text-emerald-600' },
+          { label: t('inProgressParts'), value: inProgressCount, color: isDark ? 'text-[#83CACA]' : 'text-cyan-600' },
+          { label: t('notStarted'), value: productionRecords.length - completedCount - inProgressCount, color: isDark ? 'text-[#85858B]' : 'text-slate-400' },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -59,9 +61,9 @@ export function ProductionPage() {
 
         const isFullyCompleted = prodItems.every(p => p.completionPercent === 100);
         const isInProgress = prodItems.some(p => (p.completionPercent || 0) > 0);
-        let projectStatus = 'Not Started';
-        if (isFullyCompleted) projectStatus = 'Completed';
-        else if (isInProgress) projectStatus = 'In Progress';
+        let projectStatus = t('notStarted');
+        if (isFullyCompleted) projectStatus = t('completed');
+        else if (isInProgress) projectStatus = t('inProgress');
 
         return (
           <motion.div
@@ -79,7 +81,7 @@ export function ProductionPage() {
                   <StatusBadge status={project.contractStatus} />
                 </div>
                 <h3 className={`font-bold ${isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}`}>{project.project}</h3>
-                <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{project.customer} {project.block ? `· Block ${project.block}` : ''}</p>
+                <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{project.customer} {project.block ? `· ${t('block')} ${project.block}` : ''}</p>
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -90,10 +92,10 @@ export function ProductionPage() {
                       : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
                   }`}
                 >
-                  <Plus size={13} /> Record Output
+                  <Plus size={13} /> {t('recordOutput')}
                 </button>
                 <div className="text-right">
-                  <p className={`text-[10px] uppercase tracking-wide mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Production Status</p>
+                  <p className={`text-[10px] uppercase tracking-wide mb-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('productionStatus')}</p>
                   <StatusBadge status={projectStatus} />
                 </div>
               </div>
@@ -101,11 +103,11 @@ export function ProductionPage() {
 
             <div className={`grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5 text-sm border-t pt-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Production Start</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('productionStart')}</p>
                 <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.productionStart || '—'}</p>
               </div>
               <div>
-                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Production Complete</p>
+                <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('productionComplete')}</p>
                 <p className={`font-medium ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.productionComplete || '—'}</p>
               </div>
             </div>
@@ -114,11 +116,11 @@ export function ProductionPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className={`border-b text-xs uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
-                    <th className="text-left py-2 pr-4 font-semibold">Part / Block</th>
-                    <th className="text-left py-2 pr-4 font-semibold">Order Qty</th>
-                    <th className="text-left py-2 pr-4 font-semibold">Finished Qty</th>
-                    <th className="text-left py-2 pr-4 font-semibold">Completion</th>
-                    <th className="text-right py-2 pr-2 font-semibold">Actions</th>
+                    <th className="text-left py-2 pr-4 font-semibold">{t('partBlock')}</th>
+                    <th className="text-left py-2 pr-4 font-semibold">{t('orderQty')}</th>
+                    <th className="text-left py-2 pr-4 font-semibold">{t('finishedQty')}</th>
+                    <th className="text-left py-2 pr-4 font-semibold">{t('completion')}</th>
+                    <th className="text-right py-2 pr-2 font-semibold">{t('actions')}</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
@@ -139,7 +141,7 @@ export function ProductionPage() {
                               : 'bg-slate-100 text-emerald-700 border-slate-200 hover:bg-slate-200'
                           }`}
                         >
-                          <Edit3 size={12} /> Edit
+                          <Edit3 size={12} /> {t('edit')}
                         </button>
                       </td>
                     </tr>
@@ -166,7 +168,7 @@ export function ProductionPage() {
                 <StatusBadge status={project.contractStatus} />
               </div>
               <p className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{project.project}</p>
-              <p className={`text-sm mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No production records mapped.</p>
+              <p className={`text-sm mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{t('noProductionRecords')}</p>
             </div>
             <button
               onClick={() => setAddingProjectId(project.projectId)}
@@ -176,7 +178,7 @@ export function ProductionPage() {
                   : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
               }`}
             >
-              <Plus size={14} /> Add Production Record
+              <Plus size={14} /> {t('addProductionRecord')}
             </button>
           </div>
         ))}
