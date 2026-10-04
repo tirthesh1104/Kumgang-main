@@ -14,8 +14,378 @@ import { DesignAreaSection } from './phase3/DesignAreaSection';
 import { SiteExecutionSection } from './phase3/SiteExecutionSection';
 import { useState } from 'react';
 import {
-  ArrowLeft, AlertTriangle, ChevronDown, ChevronUp, FileText, Printer, X, Edit3
+  ArrowLeft, AlertTriangle, ChevronDown, ChevronUp, FileText, Printer, X, Edit3,
+  Plus, Trash2, Edit2, Save, Upload, Paperclip, DollarSign
 } from 'lucide-react';
+
+function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string; totalContractUSD: number }) {
+  const { theme } = useApp();
+  const isDark = theme === 'dark';
+  const { getPaymentsForProject, recordNewPayment, updatePaymentRow, deletePaymentRow, getLastApprovedPIDate, getProjectById } = useData();
+  const payments = getPaymentsForProject(projectId);
+  const project = getProjectById(projectId);
+  const dynamicLastPi = getLastApprovedPIDate(projectId) || project?.lastPiRaisedDate || '—';
+
+  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
+  const exchangeRate = 83.5;
+  const currSymbol = currency === 'USD' ? '$' : '₹';
+  const mult = currency === 'USD' ? 1 : exchangeRate;
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
+
+  const handleStartEdit = (pay: any) => {
+    setEditingId(pay.paymentId);
+    setEditForm({
+      stageWise: pay.stageWise || pay.description || '',
+      amountUSD: pay.amountUSD || 0,
+      advancePaidUSD: pay.advancePaidUSD || 0,
+      dueDays: pay.dueDays ?? project?.dueDays ?? 30,
+      remark: pay.remark || '',
+      documentName: pay.documentName || '',
+      documentUrl: pay.documentUrl || '',
+    });
+  };
+
+  const handleSaveEdit = (paymentId: string) => {
+    const amt = parseFloat(editForm.amountUSD) || 0;
+    const paid = parseFloat(editForm.advancePaidUSD) || 0;
+    const bal = amt - paid;
+    const balPct = amt > 0 ? (bal / amt) * 100 : 0;
+    updatePaymentRow(paymentId, {
+      stageWise: editForm.stageWise,
+      description: editForm.stageWise,
+      amountUSD: amt,
+      advancePaidUSD: paid,
+      balanceUSD: bal,
+      dueDays: parseInt(editForm.dueDays, 10) || 0,
+      remark: editForm.remark,
+      documentName: editForm.documentName,
+      documentUrl: editForm.documentUrl,
+      balancePercent: balPct,
+    });
+    setEditingId(null);
+  };
+
+  const handleAddRow = () => {
+    const newId = `PAY-${Date.now().toString().slice(-6)}`;
+    const newStage = `Stage ${payments.length + 1}`;
+    recordNewPayment({
+      paymentId: newId,
+      projectId,
+      customer: project?.customer || '',
+      project: project?.project || '',
+      tower: project?.block || '',
+      description: newStage,
+      stageWise: newStage,
+      amountUSD: 10000,
+      advancePaidUSD: 0,
+      balanceUSD: 10000,
+      dueDays: 30,
+      lastPiDate: dynamicLastPi !== '—' ? dynamicLastPi : undefined,
+      remark: 'New Payment Milestone',
+    });
+  };
+
+  const handleDelete = (paymentId: string) => {
+    deletePaymentRow(paymentId);
+  };
+
+  const handleFileUpload = (paymentId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      updatePaymentRow(paymentId, {
+        documentName: file.name,
+        documentUrl: url,
+      });
+    }
+  };
+
+  // Totals
+  const contractVal = totalContractUSD || payments.reduce((acc, p) => acc + (p.amountUSD || 0), 0) || 1;
+  const totalScheduledUSD = payments.reduce((acc, p) => acc + (p.amountUSD || 0), 0);
+  const totalReceivedUSD = payments.reduce((acc, p) => acc + (p.advancePaidUSD || 0), 0);
+  const totalBalanceUSD = totalScheduledUSD - totalReceivedUSD;
+  const overallReceivedPct = totalScheduledUSD > 0 ? (totalReceivedUSD / totalScheduledUSD) * 100 : 0;
+  const overallBalancePct = totalScheduledUSD > 0 ? (totalBalanceUSD / totalScheduledUSD) * 100 : 0;
+
+  return (
+    <div className="space-y-3 mt-4">
+      {/* Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+        <div>
+          <h4 className={`text-sm font-extrabold uppercase tracking-wider flex items-center gap-2 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
+            <DollarSign size={16} className="text-emerald-500" /> 12-Column Payment Receivable Matrix
+          </h4>
+          <p className={`text-[11px] ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
+            Comprehensive stage-wise financial tracking, PI alignment, due days & document uploads
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Currency Switcher */}
+          <div className={`p-1 rounded-lg border flex items-center gap-1 text-xs font-bold ${
+            isDark ? 'bg-[#18181B] border-[#303035]' : 'bg-slate-100 border-slate-300'
+          }`}>
+            <button
+              onClick={() => setCurrency('USD')}
+              className={`px-2 py-0.5 rounded transition-all ${currency === 'USD' ? 'bg-[#1688D4] text-white shadow-xs' : (isDark ? 'text-slate-400' : 'text-slate-600')}`}
+            >
+              USD ($)
+            </button>
+            <button
+              onClick={() => setCurrency('INR')}
+              className={`px-2 py-0.5 rounded transition-all ${currency === 'INR' ? 'bg-[#1688D4] text-white shadow-xs' : (isDark ? 'text-slate-400' : 'text-slate-600')}`}
+            >
+              INR (₹)
+            </button>
+          </div>
+
+          {/* Add Row Button */}
+          <button
+            onClick={handleAddRow}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+              isDark ? 'bg-[#27272A] hover:bg-[#3F3F46] text-[#F5F5F3] border border-[#303035]' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+            }`}
+          >
+            <Plus size={14} /> Add Payment Row
+          </button>
+        </div>
+      </div>
+
+      {/* 12-Column Matrix Table */}
+      <div className="overflow-x-auto rounded-xl border border-slate-700/30 shadow-xs">
+        <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
+          <thead>
+            <tr className={`uppercase font-bold text-[10px] tracking-wider border-b ${
+              isDark ? 'bg-[#18181B] text-[#A1A1AA] border-[#27272A]' : 'bg-slate-100 text-slate-600 border-slate-200'
+            }`}>
+              <th className="p-2.5 w-12 text-center">Sr.</th>
+              <th className="p-2.5 min-w-[160px]">Payment Terms / Stage Wise</th>
+              <th className="p-2.5 text-right">Amount ({currSymbol})</th>
+              <th className="p-2.5 text-right">%</th>
+              <th className="p-2.5 text-center">Last PI Date</th>
+              <th className="p-2.5 text-center">Due Days</th>
+              <th className="p-2.5 text-right">Received Amt ({currSymbol})</th>
+              <th className="p-2.5 text-right">Recv %</th>
+              <th className="p-2.5 text-right">Balance Amt ({currSymbol})</th>
+              <th className="p-2.5 text-right">Bal %</th>
+              <th className="p-2.5 min-w-[130px]">Remark</th>
+              <th className="p-2.5 text-center min-w-[120px]">Document / Actions</th>
+            </tr>
+          </thead>
+          <tbody className={`divide-y ${isDark ? 'divide-[#27272A]' : 'divide-slate-200'}`}>
+            {payments.map((pay, idx) => {
+              const isEditing = editingId === pay.paymentId;
+              const amtUSD = isEditing ? (parseFloat(editForm.amountUSD) || 0) : (pay.amountUSD || 0);
+              const paidUSD = isEditing ? (parseFloat(editForm.advancePaidUSD) || 0) : (pay.advancePaidUSD || 0);
+              const balUSD = amtUSD - paidUSD;
+              
+              const stagePct = contractVal > 0 ? ((amtUSD / contractVal) * 100).toFixed(1) : '0.0';
+              const recvPct = amtUSD > 0 ? ((paidUSD / amtUSD) * 100).toFixed(1) : '0.0';
+              const balPct = amtUSD > 0 ? ((balUSD / amtUSD) * 100).toFixed(1) : '0.0';
+              const piDate = pay.lastPiDate || dynamicLastPi;
+
+              return (
+                <tr key={pay.paymentId || idx} className={`transition-colors font-medium ${
+                  isDark ? 'hover:bg-[#1C1C1F]' : 'hover:bg-slate-50'
+                }`}>
+                  {/* Col 1: Sr */}
+                  <td className="p-2.5 text-center font-bold text-slate-400">{idx + 1}</td>
+
+                  {/* Col 2: Payment Terms / Stage Wise */}
+                  <td className="p-2.5 font-semibold">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm.stageWise}
+                        onChange={e => setEditForm({ ...editForm, stageWise: e.target.value })}
+                        className={`w-full p-1 border rounded text-xs outline-none ${
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                        }`}
+                      />
+                    ) : (
+                      <span className={isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}>
+                        {pay.stageWise || pay.description || `Stage ${idx + 1}`}
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Col 3: Amount */}
+                  <td className="p-2.5 text-right font-bold font-mono">
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={editForm.amountUSD}
+                        onChange={e => setEditForm({ ...editForm, amountUSD: e.target.value })}
+                        className={`w-24 p-1 text-right border rounded text-xs outline-none ${
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                        }`}
+                      />
+                    ) : (
+                      <span className={isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}>
+                        {currSymbol}{(amtUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Col 4: % */}
+                  <td className="p-2.5 text-right font-mono text-slate-400">{stagePct}%</td>
+
+                  {/* Col 5: Last PI Date */}
+                  <td className="p-2.5 text-center font-mono">
+                    <span className="px-2 py-0.5 rounded text-[11px] bg-amber-900/30 text-amber-300 border border-amber-800/40">
+                      {piDate}
+                    </span>
+                  </td>
+
+                  {/* Col 6: Due Days */}
+                  <td className="p-2.5 text-center font-mono">
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={editForm.dueDays}
+                        onChange={e => setEditForm({ ...editForm, dueDays: e.target.value })}
+                        className={`w-14 p-1 text-center border rounded text-xs outline-none ${
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                        }`}
+                      />
+                    ) : (
+                      <span className={isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}>
+                        {pay.dueDays ?? project?.dueDays ?? 30} Days
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Col 7: Received Amount */}
+                  <td className="p-2.5 text-right font-bold font-mono text-emerald-400">
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={editForm.advancePaidUSD}
+                        onChange={e => setEditForm({ ...editForm, advancePaidUSD: e.target.value })}
+                        className={`w-24 p-1 text-right border rounded text-xs outline-none ${
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                        }`}
+                      />
+                    ) : (
+                      <span>{currSymbol}{(paidUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    )}
+                  </td>
+
+                  {/* Col 8: Received % */}
+                  <td className="p-2.5 text-right font-mono text-emerald-500 font-bold">{recvPct}%</td>
+
+                  {/* Col 9: Balance Amount */}
+                  <td className="p-2.5 text-right font-bold font-mono text-amber-400">
+                    {currSymbol}{(balUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  </td>
+
+                  {/* Col 10: Balance % */}
+                  <td className="p-2.5 text-right font-mono text-amber-500 font-bold">{balPct}%</td>
+
+                  {/* Col 11: Remark */}
+                  <td className="p-2.5 text-slate-400">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm.remark}
+                        onChange={e => setEditForm({ ...editForm, remark: e.target.value })}
+                        className={`w-full p-1 border rounded text-xs outline-none ${
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                        }`}
+                      />
+                    ) : (
+                      <span>{pay.remark || '—'}</span>
+                    )}
+                  </td>
+
+                  {/* Col 12: Documents Upload & Actions */}
+                  <td className="p-2.5 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {/* Document Attachment */}
+                      {pay.documentUrl ? (
+                        <a
+                          href={pay.documentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={pay.documentName || 'Download Document'}
+                          className="p-1 rounded bg-sky-900/40 text-sky-300 hover:bg-sky-800/60 border border-sky-700/50"
+                        >
+                          <Paperclip size={13} />
+                        </a>
+                      ) : (
+                        <label className="p-1 rounded bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 cursor-pointer border border-slate-700/50">
+                          <Upload size={13} />
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={e => handleFileUpload(pay.paymentId, e)}
+                          />
+                        </label>
+                      )}
+
+                      {/* Edit / Save Action */}
+                      {isEditing ? (
+                        <button
+                          onClick={() => handleSaveEdit(pay.paymentId)}
+                          className="p-1 rounded bg-emerald-700 text-white hover:bg-emerald-600 cursor-pointer"
+                        >
+                          <Save size={13} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleStartEdit(pay)}
+                          className="p-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+                      )}
+
+                      {/* Delete Action */}
+                      <button
+                        onClick={() => handleDelete(pay.paymentId)}
+                        className="p-1 rounded bg-red-950/60 text-red-400 hover:bg-red-900/80 border border-red-900/40 cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          {/* Summary Row */}
+          <tfoot>
+            <tr className={`font-bold font-mono border-t-2 text-xs ${
+              isDark ? 'bg-[#141416] text-[#FFFFFF] border-[#303035]' : 'bg-slate-100 text-slate-900 border-slate-300'
+            }`}>
+              <td colSpan={2} className="p-2.5 text-center uppercase tracking-wider text-[11px]">
+                Total Milestone Summary
+              </td>
+              <td className="p-2.5 text-right font-bold text-sky-400">
+                {currSymbol}{(totalScheduledUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </td>
+              <td className="p-2.5 text-right text-slate-400">100.0%</td>
+              <td colSpan={2} className="p-2.5 text-center text-slate-400">—</td>
+              <td className="p-2.5 text-right font-bold text-emerald-400">
+                {currSymbol}{(totalReceivedUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </td>
+              <td className="p-2.5 text-right text-emerald-400">{overallReceivedPct.toFixed(1)}%</td>
+              <td className="p-2.5 text-right font-bold text-amber-400">
+                {currSymbol}{(totalBalanceUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </td>
+              <td className="p-2.5 text-right text-amber-400">{overallBalancePct.toFixed(1)}%</td>
+              <td colSpan={2} className="p-2.5 text-center text-slate-400 font-sans text-[11px]">
+                Auto-calculated totals
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 function FieldRow({ label, value }: { label: string; value: string | number | null | undefined }) {
   const { theme } = useApp();
@@ -445,7 +815,7 @@ export function ProjectDetail() {
   const isDark = theme === 'dark';
   const {
     getProjectById, getDesignForProject, getProductionForProject,
-    getShipmentForProject, getPaymentsForProject
+    getShipmentForProject, getPaymentsForProject, getLastApprovedPIDate
   } = useData();
 
   const [isExportPreviewOpen, setIsExportPreviewOpen] = useState(false);
@@ -453,6 +823,7 @@ export function ProjectDetail() {
   const [editingDesign, setEditingDesign] = useState<any>(null);
 
   const project = selectedProjectId ? getProjectById(selectedProjectId) : undefined;
+  const dynamicLastPiDate = project ? getLastApprovedPIDate(project.projectId) : null;
 
   if (!project) {
     return (
@@ -932,7 +1303,7 @@ export function ProjectDetail() {
                 <FieldRow label="Actual Balance Amount" value={project.actualBalanceAmount ? `$${project.actualBalanceAmount.toLocaleString()}` : null} />
                 <FieldRow label="Current Payment Amt" value={project.paymentStatusAmount ? `$${project.paymentStatusAmount.toLocaleString()}` : null} />
                 <FieldRow label="Current Payment %" value={project.paymentStatusPercent ? `${project.paymentStatusPercent}%` : null} />
-                <FieldRow label="Last PI Raised Date" value={project.lastPiRaisedDate} />
+                <FieldRow label="Last PI Raised Date" value={dynamicLastPiDate ? `${dynamicLastPiDate} (Approved PI)` : (project.lastPiRaisedDate || '—')} />
                 <FieldRow label="Due Days" value={project.dueDays} />
               </div>
 
@@ -960,37 +1331,12 @@ export function ProjectDetail() {
                 </div>
               </div>
               
-              {payments.length > 0 && (
-                <div className={`mt-6 border-t pt-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
-                  <p className={`text-sm font-extrabold mb-3 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{t('paymentScheduleBreakdown')}</p>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className={`border-b text-xs uppercase ${isDark ? 'border-[#262629] text-[#85858B]' : 'border-slate-200 text-slate-500'}`}>
-                          <th className="text-left py-2 pr-4 font-semibold">Description</th>
-                          <th className="text-left py-2 pr-4 font-semibold">Value</th>
-                          <th className="text-left py-2 pr-4 font-semibold">Advance</th>
-                          <th className="text-left py-2 pr-4 font-semibold">Balance</th>
-                        </tr>
-                      </thead>
-                      <tbody className={`divide-y ${isDark ? 'divide-[#262629]' : 'divide-slate-200'}`}>
-                        {payments.map((pay, i) => (
-                          <tr key={i} className={`transition-colors ${isDark ? 'hover:bg-[#1B1B1F]' : 'hover:bg-slate-50'}`}>
-                            <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>{pay.description || 'Installment'}</td>
-                            <td className={`py-2.5 pr-4 font-medium ${isDark ? 'text-[#B4B4B8]' : 'text-slate-600'}`}>{pay.amountUSD ? `$${pay.amountUSD.toLocaleString()}` : '—'}</td>
-                            <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#70D0A8]' : 'text-emerald-700'}`}>{pay.advancePaidUSD ? `$${pay.advancePaidUSD.toLocaleString()}` : '—'}</td>
-                            <td className={`py-2.5 pr-4 font-semibold ${isDark ? 'text-[#E5C47A]' : 'text-amber-700'}`}>{pay.balanceUSD ? `$${pay.balanceUSD.toLocaleString()}` : '—'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
+              <PaymentMatrixTable projectId={project.projectId} totalContractUSD={project.totalAmountUSD || 0} />
             </SectionCard>
           ) : (
             <SectionCard title={t('commercialPayments')} label={t('financialMonitoring')}>
               <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No payment data available for this project.</p>
+              <PaymentMatrixTable projectId={project.projectId} totalContractUSD={project.totalAmountUSD || 0} />
             </SectionCard>
           )}
 

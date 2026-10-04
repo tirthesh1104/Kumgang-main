@@ -5,7 +5,12 @@ export type NotificationType =
   | 'SHIPMENT_PENDING'
   | 'APPROVAL_REQUIRED'
   | 'SITE_PROGRESS_UPDATE'
-  | 'SYSTEM_ALERT';
+  | 'SYSTEM_ALERT'
+  | 'FACTORY_VISIT'
+  | 'HOLIDAY'
+  | 'FESTIVAL'
+  | 'PAYMENT_DUE_SOON'
+  | 'SHIPMENT_ARRIVING_SOON';
 
 export interface AppNotification {
   id: string;

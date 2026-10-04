@@ -15,14 +15,38 @@ interface EditProjectModalProps {
   onSuccess?: () => void;
 }
 
+function compute13WeekDate(dateStr: string | null | undefined): string | null {
+  if (!dateStr || !dateStr.trim()) return null;
+  const clean = dateStr.trim();
+  if (['done', 'pending', 'n/a', 'waiting cfm', 'no information', 'signed'].includes(clean.toLowerCase())) return null;
+  let d: Date | null = null;
+  if (clean.includes('-')) {
+    const parts = clean.split('-');
+    if (parts[0].length === 4) {
+      d = new Date(clean);
+    } else if (parts[2].length === 4) {
+      d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    }
+  } else {
+    d = new Date(clean);
+  }
+  if (!d || isNaN(d.getTime())) return null;
+  const result = new Date(d.getTime() + 91 * 24 * 60 * 60 * 1000);
+  const dd = String(result.getDate()).padStart(2, '0');
+  const mm = String(result.getMonth() + 1).padStart(2, '0');
+  const yyyy = result.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+}
+
 export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectModalProps) {
   const { theme } = useApp();
   const { t } = useLanguage();
   const isDark = theme === 'dark';
-  const { getProjectById, updateProjectManual, addProjectManual } = useData();
+  const { getProjectById, updateProjectManual, addProjectManual, getLastApprovedPIDate } = useData();
 
   const isNew = !projectId;
   const existing = projectId ? getProjectById(projectId) : undefined;
+  const dynamicLastPiDate = projectId ? getLastApprovedPIDate(projectId) : null;
 
   const [formData, setFormData] = useState<Partial<ProjectMaster>>({
     projectId: existing?.projectId || '',
@@ -1202,7 +1226,9 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                 />
               </div>
               <div>
-                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>Shell Plan Confirm</label>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>
+                  Shell Plan Confirm
+                </label>
                 <input
                   type="text"
                   value={formData.shellPlanConfirmation || ''}
@@ -1214,6 +1240,11 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                       : 'border-slate-300 bg-white text-slate-900'
                   }`}
                 />
+                {formData.shellPlanConfirmation && compute13WeekDate(formData.shellPlanConfirmation) && (
+                  <p className="text-[10px] text-sky-500 font-semibold mt-1">
+                    +13 Weeks Target: {compute13WeekDate(formData.shellPlanConfirmation)}
+                  </p>
+                )}
               </div>
               <div>
                 <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>MD Completion</label>
@@ -1313,6 +1344,11 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                       : 'border-slate-300 bg-white text-slate-900'
                   }`}
                 />
+                {formData.paymentReceivedShellPlanDate && compute13WeekDate(formData.paymentReceivedShellPlanDate) && (
+                  <p className="text-[10px] text-emerald-500 font-semibold mt-1">
+                    +13 Weeks Target: {compute13WeekDate(formData.paymentReceivedShellPlanDate)}
+                  </p>
+                )}
               </div>
               <div>
                 <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}`}>ETA Location / Port</label>
@@ -1355,6 +1391,40 @@ export function EditProjectModal({ projectId, onClose, onSuccess }: EditProjectM
                       : 'border-slate-300 bg-white text-slate-900'
                   }`}
                 />
+              </div>
+            </div>
+
+            {/* 13-Week Date Automation & Dynamic Last PI Summary Banner */}
+            <div className={`p-3 rounded-xl border text-xs space-y-2 ${
+              isDark ? 'bg-[#18181B] border-[#27272A] text-[#B4B4B8]' : 'bg-slate-50 border-slate-200 text-slate-700'
+            }`}>
+              <div className="flex items-center justify-between font-bold">
+                <span className="flex items-center gap-1.5 text-sky-400">
+                  <Calendar size={14} /> 13-Week Automated Milestone Targets
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-sky-900/40 text-sky-300 border border-sky-700/50">
+                  Auto-Calculated (+91 Days)
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
+                <div>
+                  <span className="text-slate-400">Shell Plan Target (13 Wks):</span>{' '}
+                  <span className="font-semibold text-sky-300">
+                    {compute13WeekDate(formData.shellPlanConfirmation) || 'Enter Shell Date'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Payment Recv Target (13 Wks):</span>{' '}
+                  <span className="font-semibold text-emerald-300">
+                    {compute13WeekDate(formData.paymentReceivedShellPlanDate) || 'Enter Payment Date'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Last PI Raised Date:</span>{' '}
+                  <span className="font-semibold text-amber-300">
+                    {dynamicLastPiDate || formData.lastPiRaisedDate || 'No Approved PI'}
+                  </span>
+                </div>
               </div>
             </div>
 

@@ -383,19 +383,27 @@ export interface PaymentRecord {
   project: string;
   tower: string;
   description: string;
-  quantitySqm: number | null;
-  rateUSD: number | null;
+  quantitySqm?: number | null;
+  rateUSD?: number | null;
   amountUSD: number | null;
   advancePaidUSD: number | null;
   balanceUSD: number | null;
-  advancePercent: number | null;
-  paymentTerm: string;
-  paymentStatus: string;
+  advancePercent?: number | null;
+  balancePercent?: number | null;
+  paymentTerm?: string;
+  paymentStatus?: string;
   remark: string;
   sourceSheet?: string;
   paymentDate?: string | null;
   paymentType?: string | null;
   paymentReference?: string | null;
+
+  // 12-Column Table Extended Fields
+  stageWise?: string;
+  lastPiDate?: string | null;
+  dueDays?: number | string | null;
+  documentUrl?: string | null;
+  documentName?: string | null;
 }
 
 // ============================================================
@@ -1964,6 +1972,111 @@ export const projectMasterData: ProjectMaster[] = [
     "incoterm": "",
     "remark": "",
     "sourceSheet": "KKM"
+  },
+  {
+    "projectId": "KKHQ-001",
+    "country": "South Korea",
+    "customer": "HYUNDAI E&C",
+    "project": "SEOUL TOWER HQ",
+    "block": "Block A_Typical",
+    "contractDate": "15-01-2025",
+    "contractStatus": "Signed",
+    "contractQtyM2": 5200,
+    "contractWeightTons": 120,
+    "actualDesignQtyM2": 5200,
+    "actualDesignWeightTons": 120,
+    "designProgressPercent": 100,
+    "pricePerM2USD": 125.00,
+    "totalAmountUSD": 650000.00,
+    "advanceUSD": 195000.00,
+    "balanceUSD": 455000.00,
+    "shellPlanConfirmation": "Done",
+    "mdCompletion": "Done",
+    "productionStart": "Done",
+    "productionComplete": "10-08-2025",
+    "deliveryRequest": "10-09-2025",
+    "loadingDate": "05-09-2025",
+    "etd": "06-09-2025",
+    "eta": "12-09-2025",
+    "fwd": "15-09-2025",
+    "paymentTerm": "Advance 30%, 70% before dispatch",
+    "paymentStatus": "Received 30%",
+    "incoterm": "FOB Busan",
+    "remark": "KKHQ Seed Project — Hyundai E&C Seoul Tower",
+    "sourceSheet": "KKHQ HQ Master",
+    "vendorCompany": "KKHQ",
+    "initialContractQtyM2": 5000,
+    "initialContractWeightTons": 115
+  },
+  {
+    "projectId": "KKHQ-002",
+    "country": "South Korea",
+    "customer": "SAMSUNG C&T",
+    "project": "BUSAN BAY COMPLEX",
+    "block": "Tower 1",
+    "contractDate": "20-02-2025",
+    "contractStatus": "Signed",
+    "contractQtyM2": 8400,
+    "contractWeightTons": 198,
+    "actualDesignQtyM2": 8400,
+    "actualDesignWeightTons": 198,
+    "designProgressPercent": 85,
+    "pricePerM2USD": 130.00,
+    "totalAmountUSD": 1092000.00,
+    "advanceUSD": 327600.00,
+    "balanceUSD": 764400.00,
+    "shellPlanConfirmation": "10-05-2025",
+    "mdCompletion": "25-06-2025",
+    "productionStart": "15-07-2025",
+    "productionComplete": "30-09-2025",
+    "deliveryRequest": "15-10-2025",
+    "loadingDate": "10-10-2025",
+    "etd": "12-10-2025",
+    "eta": "18-10-2025",
+    "fwd": "20-10-2025",
+    "paymentTerm": "Advance 30%, 70% LC at Sight",
+    "paymentStatus": "Received 30%",
+    "incoterm": "CIF Busan",
+    "remark": "KKHQ Seed Project — Samsung C&T Busan Bay",
+    "sourceSheet": "KKHQ HQ Master",
+    "vendorCompany": "KKHQ",
+    "initialContractQtyM2": 8000,
+    "initialContractWeightTons": 190
+  },
+  {
+    "projectId": "KKHQ-003",
+    "country": "South Korea",
+    "customer": "GS E&C",
+    "project": "INCHEON LOGISTICS PARK",
+    "block": "Warehouse B",
+    "contractDate": "10-03-2025",
+    "contractStatus": "Signed",
+    "contractQtyM2": 3600,
+    "contractWeightTons": 85,
+    "actualDesignQtyM2": 3600,
+    "actualDesignWeightTons": 85,
+    "designProgressPercent": 40,
+    "pricePerM2USD": 115.00,
+    "totalAmountUSD": 414000.00,
+    "advanceUSD": 124200.00,
+    "balanceUSD": 289800.00,
+    "shellPlanConfirmation": "Pending",
+    "mdCompletion": "Pending",
+    "productionStart": "Pending",
+    "productionComplete": "30-11-2025",
+    "deliveryRequest": "15-12-2025",
+    "loadingDate": "10-12-2025",
+    "etd": "12-12-2025",
+    "eta": "18-12-2025",
+    "fwd": "20-12-2025",
+    "paymentTerm": "Advance 30%, 70% before dispatch",
+    "paymentStatus": "Received 30%",
+    "incoterm": "FOB Incheon",
+    "remark": "KKHQ Seed Project — GS E&C Incheon",
+    "sourceSheet": "KKHQ HQ Master",
+    "vendorCompany": "KKHQ",
+    "initialContractQtyM2": 3500,
+    "initialContractWeightTons": 80
   }
 ];
 

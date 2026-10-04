@@ -74,6 +74,7 @@ interface DataContextType {
   getSiteExecutionInfoForProject: (projectId: string) => ProjectSiteExecutionInfo | undefined;
   getPIsForProject: (projectId: string) => ProformaInvoiceRecord[];
   getPIById: (piId: string) => ProformaInvoiceRecord | undefined;
+  getLastApprovedPIDate: (projectId: string) => string | null;
   getNormalizedMISDataset: () => NormalizedMISDataset;
   getNotificationsForUser: (role: string, assignedProjects?: string[]) => AppNotification[];
   getUniqueCountries: () => string[];
@@ -133,6 +134,17 @@ interface DataContextType {
 
   recordNewPayment: (
     newPayment: PaymentRecord,
+    user?: string
+  ) => { success: boolean; errors?: string[] };
+
+  updatePaymentRow: (
+    paymentId: string,
+    updatedFields: Partial<PaymentRecord>,
+    user?: string
+  ) => { success: boolean; errors?: string[] };
+
+  deletePaymentRow: (
+    paymentId: string,
     user?: string
   ) => { success: boolean; errors?: string[] };
 
@@ -221,13 +233,17 @@ function formatLogTimestamp(date = new Date()): string {
 }
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  // Initialize projects from localStorage or default static projectMasterData
   const [projects, setProjects] = useState<ProjectMaster[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_PROJECTS_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasKKHQ = parsed.some(p => p.projectId && p.projectId.startsWith('KKHQ'));
+          if (!hasKKHQ) {
+            const kkhqSeeds = projectMasterData.filter(p => p.projectId && p.projectId.startsWith('KKHQ'));
+            return [...parsed, ...kkhqSeeds];
+          }
           return parsed;
         }
       }
@@ -1283,6 +1299,61 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return proformaInvoices.find(pi => pi.id === piId);
   }, [proformaInvoices]);
 
+  const getLastApprovedPIDate = useCallback((projectId: string): string | null => {
+    const approvedPIs = proformaInvoices.filter(pi => pi.projectId === projectId && pi.status === 'APPROVED');
+    if (approvedPIs.length === 0) return null;
+    approvedPIs.sort((a, b) => {
+      const dateA = new Date(a.documentDate || a.updatedAt).getTime();
+      const dateB = new Date(b.documentDate || b.updatedAt).getTime();
+      return dateB - dateA;
+    });
+    return approvedPIs[0].documentDate || approvedPIs[0].updatedAt.split('T')[0];
+  }, [proformaInvoices]);
+
+  const updatePaymentRow = useCallback((paymentId: string, updatedFields: Partial<PaymentRecord>, user = 'Project Manager') => {
+    let targetProjectId = '';
+    setPayments(prev => {
+      const idx = prev.findIndex(p => p.paymentId === paymentId);
+      if (idx === -1) return prev;
+      targetProjectId = prev[idx].projectId || '';
+      const merged = { ...prev[idx], ...updatedFields };
+      const next = [...prev];
+      next[idx] = merged;
+      return next;
+    });
+
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: formatLogTimestamp(),
+      user,
+      method: 'Manual',
+      projectId: targetProjectId || undefined,
+      summary: `Updated payment row ${paymentId} for project ${targetProjectId}`,
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+    return { success: true };
+  }, []);
+
+  const deletePaymentRow = useCallback((paymentId: string, user = 'Project Manager') => {
+    let targetProjectId = '';
+    setPayments(prev => {
+      const target = prev.find(p => p.paymentId === paymentId);
+      if (target) targetProjectId = target.projectId || '';
+      return prev.filter(p => p.paymentId !== paymentId);
+    });
+
+    const newLog: AuditLogEntry = {
+      id: `LOG-${Date.now()}`,
+      timestamp: formatLogTimestamp(),
+      user,
+      method: 'Manual',
+      projectId: targetProjectId || undefined,
+      summary: `Deleted payment row ${paymentId} for project ${targetProjectId}`,
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+    return { success: true };
+  }, []);
+
   const updateStakeholderEmails = useCallback((emails: Partial<StakeholderEmails>, user = 'Administrator') => {
     setStakeholderEmails(prev => {
       const updated = { ...prev, ...emails };
@@ -1898,6 +1969,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     getSiteExecutionInfoForProject,
     getPIsForProject,
     getPIById,
+    getLastApprovedPIDate,
     getNormalizedMISDataset,
     getNotificationsForUser,
     getUniqueCountries,
@@ -1914,6 +1986,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     addProductionEntry,
     updateShipmentRecord,
     recordNewPayment,
+    updatePaymentRow,
+    deletePaymentRow,
     commitExcelImport,
     addProjectDocument,
     addDocumentVersion,
@@ -1965,6 +2039,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     getSiteExecutionInfoForProject,
     getPIsForProject,
     getPIById,
+    getLastApprovedPIDate,
     getNormalizedMISDataset,
     getNotificationsForUser,
     getUniqueCountries,
@@ -1981,6 +2056,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     addProductionEntry,
     updateShipmentRecord,
     recordNewPayment,
+    updatePaymentRow,
+    deletePaymentRow,
     commitExcelImport,
     addProjectDocument,
     addDocumentVersion,

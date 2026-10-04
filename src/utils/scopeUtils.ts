@@ -12,6 +12,10 @@ export function getProjectScope(project: ProjectMaster): string {
     return project.vendorCompany.trim().toUpperCase();
   }
 
+  if (project.projectId && project.projectId.toUpperCase().startsWith('KKHQ')) {
+    return 'KKHQ';
+  }
+
   // Pre-configured commercial contract scope mapping for existing dataset
   const kkvClients = ['TOTAL ENVIROMENT', 'BREN', 'TRIFECTA', 'KANWARJI  CONSTRUCTION'];
   if (kkvClients.includes(project.customer)) {
