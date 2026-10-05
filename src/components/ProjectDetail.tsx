@@ -116,9 +116,9 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
       <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
         <div>
           <h4 className={`text-sm font-extrabold uppercase tracking-wider flex items-center gap-2 ${isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}`}>
-            <DollarSign size={16} className="text-emerald-500" /> 12-Column Payment Receivable Matrix
+            <DollarSign size={16} className={isDark ? 'text-emerald-500' : 'text-emerald-700'} /> 12-Column Payment Receivable Matrix
           </h4>
-          <p className={`text-[11px] ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
+          <p className={`text-[11px] ${isDark ? 'text-[#85858B]' : 'text-slate-600 font-medium'}`}>
             Comprehensive stage-wise financial tracking, PI alignment, due days & document uploads
           </p>
         </div>
@@ -129,13 +129,13 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
           }`}>
             <button
               onClick={() => setCurrency('USD')}
-              className={`px-2 py-0.5 rounded transition-all ${currency === 'USD' ? 'bg-[#1688D4] text-white shadow-xs' : (isDark ? 'text-slate-400' : 'text-slate-600')}`}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${currency === 'USD' ? 'bg-[#1688D4] text-white shadow-xs font-bold' : (isDark ? 'text-slate-400' : 'text-slate-700 hover:text-slate-900')}`}
             >
               USD ($)
             </button>
             <button
               onClick={() => setCurrency('INR')}
-              className={`px-2 py-0.5 rounded transition-all ${currency === 'INR' ? 'bg-[#1688D4] text-white shadow-xs' : (isDark ? 'text-slate-400' : 'text-slate-600')}`}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${currency === 'INR' ? 'bg-[#1688D4] text-white shadow-xs font-bold' : (isDark ? 'text-slate-400' : 'text-slate-700 hover:text-slate-900')}`}
             >
               INR (₹)
             </button>
@@ -144,21 +144,23 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
           {/* Add Row Button */}
           <button
             onClick={handleAddRow}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-              isDark ? 'bg-[#27272A] hover:bg-[#3F3F46] text-[#F5F5F3] border border-[#303035]' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+              isDark ? 'bg-[#27272A] hover:bg-[#3F3F46] text-[#F5F5F3] border border-[#303035]' : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 shadow-2xs'
             }`}
           >
-            <Plus size={14} /> Add Payment Row
+            <Plus size={14} className={isDark ? 'text-[#F5F5F3]' : 'text-slate-800'} /> Add Payment Row
           </button>
         </div>
       </div>
 
       {/* 12-Column Matrix Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-700/30 shadow-xs">
+      <div className={`overflow-x-auto rounded-xl border shadow-xs ${
+        isDark ? 'border-slate-700/40' : 'border-slate-300 bg-white'
+      }`}>
         <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
           <thead>
             <tr className={`uppercase font-bold text-[10px] tracking-wider border-b ${
-              isDark ? 'bg-[#18181B] text-[#A1A1AA] border-[#27272A]' : 'bg-slate-100 text-slate-600 border-slate-200'
+              isDark ? 'bg-[#18181B] text-[#A1A1AA] border-[#27272A]' : 'bg-slate-100 text-slate-800 border-slate-300'
             }`}>
               <th className="p-2.5 w-12 text-center">Sr.</th>
               <th className="p-2.5 min-w-[160px]">Payment Terms / Stage Wise</th>
@@ -188,20 +190,20 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
 
               return (
                 <tr key={pay.paymentId || idx} className={`transition-colors font-medium ${
-                  isDark ? 'hover:bg-[#1C1C1F]' : 'hover:bg-slate-50'
+                  isDark ? 'hover:bg-[#1C1C1F]' : 'hover:bg-slate-50/80'
                 }`}>
                   {/* Col 1: Sr */}
-                  <td className="p-2.5 text-center font-bold text-slate-400">{idx + 1}</td>
+                  <td className={`p-2.5 text-center font-bold ${isDark ? 'text-slate-400' : 'text-slate-700'}`}>{idx + 1}</td>
 
                   {/* Col 2: Payment Terms / Stage Wise */}
-                  <td className="p-2.5 font-semibold">
+                  <td className="p-2.5 font-bold">
                     {isEditing ? (
                       <input
                         type="text"
                         value={editForm.stageWise}
                         onChange={e => setEditForm({ ...editForm, stageWise: e.target.value })}
                         className={`w-full p-1 border rounded text-xs outline-none ${
-                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300 text-slate-900 font-medium'
                         }`}
                       />
                     ) : (
@@ -219,7 +221,7 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                         value={editForm.amountUSD}
                         onChange={e => setEditForm({ ...editForm, amountUSD: e.target.value })}
                         className={`w-24 p-1 text-right border rounded text-xs outline-none ${
-                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300 text-slate-900 font-semibold'
                         }`}
                       />
                     ) : (
@@ -230,11 +232,13 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                   </td>
 
                   {/* Col 4: % */}
-                  <td className="p-2.5 text-right font-mono text-slate-400">{stagePct}%</td>
+                  <td className={`p-2.5 text-right font-mono ${isDark ? 'text-slate-400' : 'text-slate-700 font-semibold'}`}>{stagePct}%</td>
 
                   {/* Col 5: Last PI Date */}
                   <td className="p-2.5 text-center font-mono">
-                    <span className="px-2 py-0.5 rounded text-[11px] bg-amber-900/30 text-amber-300 border border-amber-800/40">
+                    <span className={`px-2 py-0.5 rounded text-[11px] ${
+                      isDark ? 'bg-amber-900/30 text-amber-300 border border-amber-800/40' : 'bg-amber-50 text-amber-900 border border-amber-300 font-semibold'
+                    }`}>
                       {piDate}
                     </span>
                   </td>
@@ -247,25 +251,25 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                         value={editForm.dueDays}
                         onChange={e => setEditForm({ ...editForm, dueDays: e.target.value })}
                         className={`w-14 p-1 text-center border rounded text-xs outline-none ${
-                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300 text-slate-900'
                         }`}
                       />
                     ) : (
-                      <span className={isDark ? 'text-[#B4B4B8]' : 'text-slate-700'}>
+                      <span className={isDark ? 'text-[#B4B4B8]' : 'text-slate-800 font-semibold'}>
                         {pay.dueDays ?? project?.dueDays ?? 30} Days
                       </span>
                     )}
                   </td>
 
                   {/* Col 7: Received Amount */}
-                  <td className="p-2.5 text-right font-bold font-mono text-emerald-400">
+                  <td className={`p-2.5 text-right font-bold font-mono ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
                     {isEditing ? (
                       <input
                         type="number"
                         value={editForm.advancePaidUSD}
                         onChange={e => setEditForm({ ...editForm, advancePaidUSD: e.target.value })}
                         className={`w-24 p-1 text-right border rounded text-xs outline-none ${
-                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300 text-slate-900'
                         }`}
                       />
                     ) : (
@@ -274,25 +278,25 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                   </td>
 
                   {/* Col 8: Received % */}
-                  <td className="p-2.5 text-right font-mono text-emerald-500 font-bold">{recvPct}%</td>
+                  <td className={`p-2.5 text-right font-mono font-bold ${isDark ? 'text-emerald-500' : 'text-emerald-800'}`}>{recvPct}%</td>
 
                   {/* Col 9: Balance Amount */}
-                  <td className="p-2.5 text-right font-bold font-mono text-amber-400">
+                  <td className={`p-2.5 text-right font-bold font-mono ${isDark ? 'text-amber-400' : 'text-amber-800'}`}>
                     {currSymbol}{(balUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </td>
 
                   {/* Col 10: Balance % */}
-                  <td className="p-2.5 text-right font-mono text-amber-500 font-bold">{balPct}%</td>
+                  <td className={`p-2.5 text-right font-mono font-bold ${isDark ? 'text-amber-500' : 'text-amber-800'}`}>{balPct}%</td>
 
                   {/* Col 11: Remark */}
-                  <td className="p-2.5 text-slate-400">
+                  <td className={`p-2.5 ${isDark ? 'text-slate-400' : 'text-slate-700'}`}>
                     {isEditing ? (
                       <input
                         type="text"
                         value={editForm.remark}
                         onChange={e => setEditForm({ ...editForm, remark: e.target.value })}
                         className={`w-full p-1 border rounded text-xs outline-none ${
-                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300'
+                          isDark ? 'bg-[#151517] border-[#303035] text-[#F5F5F3]' : 'bg-white border-slate-300 text-slate-900'
                         }`}
                       />
                     ) : (
@@ -310,12 +314,16 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                           target="_blank"
                           rel="noreferrer"
                           title={pay.documentName || 'Download Document'}
-                          className="p-1 rounded bg-sky-900/40 text-sky-300 hover:bg-sky-800/60 border border-sky-700/50"
+                          className={`p-1 rounded cursor-pointer transition-all ${
+                            isDark ? 'bg-sky-900/40 text-sky-300 hover:bg-sky-800/60 border border-sky-700/50' : 'bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-300'
+                          }`}
                         >
                           <Paperclip size={13} />
                         </a>
                       ) : (
-                        <label className="p-1 rounded bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 cursor-pointer border border-slate-700/50">
+                        <label className={`p-1 rounded cursor-pointer transition-all ${
+                          isDark ? 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 border border-slate-700/50' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300'
+                        }`}>
                           <Upload size={13} />
                           <input
                             type="file"
@@ -329,14 +337,18 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                       {isEditing ? (
                         <button
                           onClick={() => handleSaveEdit(pay.paymentId)}
-                          className="p-1 rounded bg-emerald-700 text-white hover:bg-emerald-600 cursor-pointer"
+                          className={`p-1 rounded cursor-pointer transition-all ${
+                            isDark ? 'bg-emerald-700 text-white hover:bg-emerald-600' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs'
+                          }`}
                         >
                           <Save size={13} />
                         </button>
                       ) : (
                         <button
                           onClick={() => handleStartEdit(pay)}
-                          className="p-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer"
+                          className={`p-1 rounded cursor-pointer transition-all ${
+                            isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300'
+                          }`}
                         >
                           <Edit2 size={13} />
                         </button>
@@ -345,7 +357,9 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                       {/* Delete Action */}
                       <button
                         onClick={() => handleDelete(pay.paymentId)}
-                        className="p-1 rounded bg-red-950/60 text-red-400 hover:bg-red-900/80 border border-red-900/40 cursor-pointer"
+                        className={`p-1 rounded cursor-pointer transition-all ${
+                          isDark ? 'bg-red-950/60 text-red-400 hover:bg-red-900/80 border border-red-900/40' : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-300'
+                        }`}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -358,25 +372,25 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
           {/* Summary Row */}
           <tfoot>
             <tr className={`font-bold font-mono border-t-2 text-xs ${
-              isDark ? 'bg-[#141416] text-[#FFFFFF] border-[#303035]' : 'bg-slate-100 text-slate-900 border-slate-300'
+              isDark ? 'bg-[#141416] text-[#FFFFFF] border-[#303035]' : 'bg-slate-200/90 text-slate-900 border-slate-400'
             }`}>
-              <td colSpan={2} className="p-2.5 text-center uppercase tracking-wider text-[11px]">
+              <td colSpan={2} className="p-2.5 text-center uppercase tracking-wider text-[11px] font-extrabold">
                 Total Milestone Summary
               </td>
-              <td className="p-2.5 text-right font-bold text-sky-400">
+              <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-sky-400' : 'text-sky-800'}`}>
                 {currSymbol}{(totalScheduledUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </td>
-              <td className="p-2.5 text-right text-slate-400">100.0%</td>
-              <td colSpan={2} className="p-2.5 text-center text-slate-400">—</td>
-              <td className="p-2.5 text-right font-bold text-emerald-400">
+              <td className={`p-2.5 text-right ${isDark ? 'text-slate-400' : 'text-slate-800 font-bold'}`}>100.0%</td>
+              <td colSpan={2} className={`p-2.5 text-center ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>—</td>
+              <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
                 {currSymbol}{(totalReceivedUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </td>
-              <td className="p-2.5 text-right text-emerald-400">{overallReceivedPct.toFixed(1)}%</td>
-              <td className="p-2.5 text-right font-bold text-amber-400">
+              <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>{overallReceivedPct.toFixed(1)}%</td>
+              <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-amber-400' : 'text-amber-800'}`}>
                 {currSymbol}{(totalBalanceUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </td>
-              <td className="p-2.5 text-right text-amber-400">{overallBalancePct.toFixed(1)}%</td>
-              <td colSpan={2} className="p-2.5 text-center text-slate-400 font-sans text-[11px]">
+              <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-amber-400' : 'text-amber-800'}`}>{overallBalancePct.toFixed(1)}%</td>
+              <td colSpan={2} className={`p-2.5 text-center font-sans text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-700 font-semibold'}`}>
                 Auto-calculated totals
               </td>
             </tr>
