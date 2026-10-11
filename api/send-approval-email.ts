@@ -37,6 +37,8 @@ export default async function handler(req: any, res: any) {
       currency = 'USD',
       baseUrl = 'https://kumgang-main.vercel.app',
       submittedBy = 'Project Manager',
+      previousNotes,
+      rejectionReason,
     } = body || {};
 
     if (!recipientEmail || recipientEmail === 'Email Not Configured') {
@@ -68,27 +70,38 @@ export default async function handler(req: any, res: any) {
     const holdUrl = `${originUrl}/?piActionToken=${encodeURIComponent(actionToken)}&action=PUT_ON_HOLD`;
     const viewUrl = `${originUrl}/?piNumber=${encodeURIComponent(piNumber)}`;
 
+    const isCompleted = stage === 'COMPLETED';
+    const isRejected = stage === 'REJECTED';
+
+    const emailSubject = isCompleted
+      ? `[Authorized & Released] Final Signed Proforma Invoice: ${piNumber} - ${projectName}`
+      : isRejected
+      ? `[Revision Required] Proforma Invoice ${piNumber} Returned - ${projectName}`
+      : `[Action Required] PI Approval Request: ${piNumber} - ${projectName}`;
+
     const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Approval Request - ${piNumber}</title>
+  <title>${emailSubject}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; margin: 0; padding: 24px; color: #1e293b; }
     .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; }
-    .header { background: #1e1b4b; padding: 24px 30px; border-bottom: 3px solid #6366f1; text-align: left; }
+    .header { background: #1e1b4b; padding: 24px 30px; border-bottom: 3px solid ${isCompleted ? '#10b981' : isRejected ? '#ef4444' : '#6366f1'}; text-align: left; }
     .header h1 { color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
     .header p { color: #a5b4fc; margin: 6px 0 0 0; font-size: 13px; }
     .body-content { padding: 30px; }
-    .stage-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px; }
+    .stage-badge { display: inline-block; background: ${isCompleted ? '#d1fae5' : isRejected ? '#fee2e2' : '#e0e7ff'}; color: ${isCompleted ? '#065f46' : isRejected ? '#991b1b' : '#4338ca'}; font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px; }
     .info-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px; }
     .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; }
     .info-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
     .info-label { color: #64748b; font-weight: 500; }
     .info-val { color: #0f172a; font-weight: 700; }
     .amount-highlight { font-size: 18px; color: #4f46e5; }
+    .notes-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 4px; margin: 16px 0; font-size: 13px; color: #1e40af; }
+    .rejection-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 4px; margin: 16px 0; font-size: 13px; color: #991b1b; }
     .actions-section { text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e2e8f0; }
     .btn { display: inline-block; padding: 12px 22px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 6px; margin: 6px 4px; }
     .btn-approve { background: #10b981; color: #ffffff !important; }
@@ -103,13 +116,19 @@ export default async function handler(req: any, res: any) {
   <div class="container">
     <div class="header">
       <h1>KUMKANG KIND CO., LTD.</h1>
-      <p>Proforma Invoice Approval Request · Multi-Level Workflow</p>
+      <p>Proforma Invoice Management · Sequential Approval Workflow</p>
     </div>
     <div class="body-content">
       <div class="stage-badge">${stageLabel || stage}</div>
       <p style="font-size: 15px; margin: 0 0 16px 0; line-height: 1.5;">
         Dear <strong>${recipientRole}</strong>,<br>
-        A Proforma Invoice has been submitted and requires your stage authorization.
+        ${
+          isCompleted
+            ? `Proforma Invoice <strong>${piNumber}</strong> has completed final Managing Director authorization and is officially released with signed authorization.`
+            : isRejected
+            ? `Proforma Invoice <strong>${piNumber}</strong> has been returned for revisions. Please review the comments below and submit an updated version.`
+            : `A Proforma Invoice has been submitted and requires your stage authorization.`
+        }
       </p>
 
       <div class="info-card">
@@ -135,21 +154,51 @@ export default async function handler(req: any, res: any) {
         </div>
       </div>
 
+      ${
+        previousNotes
+          ? `<div class="notes-box">
+              <strong>Previous Stage Approval Notes:</strong><br>
+              <em>"${previousNotes}"</em>
+            </div>`
+          : ''
+      }
+
+      ${
+        isRejected && rejectionReason
+          ? `<div class="rejection-box">
+              <strong>Reason for Rejection / Required Revisions:</strong><br>
+              <em>"${rejectionReason}"</em>
+            </div>`
+          : ''
+      }
+
       <div class="actions-section">
-        <p style="font-size: 13px; color: #475569; margin-bottom: 14px; font-weight: 600;">
-          Select your review decision below:
-        </p>
-        <a href="${approveUrl}" class="btn btn-approve">✓ APPROVE</a>
-        <a href="${holdUrl}" class="btn btn-hold">⏸ PUT ON HOLD</a>
-        <a href="${rejectUrl}" class="btn btn-reject">✕ REJECT</a>
-        <div style="margin-top: 12px;">
-          <a href="${viewUrl}" class="btn btn-view" style="font-size: 12px; padding: 8px 16px;">View Full Digital Document</a>
-        </div>
-        <div class="token-note">
-          <strong>Security Action Token:</strong><br>
-          <code style="word-break: break-all; color: #475569;">${actionToken}</code><br>
-          <em>This link is cryptographically tied to PI ${piNumber} and stage ${stage}.</em>
-        </div>
+        ${
+          isCompleted
+            ? `<p style="font-size: 13px; color: #047857; margin-bottom: 14px; font-weight: 600;">
+                ✓ Official Authorization Complete. View and download signed proforma invoice:
+              </p>
+              <a href="${viewUrl}" class="btn btn-approve">View & Download Signed PDF</a>`
+            : isRejected
+            ? `<p style="font-size: 13px; color: #b91c1c; margin-bottom: 14px; font-weight: 600;">
+                Please access the ERP portal to revise and resubmit:
+              </p>
+              <a href="${viewUrl}" class="btn btn-reject">Open PI in ERP Editor</a>`
+            : `<p style="font-size: 13px; color: #475569; margin-bottom: 14px; font-weight: 600;">
+                Select your review decision below:
+              </p>
+              <a href="${approveUrl}" class="btn btn-approve">✓ APPROVE</a>
+              <a href="${holdUrl}" class="btn btn-hold">⏸ PUT ON HOLD</a>
+              <a href="${rejectUrl}" class="btn btn-reject">✕ REJECT</a>
+              <div style="margin-top: 12px;">
+                <a href="${viewUrl}" class="btn btn-view" style="font-size: 12px; padding: 8px 16px;">View Full Digital Document</a>
+              </div>
+              <div class="token-note">
+                <strong>Security Action Token:</strong><br>
+                <code style="word-break: break-all; color: #475569;">${actionToken}</code><br>
+                <em>This link is cryptographically tied to PI ${piNumber} and stage ${stage}.</em>
+              </div>`
+        }
       </div>
     </div>
     <div class="footer">
@@ -161,6 +210,8 @@ export default async function handler(req: any, res: any) {
 </html>
     `;
 
+    const recipientList = recipientEmail.split(',').map((e: string) => e.trim()).filter(Boolean);
+
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -169,9 +220,9 @@ export default async function handler(req: any, res: any) {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: [recipientEmail],
+        to: recipientList,
         reply_to: replyTo,
-        subject: `[Action Required] PI Approval Request: ${piNumber} - ${projectName}`,
+        subject: emailSubject,
         html: htmlContent,
       }),
     });

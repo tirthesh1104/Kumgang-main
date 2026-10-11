@@ -18,6 +18,7 @@ import { SiteExecutionPage } from './components/SiteExecutionPage';
 import { ProformaInvoicePage } from './components/pi/ProformaInvoicePage';
 import { ClientAccessPage } from './components/crm/ClientAccessPage';
 import { ClientDashboardView } from './components/crm/ClientDashboardView';
+import { DualLoginPortal } from './components/crm/DualLoginPortal';
 import { DataPipelinePage } from './components/DataPipelinePage';
 import { EditProjectManagerModal } from './components/EditProjectManagerModal';
 import { NotificationToast } from './components/NotificationToast';
@@ -66,9 +67,14 @@ function PageContent() {
 
 function AppLayout() {
   const { theme } = useApp();
+  const { isPortalOpen, setIsPortalOpen } = useClientAccess();
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
 
   const isDark = theme === 'dark';
+
+  if (isPortalOpen) {
+    return <DualLoginPortal onClose={() => setIsPortalOpen(false)} />;
+  }
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${

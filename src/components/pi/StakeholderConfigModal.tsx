@@ -18,6 +18,8 @@ export function StakeholderConfigModal({ onClose }: StakeholderConfigModalProps)
   const [pmEmail, setPmEmail] = useState(stakeholderEmails.pmEmail || '');
   const [salesEmail, setSalesEmail] = useState(stakeholderEmails.salesDirectorEmail || '');
   const [mdEmail, setMdEmail] = useState(stakeholderEmails.managingDirectorEmail || '');
+  const [accountsEmail, setAccountsEmail] = useState(stakeholderEmails.accountsEmail || 'accounts.india@kumkangkind.com');
+  const [clientEmail, setClientEmail] = useState(stakeholderEmails.clientEmail || 'client@kumkang.com');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handleSubmit = (e: React.SyntheticEvent) => {
@@ -26,6 +28,8 @@ export function StakeholderConfigModal({ onClose }: StakeholderConfigModalProps)
       pmEmail: pmEmail.trim(),
       salesDirectorEmail: salesEmail.trim(),
       managingDirectorEmail: mdEmail.trim(),
+      accountsEmail: accountsEmail.trim(),
+      clientEmail: clientEmail.trim(),
     });
     setSavedSuccess(true);
     setTimeout(() => {
@@ -138,6 +142,44 @@ export function StakeholderConfigModal({ onClose }: StakeholderConfigModalProps)
                 ⚠ {t('emailNotConfigured')}
               </span>
             )}
+          </div>
+
+          <div>
+            <label className={`block text-xs font-semibold uppercase tracking-wider mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              4. Internal Accounts Notification Email (Final PI Release)
+            </label>
+            <div className="relative">
+              <input
+                type="email"
+                value={accountsEmail}
+                onChange={(e) => setAccountsEmail(e.target.value)}
+                placeholder="accounts.india@kumkangkind.com"
+                className={`w-full px-3.5 py-2.5 rounded-lg text-sm border focus:outline-hidden transition-all ${
+                  isDark
+                    ? 'bg-[#1C1C1F] border-[#303035] focus:border-indigo-500 text-white placeholder-slate-600'
+                    : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder-slate-400'
+                }`}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={`block text-xs font-semibold uppercase tracking-wider mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              5. Default Client Notification Email (Final PI Release)
+            </label>
+            <div className="relative">
+              <input
+                type="email"
+                value={clientEmail}
+                onChange={(e) => setClientEmail(e.target.value)}
+                placeholder="client@clientorg.com"
+                className={`w-full px-3.5 py-2.5 rounded-lg text-sm border focus:outline-hidden transition-all ${
+                  isDark
+                    ? 'bg-[#1C1C1F] border-[#303035] focus:border-indigo-500 text-white placeholder-slate-600'
+                    : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder-slate-400'
+                }`}
+              />
+            </div>
           </div>
 
           <div className={`p-3 rounded-lg flex items-start gap-2.5 text-xs ${

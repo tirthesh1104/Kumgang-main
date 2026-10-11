@@ -164,7 +164,7 @@ export function exportProjectPDF(project: typeof projectMasterData[0], shipmentO
         }
         .journey-grid {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
+          grid-template-columns: repeat(8, 1fr);
           gap: 6px;
           background: #f8fafc;
           border: 1px solid #e2e8f0;

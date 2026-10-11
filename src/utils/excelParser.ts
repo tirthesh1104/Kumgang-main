@@ -73,25 +73,25 @@ function mapRowToProjectMaster(row: Record<string, any>, sheetName: string): Par
     return null;
   };
 
-  const projectId = parseString(getVal('projectId', 'project id', 'id', 'ref', 'projectref'));
-  const country = parseString(getVal('country', 'location', 'nation')) || 'India';
-  const customer = parseString(getVal('customer', 'client', 'buyer'));
+  const projectId = parseString(getVal('projectId', 'project id', 'id', 'ref', 'projectref', 'job no', 'jobid', 'code'));
+  const country = parseString(getVal('country', 'location', 'nation', 'manufacture in')) || 'India';
+  const customer = parseString(getVal('customer', 'client', 'buyer', 'client name'));
   const project = parseString(getVal('project', 'project name', 'name', 'title'));
-  const block = parseString(getVal('block', 'tower', 'unit', 'phase'));
-  const contractDate = parseString(getVal('contract date', 'contractdate', 'date'));
+  const block = parseString(getVal('block', 'typology of block', 'typology', 'tower', 'unit', 'phase'));
+  const contractDate = parseString(getVal('contract date', 'contractdate', 'sales agreement date', 'sa date', 'agreement date', 'date'));
   const contractStatus = parseString(getVal('contract status', 'contractstatus', 'status')) || 'Signed';
-  const contractQtyM2 = parseNumeric(getVal('contract qty m2', 'contractqtym2', 'qty m2', 'quantity m2'));
+  const contractQtyM2 = parseNumeric(getVal('contract qty m2', 'contractqtym2', 'sales agreement qty (m2)', 'sales agreement qty', 'total area (m2)', 'net area (m2)', 'total area', 'net area', 'qty m2', 'quantity m2'));
   const contractWeightTons = parseNumeric(getVal('contract weight tons', 'contractweighttons', 'weight tons', 'weight'));
   const actualDesignQtyM2 = parseNumeric(getVal('actual design qty m2', 'actualdesignqtym2', 'design qty'));
   const actualDesignWeightTons = parseNumeric(getVal('actual design weight tons', 'actualdesignweighttons', 'design weight'));
-  const rawProgress = parseNumeric(getVal('design progress percent', 'designprogresspercent', 'progress %', 'progress'));
+  const rawProgress = parseNumeric(getVal('design progress percent', 'designprogresspercent', 'drawing status', 'progress %', 'progress'));
   const designProgressPercent = rawProgress !== null ? Math.min(Math.max(0, rawProgress), 100) : null;
-  const pricePerM2USD = parseNumeric(getVal('price per m2 usd', 'priceperm2usd', 'rate usd', 'price usd'));
-  const totalAmountUSD = parseNumeric(getVal('total amount usd', 'totalamountusd', 'contract value usd', 'amount usd', 'total usd'));
+  const pricePerM2USD = parseNumeric(getVal('price per m2 usd', 'priceperm2usd', 'rate per m2 (usd)', 'rate per m2', 'rate usd', 'price usd', 'rate'));
+  const totalAmountUSD = parseNumeric(getVal('total amount usd', 'totalamountusd', 'contract value usd', 'total (usd)', 'total usd', 'amount usd', 'total'));
   const advanceUSD = parseNumeric(getVal('advance usd', 'advanceusd', 'advance paid usd', 'advance paid'));
   const balanceUSD = parseNumeric(getVal('balance usd', 'balanceusd', 'balance due usd', 'balance'));
-  const shellPlanConfirmation = parseString(getVal('shell plan confirmation', 'shellplanconfirmation', 'shell plan'));
-  const mdCompletion = parseString(getVal('md completion', 'mdcompletion', 'md date'));
+  const shellPlanConfirmation = parseString(getVal('shell plan confirmation', 'shellplanconfirmation', 'shell confirmation', 'shell/height', 'shell plan'));
+  const mdCompletion = parseString(getVal('md completion', 'mdcompletion', 'manufacturing drawing status', 'manufacturing drawing schedule', 'mfg drawing status', 'md date'));
   const productionStart = parseString(getVal('production start', 'productionstart'));
   const productionComplete = parseString(getVal('production complete', 'productioncomplete'));
   const deliveryRequest = parseString(getVal('delivery request', 'deliveryrequest'));
@@ -103,6 +103,8 @@ function mapRowToProjectMaster(row: Record<string, any>, sheetName: string): Par
   const paymentStatus = parseString(getVal('payment status', 'paymentstatus'));
   const incoterm = parseString(getVal('incoterm', 'incoterms'));
   const remark = parseString(getVal('remark', 'remarks', 'notes'));
+  const currentSiteStatus = parseString(getVal('current site status', 'currentsitestatus', 'jobsite status', 'site status'));
+  const supervisorName = parseString(getVal('supervisor', 'supervisor name'));
 
   return {
     projectId,
@@ -134,6 +136,8 @@ function mapRowToProjectMaster(row: Record<string, any>, sheetName: string): Par
     paymentStatus,
     incoterm,
     remark,
+    currentSiteStatus: currentSiteStatus || undefined,
+    supervisorName: supervisorName || undefined,
     sourceSheet: sheetName,
   };
 }
@@ -187,6 +191,8 @@ const READABLE_LABELS: Record<string, string> = {
   gstRegistrationDetails: 'GSTIN Registration Details',
   gstr1Status: 'GSTR-1 Status',
   gstr3bStatus: 'GSTR-3B Status',
+  currentSiteStatus: 'Current Site Status',
+  supervisorName: 'Site Supervisor',
 };
 
 /**

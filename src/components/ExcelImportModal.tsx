@@ -44,8 +44,8 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
   };
 
   const processFile = async (file: File) => {
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-      setErrorMsg('Please upload a valid Excel file (.xlsx or .xls).');
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
+      setErrorMsg('Please upload a valid Excel or CSV file (.xlsx, .xls, or .csv).');
       return;
     }
 
@@ -210,13 +210,13 @@ export function ExcelImportModal({ onClose, onSuccess }: ExcelImportModalProps) 
                       {t('dragDropExcel')}
                     </p>
                     <p className={`text-xs font-medium mt-1 ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>
-                      {t('orBrowseFiles')} — <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xlsx</span> / <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xls</span>
+                      {t('orBrowseFiles')} — <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xlsx</span> / <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.xls</span> / <span className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>.csv</span>
                     </p>
                   </div>
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".xlsx, .xls"
+                    accept=".xlsx, .xls, .csv"
                     onChange={handleFileSelect}
                     className="hidden"
                   />

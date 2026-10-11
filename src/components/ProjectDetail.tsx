@@ -406,23 +406,24 @@ function FieldRow({ label, value }: { label: string; value: string | number | nu
   const isDark = theme === 'dark';
   const display = value === null || value === undefined || value === '' ? '—' : String(value);
   return (
-    <div>
+    <div className="min-w-0">
       <p className={`text-xs ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>{label}</p>
-      <p className={`font-semibold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{display}</p>
+      <p className={`font-semibold break-words [overflow-wrap:anywhere] ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{display}</p>
     </div>
   );
 }
 
-function SectionCard({ title, label, children }: { title: string; label?: string; children: React.ReactNode }) {
+function SectionCard({ id, title, label, children }: { id?: string; title: string; label?: string; children: React.ReactNode }) {
   const { theme } = useApp();
   const isDark = theme === 'dark';
   const [open, setOpen] = useState(true);
   return (
     <motion.div
+      id={id}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`rounded-xl shadow-card border ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}
+      className={`rounded-xl shadow-card border scroll-mt-20 ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}
     >
       <div
         className="flex items-center justify-between p-5 pb-0 cursor-pointer"
@@ -581,8 +582,8 @@ function ExportPreviewModal({
 
             {/* Section 3: Project Lifecycle Journey */}
             <div className={`space-y-2 border-b pb-4 ${isDark ? 'border-[#262629]' : 'border-slate-200'}`}>
-              <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Project Lifecycle Journey</h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+              <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Project Lifecycle Journey (8-Stage Milestone Tracker)</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
                 {stages.map(st => (
                   <div key={st.id} className={`border rounded-lg p-2 text-center ${
                     isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'
@@ -670,9 +671,9 @@ function ExportPreviewModal({
                   <span className={`text-[10px] block ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>MD Completion</span>
                   <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.mdCompletion || '—'}</span>
                 </div>
-                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
+                <div className={`p-2.5 rounded-lg border min-w-0 ${isDark ? 'bg-[#111113] border-[#262629]' : 'bg-slate-50 border-slate-200'}`}>
                   <span className={`text-[10px] block ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Delivery Request</span>
-                  <span className={`font-bold ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.deliveryRequest || '—'}</span>
+                  <span className={`font-bold text-xs block break-words [overflow-wrap:anywhere] ${isDark ? 'text-[#F5F5F3]' : 'text-slate-800'}`}>{project.deliveryRequest || '—'}</span>
                 </div>
               </div>
             </div>
@@ -972,17 +973,44 @@ export function ProjectDetail() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-1">
-          <SectionCard title={t('projectJourney')} label={t('lifecycle')}>
-            <ProjectJourney stages={stages} />
-          </SectionCard>
-        </div>
+      {/* Quick Section Navigation Bar */}
+      <div className={`p-2 rounded-xl border flex items-center gap-1 overflow-x-auto text-xs font-semibold ${
+        isDark ? 'bg-[#141416] border-[#222226]' : 'bg-slate-100 border-slate-200'
+      }`}>
+        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 shrink-0 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Jump To:</span>
+        <a href="#section-info" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-slate-300 hover:text-white hover:bg-[#202024]' : 'text-slate-700 hover:text-slate-900 hover:bg-white shadow-2xs'}`}>
+          Overview
+        </a>
+        <a href="#section-contract" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-slate-300 hover:text-white hover:bg-[#202024]' : 'text-slate-700 hover:text-slate-900 hover:bg-white shadow-2xs'}`}>
+          Contract
+        </a>
+        <a href="#section-milestones" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-slate-300 hover:text-white hover:bg-[#202024]' : 'text-slate-700 hover:text-slate-900 hover:bg-white shadow-2xs'}`}>
+          Milestones
+        </a>
+        <a href="#section-specifications" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-slate-300 hover:text-white hover:bg-[#202024]' : 'text-slate-700 hover:text-slate-900 hover:bg-white shadow-2xs'}`}>
+          Specifications
+        </a>
+        <a href="#section-production" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-slate-300 hover:text-white hover:bg-[#202024]' : 'text-slate-700 hover:text-slate-900 hover:bg-white shadow-2xs'}`}>
+          Production
+        </a>
+        <a href="#section-shipment" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-slate-300 hover:text-white hover:bg-[#202024]' : 'text-slate-700 hover:text-slate-900 hover:bg-white shadow-2xs'}`}>
+          Shipment
+        </a>
+        <a href="#section-finance" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40' : 'text-emerald-800 hover:text-emerald-900 hover:bg-emerald-50 shadow-2xs font-extrabold'}`}>
+          Finance & Matrix
+        </a>
+        <a href="#section-site" className={`px-2.5 py-1 rounded-lg shrink-0 transition-colors ${isDark ? 'text-slate-300 hover:text-white hover:bg-[#202024]' : 'text-slate-700 hover:text-slate-900 hover:bg-white shadow-2xs'}`}>
+          Site & Documents
+        </a>
+      </div>
 
-        <div className="xl:col-span-2 space-y-5">
+      {/* 8-Stage Horizontal Milestone Tracker (Project Timeline) */}
+      <ProjectJourney project={project} stages={stages} />
+
+      <div className="space-y-5">
 
           {/* Project Information */}
-          <SectionCard title={t('projectInformation')} label={t('coreDetails')}>
+          <SectionCard id="section-info" title={t('projectInformation')} label={t('coreDetails')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Project ID" value={project.projectId} />
               <FieldRow label="Vendor Company Name" value={project.vendorCompany || (['TOTAL ENVIROMENT', 'BREN', 'TRIFECTA', 'KANWARJI  CONSTRUCTION'].includes(project.customer) ? 'KKV' : 'KKI')} />
@@ -1008,7 +1036,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Project Overview */}
-          <SectionCard title={t('projectOverview')} label={t('contractAndQuantities')}>
+          <SectionCard id="section-contract" title={t('projectOverview')} label={t('contractAndQuantities')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Contract Date" value={project.contractDate} />
               <FieldRow label="Country" value={project.country} />
@@ -1060,7 +1088,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Schedule & Milestone Dates */}
-          <SectionCard title={t('scheduleMilestoneDates')} label={t('milestoneTracking')}>
+          <SectionCard id="section-milestones" title={t('scheduleMilestoneDates')} label={t('milestoneTracking')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Shell Plan Confirmation Date" value={project.shellPlanConfirmation} />
               <FieldRow label="Payment Received Date (Shell Plan)" value={project.paymentReceivedShellPlanDate} />
@@ -1096,7 +1124,7 @@ export function ProjectDetail() {
           </SectionCard>
 
           {/* Design Elements & Area Breakdown */}
-          <SectionCard title={t('designElementsAreaBreakdown')} label={t('areaSpecifications')}>
+          <SectionCard id="section-specifications" title={t('designElementsAreaBreakdown')} label={t('areaSpecifications')}>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
               <FieldRow label="Typical Floor Area" value={project.typicalFloorArea ? `${project.typicalFloorArea.toLocaleString()} ${project.typicalFloorAreaUom || 'Sqm'}` : null} />
               <FieldRow label="Basement Floor Area" value={project.basementFloorArea ? `${project.basementFloorArea.toLocaleString()} ${project.basementFloorAreaUom || 'Sqm'}` : null} />
@@ -1150,7 +1178,7 @@ export function ProjectDetail() {
 
           {/* Production */}
           {productionList.length > 0 && (
-            <SectionCard title={t('productionParts')} label={t('productionMonitoring')}>
+            <SectionCard id="section-production" title={t('productionParts')} label={t('productionMonitoring')}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm" aria-label="Production table">
                   <thead>
@@ -1186,7 +1214,7 @@ export function ProjectDetail() {
           )}
 
           {/* Shipment Details */}
-          <SectionCard title={t('shipmentTrackingLogistics')} label={t('shipmentMonitoring')}>
+          <SectionCard id="section-shipment" title={t('shipmentTrackingLogistics')} label={t('shipmentMonitoring')}>
             {shipment ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
@@ -1291,7 +1319,7 @@ export function ProjectDetail() {
 
           {/* Payment */}
           {(project.totalAmountUSD || payments.length > 0) ? (
-            <SectionCard title={t('commercialPayments')} label={t('financialMonitoring')}>
+            <SectionCard id="section-finance" title={t('commercialPayments')} label={t('financialMonitoring')}>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 mb-5">
                 <div>
                   <p className={`text-xs font-medium ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>Contract Amount</p>
@@ -1348,7 +1376,7 @@ export function ProjectDetail() {
               <PaymentMatrixTable projectId={project.projectId} totalContractUSD={project.totalAmountUSD || 0} />
             </SectionCard>
           ) : (
-            <SectionCard title={t('commercialPayments')} label={t('financialMonitoring')}>
+            <SectionCard id="section-finance" title={t('commercialPayments')} label={t('financialMonitoring')}>
               <p className={`text-sm ${isDark ? 'text-[#85858B]' : 'text-slate-500'}`}>No payment data available for this project.</p>
               <PaymentMatrixTable projectId={project.projectId} totalContractUSD={project.totalAmountUSD || 0} />
             </SectionCard>
@@ -1407,17 +1435,28 @@ export function ProjectDetail() {
             <div className={`border rounded-xl p-3 text-xs space-y-2 ${
               isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
             }`}>
-              <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#C9A86A]' : 'text-amber-800'}`}>
-                7-Point Vehicle Safety Checklist (8.8)
-              </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono">
-                <div><span className="text-[#85858B]">Lights:</span> {project.vInspLights || 'Pass'}</div>
-                <div><span className="text-[#85858B]">Horn:</span> {project.vInspHorn || 'Pass'}</div>
-                <div><span className="text-[#85858B]">Wiper:</span> {project.vInspWiper || 'Pass'}</div>
-                <div><span className="text-[#85858B]">Brakes:</span> {project.vInspBrakes || 'Pass'}</div>
-                <div><span className="text-[#85858B]">Indicators:</span> {project.vInspIndicators || 'Pass'}</div>
-                <div><span className="text-[#85858B]">Condition:</span> {project.vInspGeneralCondition || 'Pass'}</div>
-                <div><span className="text-[#85858B]">Guard:</span> {project.vInspSafetyProtection || 'Pass'}</div>
+              <div className="flex items-center justify-between">
+                <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#C9A86A]' : 'text-amber-800'}`}>
+                  7-Point Vehicle Safety Checklist (8.8)
+                </h4>
+                {project.overallVehicleInspectionStatus && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                    project.overallVehicleInspectionStatus.toLowerCase().includes('fail')
+                      ? (isDark ? 'bg-rose-950/60 text-rose-400 border border-rose-900/40' : 'bg-rose-50 text-rose-700 border border-rose-200')
+                      : (isDark ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/40' : 'bg-emerald-50 text-emerald-700 border border-emerald-200')
+                  }`}>
+                    {project.overallVehicleInspectionStatus}
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 pt-1">
+                <FieldRow label="Lights" value={project.vInspLights || 'Pass'} />
+                <FieldRow label="Horn" value={project.vInspHorn || 'Pass'} />
+                <FieldRow label="Wiper" value={project.vInspWiper || 'Pass'} />
+                <FieldRow label="Brakes" value={project.vInspBrakes || 'Pass'} />
+                <FieldRow label="Indicators" value={project.vInspIndicators || 'Pass'} />
+                <FieldRow label="Condition" value={project.vInspGeneralCondition || 'Pass'} />
+                <FieldRow label="Guard" value={project.vInspSafetyProtection || 'Pass'} />
               </div>
             </div>
           </SectionCard>
@@ -1434,42 +1473,48 @@ export function ProjectDetail() {
             </div>
           </SectionCard>
 
-          {/* Statutory Tax & GST Compliance */}
-          <SectionCard title={t('statutoryTaxGst')} label={t('tdsGstReturns')}>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-              <FieldRow label="TDS Applicability" value={project.tdsApplicability || 'Applicable'} />
-              <FieldRow label="TDS Rate" value={project.tdsPercentage ? `${project.tdsPercentage}%` : null} />
-              <FieldRow label="TDS Amount" value={project.tdsAmount ? `$${project.tdsAmount}` : null} />
-              <FieldRow label="TDS Status" value={project.tdsStatus || 'Deposited'} />
-              <FieldRow label="GST Compliance" value={project.gstComplianceStatus || 'Compliant'} />
-              <FieldRow label="GSTIN Ref" value={project.gstRegistrationDetails || 'Verified'} />
-              <FieldRow label="GST Rate" value={project.gstRate ? `${project.gstRate}%` : null} />
-              <FieldRow label="GST Amount" value={project.gstAmount ? `$${project.gstAmount}` : null} />
-            </div>
-
-            <div className={`border rounded-xl p-3 text-xs space-y-2 ${
-              isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#89C9DF]' : 'text-sky-800'}`}>
-                Statutory Tax Returns (GSTR-1 & GSTR-3B)
-              </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                <FieldRow label="GSTR-1 Status" value={project.gstr1Status || 'Filed'} />
-                <FieldRow label="GSTR-1 ARN" value={project.gstr1ArnReference} />
-                <FieldRow label="GSTR-3B Status" value={project.gstr3bStatus || 'Filed & Tax Paid'} />
-                <FieldRow label="GSTR-3B ARN" value={project.gstr3bArnReference} />
+          {/* Statutory Tax & GST Compliance (Strictly KKI India Projects Only per Requirements Points 13 & 14) */}
+          {(project.projectId?.startsWith('KKI') || project.country === 'India' || project.vendorCompany?.includes('KKI')) && (
+            <SectionCard title={t('statutoryTaxGst')} label={t('tdsGstReturns')}>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                <FieldRow label="TDS Applicability" value={project.tdsApplicability || 'Applicable'} />
+                <FieldRow label="TDS Rate" value={project.tdsPercentage ? `${project.tdsPercentage}%` : null} />
+                <FieldRow label="TDS Amount" value={project.tdsAmount ? `$${project.tdsAmount}` : null} />
+                <FieldRow label="TDS Status" value={project.tdsStatus || 'Deposited'} />
+                <FieldRow label="GST Compliance" value={project.gstComplianceStatus || 'Compliant'} />
+                <FieldRow label="GSTIN Ref" value={project.gstRegistrationDetails || 'Verified'} />
+                <FieldRow label="GST Rate" value={project.gstRate ? `${project.gstRate}%` : null} />
+                <FieldRow label="GST Amount" value={project.gstAmount ? `$${project.gstAmount}` : null} />
               </div>
-            </div>
-          </SectionCard>
+
+              <div className={`border rounded-xl p-3 text-xs space-y-2 ${
+                isDark ? 'bg-[#18181B] border-[#27272A]' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <h4 className={`font-extrabold uppercase tracking-wider text-[10px] ${isDark ? 'text-[#89C9DF]' : 'text-sky-800'}`}>
+                  Statutory Tax Returns (GSTR-1 & GSTR-3B)
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                  <FieldRow label="GSTR-1 Status" value={project.gstr1Status || 'Filed'} />
+                  <FieldRow label="GSTR-1 ARN" value={project.gstr1ArnReference} />
+                  <FieldRow label="GSTR-3B Status" value={project.gstr3bStatus || 'Filed & Tax Paid'} />
+                  <FieldRow label="GSTR-3B ARN" value={project.gstr3bArnReference} />
+                </div>
+              </div>
+            </SectionCard>
+          )}
 
           {/* Phase 2: Project Documents & File Management */}
-          <ProjectDocumentsSection projectId={project.projectId} />
+          <div id="section-documents" className="scroll-mt-20">
+            <ProjectDocumentsSection projectId={project.projectId} />
+          </div>
 
           {/* Phase 3: Design Elements Breakdown */}
           <DesignAreaSection projectId={project.projectId} />
 
           {/* Phase 3: Site Execution, Photos & Progress */}
-          <SiteExecutionSection projectId={project.projectId} />
+          <div id="section-site" className="scroll-mt-20">
+            <SiteExecutionSection projectId={project.projectId} />
+          </div>
 
           {/* Derived Risk (replacing old ML data) */}
           {needsAttention && (
@@ -1508,7 +1553,6 @@ export function ProjectDetail() {
               </div>
             </SectionCard>
           )}
-        </div>
       </div>
 
       {/* Edit Project Modal */}

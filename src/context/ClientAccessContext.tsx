@@ -49,7 +49,7 @@ interface ClientAccessContextType {
   clientAuditLogs: AccessHistoryRecord[];
   
   // Role & Session Handlers
-  switchRole: (role: UserRole, clientToSimulate?: ClientRecord) => void;
+  switchRole: (role: UserRole, clientToSimulate?: any) => void;
   loginClient: (usernameOrClientId: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 
@@ -61,6 +61,10 @@ interface ClientAccessContextType {
   resetClientPassword: (internalId: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
   getClientByInternalId: (internalId: string) => ClientRecord | undefined;
   getClientByPublicId: (clientId: string) => ClientRecord | undefined;
+
+  // Portal View Control
+  isPortalOpen: boolean;
+  setIsPortalOpen: (open: boolean) => void;
 
   // Security Authorization Verification Gateway
   authorizeAction: (req: Omit<AuthorizationRequest, 'session'>) => AuthorizationResult;
@@ -130,6 +134,9 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     }
     return [];
   });
+
+  // Portal Landing Page Open State
+  const [isPortalOpen, setIsPortalOpen] = useState(false);
 
   // Persist clients when updated
   useEffect(() => {
@@ -387,6 +394,7 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
 
   // Switch Role / Mode (Admin, ProjectManager, Developer, Client)
   const switchRole = useCallback((role: UserRole, clientToSimulate?: ClientRecord) => {
+    setIsPortalOpen(false);
     if (role === 'Admin') {
       setActiveSession(DEFAULT_ADMIN_SESSION);
       addAuditRecord('ROLE_SWITCH', 'Switched user role to Administrator.');
@@ -411,29 +419,49 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
       });
       addAuditRecord('ROLE_SWITCH', 'Switched user role to Developer.');
     } else if (role === 'Client' && clientToSimulate) {
-      setActiveSession({
-        userId: clientToSimulate.internalId,
-        username: clientToSimulate.username,
-        displayName: `${clientToSimulate.companyName} (${clientToSimulate.contactPerson})`,
+      const assigned = clientToSimulate.assignedProjects && clientToSimulate.assignedProjects.length > 0
+        ? clientToSimulate.assignedProjects
+        : [(clientToSimulate as any).projectId].filter(Boolean);
+
+      const clientSession: ActiveUserSession = {
+        userId: clientToSimulate.internalId || (clientToSimulate as any).userId || `CLI-${Date.now()}`,
+        username: clientToSimulate.username || 'client',
+        displayName: clientToSimulate.companyName
+          ? `${clientToSimulate.companyName} (${clientToSimulate.contactPerson || 'Authorized Client'})`
+          : ((clientToSimulate as any).displayName || 'Authorized Client'),
         role: 'Client',
-        clientId: clientToSimulate.clientId,
-        permissions: clientToSimulate.permissions,
-        assignedProjects: clientToSimulate.assignedProjects,
-        token: `sim-client-token-${Date.now()}`,
+        clientId: clientToSimulate.clientId || (clientToSimulate as any).userId,
+        permissions: clientToSimulate.permissions || DEFAULT_CLIENT_PERMISSIONS,
+        assignedProjects: assigned,
+        token: `client-session-token-${Date.now()}`,
         loginTime: formatTimestamp(),
-      });
+      };
+
+      setActiveSession(clientSession);
+      try {
+        localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(clientSession));
+      } catch {
+        // ignore
+      }
+
       addAuditRecord(
         'ROLE_SWITCH',
-        `Switched user role to Client mode simulating ${clientToSimulate.clientId} (${clientToSimulate.companyName}).`,
-        clientToSimulate.clientId
+        `Switched user role to Client mode for ${clientSession.displayName}.`,
+        clientSession.clientId
       );
     }
   }, [addAuditRecord]);
 
-  // Logout
+  // Logout - strictly clears client/staff session and resets to unauthenticated state
   const logout = useCallback(() => {
     addAuditRecord('LOGOUT', `User ${activeSession.displayName} logged out.`);
+    try {
+      localStorage.removeItem(STORAGE_SESSION_KEY);
+    } catch {
+      // ignore
+    }
     setActiveSession(DEFAULT_ADMIN_SESSION);
+    setIsPortalOpen(true);
   }, [activeSession, addAuditRecord]);
 
   // Security Verification Gateway
@@ -453,6 +481,8 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     clients,
     activeSession,
     clientAuditLogs,
+    isPortalOpen,
+    setIsPortalOpen,
     switchRole,
     loginClient,
     logout,
@@ -468,6 +498,7 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     clients,
     activeSession,
     clientAuditLogs,
+    isPortalOpen,
     switchRole,
     loginClient,
     logout,

@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FolderKanban, Paintbrush, Factory,
   Truck, AlertTriangle, User, ChevronRight, Menu, X, 
-  Building2, History, Sun, Moon, Database, CreditCard, FileBarChart, UserCheck, FileCheck
+  Building2, History, Sun, Moon, Database, CreditCard, FileBarChart, UserCheck, FileCheck, Globe2
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useClientAccess } from '../../context/ClientAccessContext';
 import { SyncExcelButton } from '../ui/SyncExcelButton';
 import { GoogleDriveButton } from '../ui/GoogleDriveButton';
 import { UpdateHistoryModal } from '../UpdateHistoryModal';
@@ -31,6 +32,7 @@ interface NavGroup {
 function SidebarContent() {
   const { currentPage, navigate, theme, setIsEditModalOpen } = useApp();
   const { t } = useLanguage();
+  const { setIsPortalOpen } = useClientAccess();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const isDark = theme === 'dark';
@@ -76,6 +78,7 @@ function SidebarContent() {
     {
       title: t('system'),
       items: [
+        { id: 'portal', label: 'Dual Login Portal', icon: Globe2, isAction: true },
         { id: 'audit-log', label: t('auditLogHistory'), icon: History, isAction: true },
         { id: 'admin', label: t('administrator'), icon: User, isAction: true },
       ]
@@ -94,12 +97,15 @@ function SidebarContent() {
     'pi-approvals': isDark ? 'text-indigo-400' : 'text-indigo-500',
     delays: isDark ? 'text-[#E05A5A]' : 'text-[#F87171]',
     pipeline: isDark ? 'text-[#3FB984]' : 'text-[#34D399]',
+    portal: isDark ? 'text-sky-400' : 'text-sky-600',
     'audit-log': isDark ? 'text-[#85858B]' : 'text-slate-400',
     admin: isDark ? 'text-[#C9A86A]' : 'text-[#38BDF8]',
   };
 
   const handleItemClick = (item: NavItem) => {
-    if (item.id === 'audit-log') {
+    if (item.id === 'portal') {
+      setIsPortalOpen(true);
+    } else if (item.id === 'audit-log') {
       setIsHistoryOpen(true);
     } else if (item.id === 'admin') {
       setIsEditModalOpen(true);
@@ -287,6 +293,7 @@ export function MobileNav() {
 export function TopBar() {
   const { setSidebarOpen, liveDateTime, theme, toggleTheme } = useApp();
   const { t } = useLanguage();
+  const { activeSession, logout, setIsPortalOpen } = useClientAccess();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const isDark = theme === 'dark';
 
@@ -360,6 +367,19 @@ export function TopBar() {
         <SyncExcelButton variant="secondary" label="Sync Excel" />
 
         <button
+          onClick={() => setIsPortalOpen(true)}
+          className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
+            isDark
+              ? 'text-[#38BDF8] bg-[#101D2D] border-[#1E3754] hover:bg-[#162B44]'
+              : 'text-sky-700 bg-sky-50 border-sky-200 hover:bg-sky-100'
+          }`}
+          title="Open Dual Login Portal (Staff & Client Access)"
+        >
+          <Globe2 size={13} />
+          <span className="hidden sm:inline">Dual Portal</span>
+        </button>
+
+        <button
           onClick={() => setIsHistoryOpen(true)}
           className={`hidden sm:flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all duration-150 ease-out active:scale-[0.98] hover:-translate-y-[1px] cursor-pointer select-none group border ${
             isDark
@@ -392,11 +412,16 @@ export function TopBar() {
           <span className={`text-xs font-bold uppercase tracking-wider hidden sm:inline ${isDark ? 'text-[#70D0A8]' : 'text-[#16A36A]'}`}>Live</span>
         </div>
 
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${
-          isDark ? 'bg-[#18181B] border-[#303035] text-[#C9A86A]' : 'bg-[#0B2239] border-[#0B2239] text-white'
-        }`} aria-label="Administrator">
+        <button
+          onClick={logout}
+          className={`w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer transition-transform hover:scale-105 ${
+            isDark ? 'bg-[#18181B] border-[#303035] text-[#C9A86A]' : 'bg-[#0B2239] border-[#0B2239] text-white'
+          }`}
+          title={`Signed in as: ${activeSession.displayName} (Click to switch / logout)`}
+          aria-label="User profile and logout"
+        >
           <User size={15} />
-        </div>
+        </button>
       </div>
 
       {isHistoryOpen && <UpdateHistoryModal onClose={() => setIsHistoryOpen(false)} />}

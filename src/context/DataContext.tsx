@@ -1277,6 +1277,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       };
     });
 
+    setProjects(prev => prev.map(p => {
+      if (p.projectId !== projectId) return p;
+      return {
+        ...p,
+        ...(info.supervisorName !== undefined ? { supervisorName: info.supervisorName } : {}),
+        ...(info.supervisorContact !== undefined ? { supervisorContact: info.supervisorContact } : {}),
+        ...(info.supervisorAllocationDate !== undefined ? { supervisorAllocationDate: info.supervisorAllocationDate } : {}),
+        ...(info.supportDuration !== undefined ? { supportDuration: info.supportDuration } : {}),
+        ...(info.siteStatus !== undefined ? { siteStatus: info.siteStatus, currentSiteStatus: info.siteStatus } : {}),
+        ...(info.currentSiteStatus !== undefined ? { siteStatus: info.currentSiteStatus, currentSiteStatus: info.currentSiteStatus } : {}),
+        ...(info.siteRequirementDate !== undefined ? { siteRequirementDate: info.siteRequirementDate } : {}),
+        ...(info.remarks !== undefined ? { siteRemarks: info.remarks } : {}),
+        ...(info.siteRemarks !== undefined ? { siteRemarks: info.siteRemarks } : {}),
+      };
+    }));
+
     const newLog: AuditLogEntry = {
       id: `LOG-${Date.now()}`,
       timestamp: formatLogTimestamp(),
@@ -1413,28 +1429,47 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         targetProject = pi.projectId;
         targetPINumber = pi.piNumber;
 
-        stageToken = generateSecureActionToken(pi.id, 'PM_REVIEW', stakeholderEmails.pmEmail || '');
+        const now = new Date().toISOString();
         const updatedHistory = [...pi.approvalHistory];
-        const step: PIApprovalStepRecord = {
-          id: `STEP-${Date.now()}-1`,
+
+        // 1. Log PM Draft & Submission
+        updatedHistory.push({
+          id: `STEP-${Date.now()}-0`,
           stage: 'PM_REVIEW',
-          stageLabel: 'Project Manager Review',
-          reviewerName: pi.pmReviewer?.name || 'Project Manager',
+          stageLabel: 'Drafted & Submitted by PM',
+          reviewerName: user,
           reviewerRole: 'Project Manager',
           reviewerEmail: stakeholderEmails.pmEmail || 'Email Not Configured',
+          status: 'APPROVED',
+          action: 'APPROVE',
+          submittedAt: now,
+          reviewedAt: now,
+          comment: comment || 'PI prepared and submitted for Sales Director review',
+          token: generateSecureActionToken(pi.id, 'PM_REVIEW', stakeholderEmails.pmEmail || ''),
+        });
+
+        // 2. Queue Stage 2: Sales Director Review
+        stageToken = generateSecureActionToken(pi.id, 'SALES_DIRECTOR_REVIEW', stakeholderEmails.salesDirectorEmail || '');
+        const step: PIApprovalStepRecord = {
+          id: `STEP-${Date.now()}-1`,
+          stage: 'SALES_DIRECTOR_REVIEW',
+          stageLabel: 'Sales Director Review',
+          reviewerName: pi.salesDirectorReviewer?.name || 'Sales Director',
+          reviewerRole: 'Sales Director',
+          reviewerEmail: stakeholderEmails.salesDirectorEmail || 'Email Not Configured',
           status: 'PENDING',
-          submittedAt: new Date().toISOString(),
-          comment: comment || '',
+          submittedAt: now,
+          comment: '',
           token: stageToken,
         };
         updatedHistory.push(step);
 
         const newPI: ProformaInvoiceRecord = {
           ...pi,
-          status: 'PENDING_PM' as PIApprovalStatus,
-          currentStage: 'PM_REVIEW' as PIApprovalStage,
+          status: 'PENDING_SALES_DIRECTOR' as PIApprovalStatus,
+          currentStage: 'SALES_DIRECTOR_REVIEW' as PIApprovalStage,
           approvalHistory: updatedHistory,
-          updatedAt: new Date().toISOString(),
+          updatedAt: now,
           updatedBy: user,
         };
         submittedPI = newPI;
@@ -1449,13 +1484,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         user,
         method: 'Manual',
         projectId: targetProject,
-        summary: `Submitted Proforma Invoice ${targetPINumber} for PM approval`,
+        summary: `Submitted Proforma Invoice ${targetPINumber} for Sales Director review`,
       };
       setAuditLogs(prev => [log, ...prev]);
 
-      // External Email Dispatch (Resend Serverless API with safe simulation fallback)
-      dispatchPIStageEmail(submittedPI, 'PM_REVIEW', stakeholderEmails, stageToken, user).then(res => {
-        const deliveryLog = createPIDeliveryLog(submittedPI!, 'PM_REVIEW', res, stageToken);
+      // Stage 2 Email Trigger: PM submits -> Email sent to Sales Director with PI preview and Approve/Reject link
+      dispatchPIStageEmail(submittedPI, 'SALES_DIRECTOR_REVIEW', stakeholderEmails, stageToken, user).then(res => {
+        const deliveryLog = createPIDeliveryLog(submittedPI!, 'SALES_DIRECTOR_REVIEW', res, stageToken);
         setProformaInvoices(current => current.map(p => {
           if (p.id !== piId) return p;
           return {
@@ -1470,7 +1505,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           user: 'System',
           method: 'Manual',
           projectId: targetProject,
-          summary: `PI ${targetPINumber} Stage 1 email dispatch: ${res.status} to ${res.recipientEmail} (${res.recipientRole})${res.providerMessageId ? ' [ID: ' + res.providerMessageId + ']' : ''}${res.error ? ' [Note: ' + res.error + ']' : ''}`,
+          summary: `PI ${targetPINumber} Sales Director notification dispatch: ${res.status} to ${res.recipientEmail} (${res.recipientRole})${res.providerMessageId ? ' [ID: ' + res.providerMessageId + ']' : ''}${res.error ? ' [Note: ' + res.error + ']' : ''}`,
         };
         setAuditLogs(prev => [emailAudit, ...prev]);
       });
@@ -1493,6 +1528,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     let nextStagePI: ProformaInvoiceRecord | undefined;
     let nextStage: PIApprovalStage | undefined;
     let nextStageToken = '';
+    let nextStageOptions: { previousNotes?: string; rejectionReason?: string } | undefined = undefined;
     let previousStatus = '';
     let newStatus = '';
     let currentStageStr = '';
@@ -1508,7 +1544,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         const now = new Date().toISOString();
 
         if (action === 'REJECT') {
-          // Reject stops workflow at current stage
+          // Rejection at any stage resets or routes back with required revision notes
           if (history.length > 0) {
             const lastIdx = history.length - 1;
             history[lastIdx] = {
@@ -1517,18 +1553,27 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               action: 'REJECT',
               reviewerName: user,
               reviewedAt: now,
-              reason: reason || comment || 'Rejected',
+              reason: reason || comment || 'Revisions required before approval',
               comment: comment || '',
             };
           }
           newStatus = 'REJECTED';
-          return {
+          nextStage = 'REJECTED';
+          nextStageToken = `REJECT-${Date.now().toString(36)}`;
+          nextStageOptions = {
+            rejectionReason: reason || comment || 'Revisions required by reviewer',
+          };
+
+          const updated: ProformaInvoiceRecord = {
             ...pi,
             status: 'REJECTED' as PIApprovalStatus,
+            currentStage: 'REJECTED' as PIApprovalStage,
             approvalHistory: history,
             updatedAt: now,
             updatedBy: user,
           };
+          nextStagePI = updated;
+          return updated;
         }
 
         if (action === 'PUT_ON_HOLD') {
@@ -1605,7 +1650,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 comment: comment || '',
               };
             }
-            // Add Managing Director Review step
+
+            // Sales Director approves -> Email sent to MD with previous approval notes and final authorization link
             nextStageToken = generateSecureActionToken(pi.id, 'MANAGING_DIRECTOR_REVIEW', stakeholderEmails.managingDirectorEmail || '');
             history.push({
               id: `STEP-${Date.now()}-3`,
@@ -1619,8 +1665,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               token: nextStageToken,
             });
 
+            // Aggregate previous approval notes for the MD
+            const previousNotesList = history
+              .filter(h => h.comment || h.reason)
+              .map(h => `${h.reviewerRole} (${h.reviewerName || 'Reviewer'}): "${h.comment || h.reason}"`)
+              .join(' | ');
+
             newStatus = 'PENDING_MANAGING_DIRECTOR';
             nextStage = 'MANAGING_DIRECTOR_REVIEW';
+            nextStageOptions = {
+              previousNotes: previousNotesList || (comment ? `Sales Director: "${comment}"` : 'Approved by Sales Director'),
+            };
+
             const updated: ProformaInvoiceRecord = {
               ...pi,
               status: 'PENDING_MANAGING_DIRECTOR' as PIApprovalStatus,
@@ -1644,7 +1700,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               };
             }
             newStatus = 'APPROVED';
-            return {
+            nextStage = 'COMPLETED';
+            nextStageToken = `RELEASE-${Date.now().toString(36)}`;
+            
+            const updated: ProformaInvoiceRecord = {
               ...pi,
               status: 'APPROVED' as PIApprovalStatus,
               currentStage: 'COMPLETED' as PIApprovalStage,
@@ -1652,6 +1711,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               updatedAt: now,
               updatedBy: user,
             };
+            nextStagePI = updated;
+            return updated;
           }
         }
 
@@ -1670,9 +1731,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       };
       setAuditLogs(prev => [log, ...prev]);
 
-      // If moved to next approval stage, dispatch the stage email
+      // If moved to next approval stage, completed, or rejected, dispatch the corresponding email notification
       if (nextStage && nextStagePI && nextStageToken) {
-        dispatchPIStageEmail(nextStagePI, nextStage, stakeholderEmails, nextStageToken, user).then(res => {
+        dispatchPIStageEmail(nextStagePI, nextStage, stakeholderEmails, nextStageToken, user, nextStageOptions).then(res => {
           const deliveryLog = createPIDeliveryLog(nextStagePI!, nextStage!, res, nextStageToken);
           setProformaInvoices(current => current.map(p => {
             if (p.id !== piId) return p;
@@ -1688,7 +1749,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             user: 'System',
             method: 'Manual',
             projectId: (targetPI as ProformaInvoiceRecord).projectId,
-            summary: `PI ${(targetPI as ProformaInvoiceRecord).piNumber} ${nextStage} email dispatch: ${res.status} to ${res.recipientEmail} (${res.recipientRole})${res.providerMessageId ? ' [ID: ' + res.providerMessageId + ']' : ''}${res.error ? ' [Note: ' + res.error + ']' : ''}`,
+            summary: `PI ${(targetPI as ProformaInvoiceRecord).piNumber} ${nextStage} notification dispatch: ${res.status} to ${res.recipientEmail} (${res.recipientRole})${res.providerMessageId ? ' [ID: ' + res.providerMessageId + ']' : ''}${res.error ? ' [Note: ' + res.error + ']' : ''}`,
           };
           setAuditLogs(prev => [emailAudit, ...prev]);
         });

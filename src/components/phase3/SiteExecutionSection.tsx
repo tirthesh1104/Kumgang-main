@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useData } from '../../context/DataContext';
 import { useClientAccess } from '../../context/ClientAccessContext';
 import { useLanguage } from '../../context/LanguageContext';
 import type { WeeklyProgressRecord } from '../../types/phase3';
 import { SitePhotosSection } from './SitePhotosSection';
-import { UserCheck, Activity, Plus, Save } from 'lucide-react';
+import { UserCheck, Activity, Plus, Save, RotateCcw, CheckCircle, AlertCircle, ShieldAlert } from 'lucide-react';
 
 interface SiteExecutionSectionProps {
   projectId: string;
@@ -18,6 +18,7 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
   const isDark = theme === 'dark';
   const {
     getProjectById,
+    updateProjectManual,
     getWeeklyProgressForProject,
     addWeeklyProgress,
     getSiteExecutionInfoForProject,
@@ -28,16 +29,20 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
   const weeklyRecords = getWeeklyProgressForProject(projectId);
   const execInfo = getSiteExecutionInfoForProject(projectId);
 
-  const canEdit = activeSession.role === 'Admin' || activeSession.role === 'ProjectManager' || (activeSession.role as string) === 'ADMIN' || (activeSession.role as string) === 'PROJECT_MANAGER';
-  const username = activeSession.displayName || 'User';
+  // Clients have read-only view; Admin, ProjectManager, Developer and Staff can edit
+  const isClient = activeSession.role === 'Client';
+  const canEdit = !isClient;
+  const username = activeSession.displayName || activeSession.username || 'User';
 
   // Supervisor & Execution form state
-  const [supervisorName, setSupervisorName] = useState(execInfo?.supervisorName || project?.supervisorName || '');
-  const [supervisorContact, setSupervisorContact] = useState(execInfo?.supervisorContact || project?.supervisorContact || '');
-  const [supervisorAllocationDate, setSupervisorAllocationDate] = useState(execInfo?.supervisorAllocationDate || project?.supervisorAllocationDate || '');
-  const [supportDuration, setSupportDuration] = useState(execInfo?.supportDuration || project?.supportDuration || '');
-  const [siteStatus, setSiteStatus] = useState<string>(execInfo?.siteStatus || execInfo?.currentSiteStatus || 'Ongoing');
+  const [supervisorName, setSupervisorName] = useState('');
+  const [supervisorContact, setSupervisorContact] = useState('');
+  const [supervisorAllocationDate, setSupervisorAllocationDate] = useState('');
+  const [supportDuration, setSupportDuration] = useState('');
+  const [siteStatus, setSiteStatus] = useState<string>('Ongoing');
   const [isSaving, setIsSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Weekly Progress form state
   const [isAddingWeekly, setIsAddingWeekly] = useState(false);
@@ -45,27 +50,78 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
   const [progressStatus, setProgressStatus] = useState('');
   const [weeklyRemarks, setWeeklyRemarks] = useState('');
 
+  // Synchronize local form fields whenever projectId, execInfo, or project change
+  useEffect(() => {
+    setSupervisorName(execInfo?.supervisorName || project?.supervisorName || '');
+    setSupervisorContact(execInfo?.supervisorContact || project?.supervisorContact || '');
+    setSupervisorAllocationDate(execInfo?.supervisorAllocationDate || project?.supervisorAllocationDate || '');
+    setSupportDuration(execInfo?.supportDuration || project?.supportDuration || '');
+    setSiteStatus(execInfo?.siteStatus || execInfo?.currentSiteStatus || project?.currentSiteStatus || project?.siteStatus || 'Ongoing');
+    setSuccessMsg('');
+    setErrorMsg('');
+  }, [projectId, execInfo, project]);
+
   const handleSaveSupervisor = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
-    updateSiteExecutionInfo(
-      projectId,
-      {
-        supervisorName,
-        supervisorContact,
-        supervisorAllocationDate: supervisorAllocationDate || null,
-        supportDuration,
-        siteStatus,
-      },
-      username
-    );
+    if (!canEdit) {
+      setErrorMsg('You do not have permission to modify supervisor allocation.');
+      return;
+    }
 
-    setTimeout(() => setIsSaving(false), 300);
+    setIsSaving(true);
+    setErrorMsg('');
+
+    try {
+      // 1. Update site execution store
+      updateSiteExecutionInfo(
+        projectId,
+        {
+          supervisorName: supervisorName.trim(),
+          supervisorContact: supervisorContact.trim(),
+          supervisorAllocationDate: supervisorAllocationDate || null,
+          supportDuration: supportDuration.trim(),
+          siteStatus,
+          currentSiteStatus: siteStatus,
+        },
+        username
+      );
+
+      // 2. Also persist to project master records
+      updateProjectManual(
+        projectId,
+        {
+          supervisorName: supervisorName.trim(),
+          supervisorContact: supervisorContact.trim(),
+          supervisorAllocationDate: supervisorAllocationDate || null,
+          supportDuration: supportDuration.trim(),
+          siteStatus,
+          currentSiteStatus: siteStatus,
+        },
+        username
+      );
+
+      setSuccessMsg('Supervisor allocation details saved successfully.');
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch {
+      setErrorMsg('An unexpected error occurred while saving. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelSupervisor = () => {
+    setSupervisorName(execInfo?.supervisorName || project?.supervisorName || '');
+    setSupervisorContact(execInfo?.supervisorContact || project?.supervisorContact || '');
+    setSupervisorAllocationDate(execInfo?.supervisorAllocationDate || project?.supervisorAllocationDate || '');
+    setSupportDuration(execInfo?.supportDuration || project?.supportDuration || '');
+    setSiteStatus(execInfo?.siteStatus || execInfo?.currentSiteStatus || project?.currentSiteStatus || project?.siteStatus || 'Ongoing');
+    setErrorMsg('');
+    setSuccessMsg('');
   };
 
   const handleAddWeekly = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!progressStatus.trim()) return;
+    if (!canEdit || !progressStatus.trim()) return;
 
     const record: WeeklyProgressRecord = {
       id: `WPR-${Date.now()}`,
@@ -86,13 +142,38 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
   return (
     <div className="space-y-6">
       {/* Supervisor Details & Support Duration Card */}
-      <div className={`rounded-xl border p-5 shadow-card ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
-        <div className="flex items-center gap-2 mb-4">
-          <UserCheck className={isDark ? 'text-cyan-400' : 'text-cyan-600'} size={18} />
-          <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            {t('supervisorDetailsAllocation')}
-          </h3>
+      <div className={`rounded-xl border p-5 shadow-xs transition-all ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2">
+            <UserCheck className={isDark ? 'text-cyan-400' : 'text-cyan-600'} size={18} />
+            <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {t('supervisorDetailsAllocation')}
+            </h3>
+          </div>
+
+          {!canEdit && (
+            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold border ${
+              isDark ? 'bg-amber-950/40 border-amber-800/60 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-800'
+            }`}>
+              <ShieldAlert size={13} />
+              <span>Read-Only (Client Mode)</span>
+            </div>
+          )}
         </div>
+
+        {/* Feedback Banners */}
+        {successMsg && (
+          <div className="mb-4 flex items-center gap-2 p-3 text-xs font-semibold rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400">
+            <CheckCircle size={15} className="flex-shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+        {errorMsg && (
+          <div className="mb-4 flex items-center gap-2 p-3 text-xs font-semibold rounded-lg bg-rose-500/15 border border-rose-500/40 text-rose-600 dark:text-rose-400">
+            <AlertCircle size={15} className="flex-shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSaveSupervisor} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
           <div>
@@ -105,9 +186,9 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
               placeholder="e.g. John Doe"
               value={supervisorName}
               onChange={e => setSupervisorName(e.target.value)}
-              className={`w-full px-2.5 py-1.5 text-xs rounded border ${
-                isDark ? 'bg-[#111113] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
-              } outline-none disabled:opacity-60`}
+              className={`w-full px-2.5 py-1.5 text-xs rounded border transition-colors ${
+                isDark ? 'bg-[#111113] border-[#303035] text-white focus:border-cyan-500' : 'bg-white border-slate-300 text-slate-900 focus:border-cyan-600'
+              } outline-none disabled:opacity-60 disabled:cursor-not-allowed`}
             />
           </div>
 
@@ -121,9 +202,9 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
               placeholder="e.g. +91 9876543210"
               value={supervisorContact}
               onChange={e => setSupervisorContact(e.target.value)}
-              className={`w-full px-2.5 py-1.5 text-xs rounded border ${
-                isDark ? 'bg-[#111113] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
-              } outline-none disabled:opacity-60`}
+              className={`w-full px-2.5 py-1.5 text-xs rounded border transition-colors ${
+                isDark ? 'bg-[#111113] border-[#303035] text-white focus:border-cyan-500' : 'bg-white border-slate-300 text-slate-900 focus:border-cyan-600'
+              } outline-none disabled:opacity-60 disabled:cursor-not-allowed`}
             />
           </div>
 
@@ -136,9 +217,9 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
               disabled={!canEdit}
               value={supervisorAllocationDate}
               onChange={e => setSupervisorAllocationDate(e.target.value)}
-              className={`w-full px-2.5 py-1.5 text-xs rounded border ${
-                isDark ? 'bg-[#111113] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
-              } outline-none disabled:opacity-60`}
+              className={`w-full px-2.5 py-1.5 text-xs rounded border transition-colors ${
+                isDark ? 'bg-[#111113] border-[#303035] text-white focus:border-cyan-500' : 'bg-white border-slate-300 text-slate-900 focus:border-cyan-600'
+              } outline-none disabled:opacity-60 disabled:cursor-not-allowed`}
             />
           </div>
 
@@ -152,9 +233,9 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
               placeholder="e.g. 4 Weeks"
               value={supportDuration}
               onChange={e => setSupportDuration(e.target.value)}
-              className={`w-full px-2.5 py-1.5 text-xs rounded border ${
-                isDark ? 'bg-[#111113] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
-              } outline-none disabled:opacity-60`}
+              className={`w-full px-2.5 py-1.5 text-xs rounded border transition-colors ${
+                isDark ? 'bg-[#111113] border-[#303035] text-white focus:border-cyan-500' : 'bg-white border-slate-300 text-slate-900 focus:border-cyan-600'
+              } outline-none disabled:opacity-60 disabled:cursor-not-allowed`}
             />
           </div>
 
@@ -165,10 +246,10 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
             <select
               disabled={!canEdit}
               value={siteStatus}
-              onChange={e => setSiteStatus(e.target.value as 'Ongoing' | 'Completed')}
-              className={`w-full px-2.5 py-1.5 text-xs rounded border ${
-                isDark ? 'bg-[#111113] border-[#303035] text-white' : 'bg-white border-slate-300 text-slate-900'
-              } outline-none disabled:opacity-60`}
+              onChange={e => setSiteStatus(e.target.value)}
+              className={`w-full px-2.5 py-1.5 text-xs rounded border transition-colors ${
+                isDark ? 'bg-[#111113] border-[#303035] text-white focus:border-cyan-500' : 'bg-white border-slate-300 text-slate-900 focus:border-cyan-600'
+              } outline-none disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               <option value="Ongoing">{t('ongoing')}</option>
               <option value="Completed">{t('completed')}</option>
@@ -176,11 +257,20 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
           </div>
 
           {canEdit && (
-            <div className="col-span-1 sm:col-span-2 md:col-span-5 flex justify-end">
+            <div className="col-span-1 sm:col-span-2 md:col-span-5 flex justify-end items-center gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={handleCancelSupervisor}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
+                  isDark ? 'border-[#303035] bg-[#1A1A1E] text-slate-300 hover:bg-[#262629]' : 'border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                <RotateCcw size={12} /> {t('cancel')}
+              </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded bg-cyan-600 hover:bg-cyan-700 text-white"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-lg bg-cyan-600 hover:bg-cyan-700 active:scale-[0.98] text-white transition-all shadow-xs cursor-pointer disabled:opacity-60"
               >
                 <Save size={13} /> {isSaving ? t('saving') : t('saveSupervisorDetails')}
               </button>
@@ -190,7 +280,7 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
       </div>
 
       {/* Weekly Site Progress Status Card */}
-      <div className={`rounded-xl border p-5 shadow-card ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
+      <div className={`rounded-xl border p-5 shadow-xs transition-all ${isDark ? 'bg-[#151517] border-[#262629]' : 'bg-white border-slate-200'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <div className="flex items-center gap-2">
@@ -207,7 +297,7 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
           {canEdit && !isAddingWeekly && (
             <button
               onClick={() => setIsAddingWeekly(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
             >
               <Plus size={14} /> {t('addWeeklyProgress')}
             </button>
@@ -266,13 +356,13 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
               <button
                 type="button"
                 onClick={() => setIsAddingWeekly(false)}
-                className={`px-3 py-1.5 text-xs font-medium rounded ${isDark ? 'bg-[#262629] text-gray-300' : 'bg-slate-200 text-slate-700'}`}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg cursor-pointer ${isDark ? 'bg-[#262629] text-gray-300 hover:bg-[#303035]' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}
               >
                 {t('cancel')}
               </button>
               <button
                 type="submit"
-                className="px-3.5 py-1.5 text-xs font-semibold rounded bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
               >
                 {t('saveRecord')}
               </button>

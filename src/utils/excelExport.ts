@@ -141,9 +141,14 @@ export function exportDispatchReportToExcel(shipments: ShipmentRecord[], project
 
 /**
  * Export Receivable Report data to native Excel file (.xlsx)
+ * Supports multi-sheet export (All, KKV, KKI, KKHQ) or single-scope export.
  */
-export function exportReceivableReportToExcel(projects: ProjectMaster[], _payments?: PaymentRecord[]) {
-  const exportRows = projects.map(p => {
+export function exportReceivableReportToExcel(
+  projects: ProjectMaster[],
+  _payments?: PaymentRecord[],
+  targetScope?: 'ALL' | 'KKV' | 'KKI' | 'KKHQ'
+) {
+  const mapProjectToRow = (p: ProjectMaster) => {
     const scope = getProjectScope(p);
     const contractVal = p.totalAmountUSD || p.actualTotalAmount || 0;
     const advanceVal = p.advanceUSD || 0;
@@ -175,11 +180,75 @@ export function exportReceivableReportToExcel(projects: ProjectMaster[], _paymen
       'LC Expiry Date': p.lcExpiryDate || 'Not Available',
       'Contract Status': p.contractStatus || 'Not Available',
     };
+  };
+
+  const workbook = XLSX.utils.book_new();
+  const timestamp = new Date().toISOString().slice(0, 10);
+
+  const applyCols = (sheet: XLSX.WorkSheet, sampleRow: Record<string, any>) => {
+    sheet['!cols'] = Object.keys(sampleRow || {}).map(key => ({
+      wch: Math.max(key.length + 3, 16)
+    }));
+  };
+
+  if (targetScope && targetScope !== 'ALL') {
+    const filteredProjects = projects.filter(p => getProjectScope(p) === targetScope);
+    const rows = filteredProjects.map(mapProjectToRow);
+    const worksheet = XLSX.utils.json_to_sheet(rows.length > 0 ? rows : [{ 'Note': `No projects under ${targetScope}` }]);
+    if (rows.length > 0) applyCols(worksheet, rows[0]);
+    XLSX.utils.book_append_sheet(workbook, worksheet, `${targetScope} Receivables`);
+    XLSX.writeFile(workbook, `Kumgang_${targetScope}_Receivable_Report_${timestamp}.xlsx`);
+    return;
+  }
+
+  // Combined All Receivables Sheet
+  const allRows = projects.map(mapProjectToRow);
+  const allWorksheet = XLSX.utils.json_to_sheet(allRows);
+  if (allRows.length > 0) applyCols(allWorksheet, allRows[0]);
+  XLSX.utils.book_append_sheet(workbook, allWorksheet, 'All Receivables');
+
+  // Separate sheets for KKV, KKI, KKHQ
+  (['KKV', 'KKI', 'KKHQ'] as const).forEach(scope => {
+    const scopedProjects = projects.filter(p => getProjectScope(p) === scope);
+    const scopedRows = scopedProjects.map(mapProjectToRow);
+    if (scopedRows.length > 0) {
+      const scopedWs = XLSX.utils.json_to_sheet(scopedRows);
+      applyCols(scopedWs, scopedRows[0]);
+      XLSX.utils.book_append_sheet(workbook, scopedWs, `${scope} Receivables`);
+    }
+  });
+
+  XLSX.writeFile(workbook, `Kumgang_Receivable_Report_${timestamp}.xlsx`);
+}
+
+/**
+ * Export Project Status Report to native Excel file (.xlsx)
+ */
+export function exportProjectStatusReportToExcel(projects: ProjectMaster[]) {
+  const exportRows = projects.map(p => {
+    const scope = getProjectScope(p);
+    return {
+      'Project ID': p.projectId || 'Not Available',
+      'Project Name': p.project || 'Not Available',
+      'Client Name': p.customer || 'Not Available',
+      'Country': p.country || 'Not Available',
+      'Operational Scope': scope,
+      'Contract Status': p.contractStatus || 'Not Available',
+      'Design Progress %': p.designProgressPercent != null ? `${p.designProgressPercent}%` : 'Not Available',
+      'Payment Status': p.paymentStatus || 'Not Available',
+      'Total Amount (USD)': p.totalAmountUSD != null ? `$${p.totalAmountUSD.toLocaleString()}` : 'Not Available',
+      'Advance Amount (USD)': p.advanceUSD != null ? `$${p.advanceUSD.toLocaleString()}` : 'Not Available',
+      'Balance (USD)': p.balanceUSD != null ? `$${p.balanceUSD.toLocaleString()}` : 'Not Available',
+      'Delivery Request': p.deliveryRequest || 'Not Available',
+      'Shell Plan Confirmation': p.shellPlanConfirmation || 'Not Available',
+      'Production Start': p.productionStart || 'Not Available',
+      'Loading Date': p.loadingDate || 'Not Available',
+    };
   });
 
   const worksheet = XLSX.utils.json_to_sheet(exportRows);
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Receivable Report');
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Project Status');
 
   const colWidths = Object.keys(exportRows[0] || {}).map(key => ({
     wch: Math.max(key.length + 3, 16)
@@ -187,5 +256,31 @@ export function exportReceivableReportToExcel(projects: ProjectMaster[], _paymen
   worksheet['!cols'] = colWidths;
 
   const timestamp = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(workbook, `Kumkang_Receivable_Report_${timestamp}.xlsx`);
+  XLSX.writeFile(workbook, `Kumkang_Project_Status_Report_${timestamp}.xlsx`);
+}
+
+/**
+ * Export FY Sales Report to native Excel file (.xlsx)
+ */
+export function exportFYSalesReportToExcel(fyData: Array<{ fy: string; count: number; totalUSD: number; kkvUSD: number; kkiUSD: number; kkhqUSD: number }>) {
+  const exportRows = fyData.map(item => ({
+    'Financial Year': item.fy,
+    'Total Projects': item.count,
+    'Total Sales (USD)': `$${Math.round(item.totalUSD).toLocaleString()}`,
+    'KKV Sales (USD)': `$${Math.round(item.kkvUSD).toLocaleString()}`,
+    'KKI Sales (USD)': `$${Math.round(item.kkiUSD).toLocaleString()}`,
+    'KKHQ Sales (USD)': `$${Math.round(item.kkhqUSD).toLocaleString()}`,
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(exportRows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'FY Sales Report');
+
+  const colWidths = Object.keys(exportRows[0] || {}).map(key => ({
+    wch: Math.max(key.length + 3, 16)
+  }));
+  worksheet['!cols'] = colWidths;
+
+  const timestamp = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(workbook, `Kumkang_FY_Sales_Report_${timestamp}.xlsx`);
 }

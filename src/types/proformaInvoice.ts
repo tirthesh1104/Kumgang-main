@@ -14,7 +14,8 @@ export type PIApprovalStage =
   | 'PM_REVIEW'
   | 'SALES_DIRECTOR_REVIEW'
   | 'MANAGING_DIRECTOR_REVIEW'
-  | 'COMPLETED';
+  | 'COMPLETED'
+  | 'REJECTED';
 
 export type PIApprovalAction =
   | 'APPROVE'
@@ -75,6 +76,8 @@ export interface StakeholderEmails {
   pmEmail: string;
   salesDirectorEmail: string;
   managingDirectorEmail: string;
+  accountsEmail?: string;
+  clientEmail?: string;
 }
 
 export interface ProformaInvoiceRecord {
@@ -148,7 +151,7 @@ export interface PIDeliveryLog {
   id: string;
   piId: string;
   piNumber: string;
-  stage: PIApprovalStage;
+  stage: PIApprovalStage | string;
   recipientEmail: string;
   recipientRole: string;
   status: 'SENT' | 'FAILED' | 'DEMO_SIMULATED';

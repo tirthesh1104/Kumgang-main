@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { StatusBadge, PaymentBadge } from './ui/StatusBadge';
 import { ProgressBar } from './ui/ProgressBar';
 import { EditProjectModal } from './EditProjectModal';
+import { getProjectScope } from '../utils/scopeUtils';
 import { Search, X, ArrowRight, AlertTriangle, Globe, Plus, Edit3 } from 'lucide-react';
 
 export function ProjectsPage() {
@@ -22,8 +23,10 @@ export function ProjectsPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCountry, setFilterCountry] = useState('all');
+  const [filterEntity, setFilterEntity] = useState('all');
   const [filterPayment, setFilterPayment] = useState('all');
   const [filterDelay, setFilterDelay] = useState('all');
+  const [sortBy, setSortBy] = useState<'default' | 'date-desc' | 'date-asc' | 'amount-desc' | 'id-asc'>('default');
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -37,6 +40,9 @@ export function ProjectsPage() {
   }
   if (filterCountry !== 'all') {
     projects = projects.filter(p => p.country === filterCountry);
+  }
+  if (filterEntity !== 'all') {
+    projects = projects.filter(p => getProjectScope(p) === filterEntity);
   }
   if (filterPayment !== 'all') {
     projects = projects.filter(p => p.paymentStatus && p.paymentStatus.toLowerCase().includes(filterPayment.toLowerCase()));
@@ -52,11 +58,37 @@ export function ProjectsPage() {
       p.project.toLowerCase().includes(q) ||
       (p.block && p.block.toLowerCase().includes(q)) ||
       p.contractStatus.toLowerCase().includes(q) ||
-      p.country.toLowerCase().includes(q)
+      p.country.toLowerCase().includes(q) ||
+      getProjectScope(p).toLowerCase().includes(q)
     );
   }
 
-  const hasFilters = filterStatus !== 'all' || filterCountry !== 'all' || filterPayment !== 'all' || filterDelay !== 'all' || search.length > 0;
+  // Helper for Year / Month date sorting
+  const parseProjectDate = (dateStr: string | null | undefined): number => {
+    if (!dateStr || dateStr.toLowerCase() === 'done' || dateStr.toLowerCase() === 'waiting cfm' || dateStr.toLowerCase() === 'n/a') return 0;
+    try {
+      if (dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        if (parts[0].length === 4) return new Date(dateStr).getTime() || 0;
+        if (parts[2].length === 4) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+      }
+      return new Date(dateStr).getTime() || 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  if (sortBy === 'date-desc') {
+    projects.sort((a, b) => parseProjectDate(b.contractDate || b.eta || b.etd) - parseProjectDate(a.contractDate || a.eta || a.etd));
+  } else if (sortBy === 'date-asc') {
+    projects.sort((a, b) => parseProjectDate(a.contractDate || a.eta || a.etd) - parseProjectDate(b.contractDate || b.eta || b.etd));
+  } else if (sortBy === 'amount-desc') {
+    projects.sort((a, b) => (b.totalAmountUSD || 0) - (a.totalAmountUSD || 0));
+  } else if (sortBy === 'id-asc') {
+    projects.sort((a, b) => a.projectId.localeCompare(b.projectId, undefined, { numeric: true }));
+  }
+
+  const hasFilters = filterStatus !== 'all' || filterCountry !== 'all' || filterEntity !== 'all' || filterPayment !== 'all' || filterDelay !== 'all' || sortBy !== 'default' || search.length > 0;
 
   const handleOpenAddModal = () => {
     setEditProjectId(null);
@@ -129,6 +161,42 @@ export function ProjectsPage() {
           <option value="all">{t('allCountries')}</option>
           {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
+
+        {/* Entity / Scope Filter (KKV / KKI / KKHQ) */}
+        <select
+          value={filterEntity}
+          onChange={e => setFilterEntity(e.target.value)}
+          className={`text-sm border rounded-lg px-3 py-2 focus:outline-none font-medium ${
+            isDark 
+              ? 'border-[#303035] bg-[#111113] text-[#F5F5F3] focus:border-[#C9A86A]' 
+              : 'border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] focus:border-[#1688D4]'
+          }`}
+          aria-label="Filter by Entity"
+        >
+          <option value="all">All Entities (KKV / KKI / KKHQ)</option>
+          <option value="KKV">KKV — Kumkang Vietnam</option>
+          <option value="KKI">KKI — Kumkang India</option>
+          <option value="KKHQ">KKHQ — Kumkang Headquarters</option>
+        </select>
+
+        {/* Sort by Year / Month / Value / ID */}
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value as any)}
+          className={`text-sm border rounded-lg px-3 py-2 focus:outline-none font-medium ${
+            isDark 
+              ? 'border-[#303035] bg-[#111113] text-[#F5F5F3] focus:border-[#C9A86A]' 
+              : 'border-[#CBD5E1] bg-[#FFFFFF] text-[#0F172A] focus:border-[#1688D4]'
+          }`}
+          aria-label="Sort projects"
+        >
+          <option value="default">Sort: Default Order</option>
+          <option value="date-desc">Timeline: Newest Date (Year/Month)</option>
+          <option value="date-asc">Timeline: Oldest Date (Year/Month)</option>
+          <option value="amount-desc">Contract Value: Highest First ($)</option>
+          <option value="id-asc">Project ID: Ascending (A-Z)</option>
+        </select>
+
         <select value={filterPayment} onChange={e => setFilterPayment(e.target.value)}
           className={`text-sm border rounded-lg px-3 py-2 focus:outline-none ${
             isDark 
@@ -152,8 +220,16 @@ export function ProjectsPage() {
         </select>
         {hasFilters && (
           <button
-            onClick={() => { setFilterStatus('all'); setFilterCountry('all'); setFilterPayment('all'); setFilterDelay('all'); setSearch(''); }}
-            className={`text-xs border rounded-lg px-3 py-2 flex items-center gap-1 ${
+            onClick={() => {
+              setFilterStatus('all');
+              setFilterCountry('all');
+              setFilterEntity('all');
+              setFilterPayment('all');
+              setFilterDelay('all');
+              setSortBy('default');
+              setSearch('');
+            }}
+            className={`text-xs border rounded-lg px-3 py-2 flex items-center gap-1 font-semibold ${
               isDark 
                 ? 'text-[#B4B4B8] hover:text-[#FFFFFF] border-[#303035] hover:bg-[#18181B]' 
                 : 'text-[#64748B] hover:text-[#0F172A] border-[#CBD5E1] hover:bg-[#F8FAFC]'
@@ -179,6 +255,7 @@ export function ProjectsPage() {
             const notFullyPaid = project.paymentStatus && !project.paymentStatus.toLowerCase().includes('100%');
             const needsAttention = hasBalance && notFullyPaid;
             const progress = project.designProgressPercent != null ? Math.min(project.designProgressPercent, 100) : null;
+            const scope = getProjectScope(project);
             
             return (
               <motion.div
@@ -207,6 +284,15 @@ export function ProjectsPage() {
                       isDark ? 'text-[#F5F5F3] bg-[#18181B] border-[#303035]' : 'text-[#0F172A] bg-[#F1F5F9] border-[#CBD5E1]'
                     }`}>
                       {project.projectId}
+                    </span>
+                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded border uppercase tracking-wider ${
+                      scope === 'KKV'
+                        ? (isDark ? 'bg-sky-950/40 text-sky-300 border-sky-800' : 'bg-sky-100 text-sky-800 border-sky-300 font-bold')
+                        : scope === 'KKHQ'
+                        ? (isDark ? 'bg-amber-950/40 text-amber-300 border-amber-800' : 'bg-amber-100 text-amber-800 border-amber-300 font-bold')
+                        : (isDark ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800' : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold')
+                    }`}>
+                      {scope}
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">

@@ -154,6 +154,7 @@ function SortHeader({
 
 export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFilter = 'All' }: ScopeDetailModalProps) {
   const { navigate, theme } = useApp();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   const [activeFilter, setActiveFilter] = useState<'All' | POStatus>(() => initialFilter);
@@ -464,8 +465,6 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
       activeShadow: 'shadow-md shadow-rose-500/10',
     },
   ];
-
-  const { t } = useLanguage();
 
   const filterTabs: {
     key: 'All' | POStatus;

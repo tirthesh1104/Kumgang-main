@@ -23,7 +23,11 @@ export async function dispatchPIStageEmail(
   stage: PIApprovalStage,
   stakeholderEmails: StakeholderEmails,
   actionToken: string,
-  user = 'Project Manager'
+  user = 'Project Manager',
+  options?: {
+    previousNotes?: string;
+    rejectionReason?: string;
+  }
 ): Promise<EmailDispatchResult> {
   let recipientEmail = '';
   let recipientRole = '';
@@ -40,7 +44,19 @@ export async function dispatchPIStageEmail(
   } else if (stage === 'MANAGING_DIRECTOR_REVIEW') {
     recipientEmail = stakeholderEmails.managingDirectorEmail;
     recipientRole = 'Managing Director';
-    stageLabel = 'Stage 3: Managing Director Review';
+    stageLabel = 'Stage 3: Managing Director Final Approval';
+  } else if (stage === 'COMPLETED') {
+    // Stage 4: MD Approved -> Sent to Client & Internal Accounts
+    const clientContact = stakeholderEmails.clientEmail || pi.clientContactEmail || 'client@kumkangkind.com';
+    const accountsContact = stakeholderEmails.accountsEmail || 'accounts.india@kumkangkind.com';
+    recipientEmail = `${clientContact}, ${accountsContact}`;
+    recipientRole = 'Client & Internal Accounts';
+    stageLabel = 'Final Authorization: Signed PI Released';
+  } else if (stage === 'REJECTED') {
+    // Rejection Notification sent back to PM / Submitter
+    recipientEmail = stakeholderEmails.pmEmail || 'pm@kumkangkind.com';
+    recipientRole = 'Project Manager (Submitter)';
+    stageLabel = 'Approval Rejected: Revision Required';
   }
 
   if (!recipientEmail || recipientEmail === 'Email Not Configured') {
@@ -69,6 +85,8 @@ export async function dispatchPIStageEmail(
     currency: pi.currency || 'USD',
     baseUrl,
     submittedBy: user,
+    previousNotes: options?.previousNotes || '',
+    rejectionReason: options?.rejectionReason || '',
   };
 
   try {
@@ -93,10 +111,10 @@ export async function dispatchPIStageEmail(
       }
       if (data.status === 'CONFIG_REQUIRED' || data.simulated) {
         return {
-          success: true,
+          success: false,
           status: 'DEMO_SIMULATED',
           providerMessageId: `SIM-${Date.now().toString(36)}`,
-          error: data.message || 'Operating in Local/Demo Simulation Mode',
+          error: data.message || 'Server environment missing RESEND_API_KEY: approval recorded in demo simulation mode.',
           recipientEmail,
           recipientRole,
         };
@@ -111,10 +129,10 @@ export async function dispatchPIStageEmail(
     } else {
       // Endpoint returned error or not found (e.g. local dev Vite without Vercel CLI)
       return {
-        success: true,
+        success: false,
         status: 'DEMO_SIMULATED',
         providerMessageId: `LOCAL-DEV-${Date.now().toString(36)}`,
-        error: 'Local development environment - operating in demo simulation mode',
+        error: 'Local Vite dev environment without Vercel Serverless runtime. Approval recorded in demo simulation mode.',
         recipientEmail,
         recipientRole,
       };
@@ -122,10 +140,10 @@ export async function dispatchPIStageEmail(
   } catch (err: any) {
     // Network fallback for offline / local Vite dev server
     return {
-      success: true,
+      success: false,
       status: 'DEMO_SIMULATED',
       providerMessageId: `LOCAL-${Date.now().toString(36)}`,
-      error: err.message || 'Local environment simulation fallback',
+      error: 'Local offline mode or serverless API not deployed. Approval recorded in demo simulation mode.',
       recipientEmail,
       recipientRole,
     };
