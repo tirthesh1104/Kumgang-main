@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FolderKanban, Paintbrush, Factory,
-  Truck, AlertTriangle, User, ChevronRight, Menu, X, 
+  Truck, AlertTriangle, User, ChevronRight, Menu, X, LogOut,
   Building2, History, Sun, Moon, Database, CreditCard, FileBarChart, UserCheck, FileCheck, Globe2
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -13,6 +13,8 @@ import { GoogleDriveButton } from '../ui/GoogleDriveButton';
 import { UpdateHistoryModal } from '../UpdateHistoryModal';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { NotificationCenter } from '../ui/NotificationCenter';
+import { DeveloperCredentialModal } from '../crm/DeveloperCredentialModal';
+import { CurrencySwitcher } from '../ui/CurrencySwitcher';
 
 interface NavItem {
   id: string;
@@ -32,10 +34,17 @@ interface NavGroup {
 function SidebarContent() {
   const { currentPage, navigate, theme, setIsEditModalOpen } = useApp();
   const { t } = useLanguage();
-  const { setIsPortalOpen } = useClientAccess();
+  const { activeSession, openPortalFromDashboard, logout } = useClientAccess();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isDeveloperModalOpen, setIsDeveloperModalOpen] = useState(false);
 
   const isDark = theme === 'dark';
+  const isDeveloper = activeSession.role === 'Developer';
+  const isProjectManager = activeSession.role === 'ProjectManager';
+  // "Generate ID & Password" is offered to Developer (full administration) and
+  // to Project Manager (scoped credential generation — see DeveloperCredentialModal's
+  // `mode` prop and the credential_manage / credential_admin checks in securityServer.ts).
+  const canManageCredentials = isDeveloper || isProjectManager;
 
   const navGroups: NavGroup[] = [
     {
@@ -79,6 +88,7 @@ function SidebarContent() {
       title: t('system'),
       items: [
         { id: 'portal', label: 'Dual Login Portal', icon: Globe2, isAction: true },
+        ...(canManageCredentials ? [{ id: 'developer-ops', label: 'Generate ID & Password', icon: UserCheck, isAction: true }] : []),
         { id: 'audit-log', label: t('auditLogHistory'), icon: History, isAction: true },
         { id: 'admin', label: t('administrator'), icon: User, isAction: true },
       ]
@@ -104,11 +114,13 @@ function SidebarContent() {
 
   const handleItemClick = (item: NavItem) => {
     if (item.id === 'portal') {
-      setIsPortalOpen(true);
+      openPortalFromDashboard();
     } else if (item.id === 'audit-log') {
       setIsHistoryOpen(true);
     } else if (item.id === 'admin') {
       setIsEditModalOpen(true);
+    } else if (item.id === 'developer-ops') {
+      setIsDeveloperModalOpen(true);
     } else {
       navigate(item.id as Parameters<typeof navigate>[0]);
     }
@@ -231,6 +243,37 @@ function SidebarContent() {
       </nav>
 
       {isHistoryOpen && <UpdateHistoryModal onClose={() => setIsHistoryOpen(false)} />}
+      {isDeveloperModalOpen && (
+        <DeveloperCredentialModal
+          isOpen={isDeveloperModalOpen}
+          onClose={() => setIsDeveloperModalOpen(false)}
+          mode={isDeveloper ? 'developer' : 'projectManager'}
+        />
+      )}
+
+      {/* Session footer: signed-in identity + explicit Logout (Staff / PM / Developer) */}
+      <div className={`px-3 pb-4 pt-2 border-t ${isDark ? 'border-[#1E1E20]' : 'border-white/10'}`}>
+        <div className={`rounded-xl px-3 py-2.5 ${isDark ? 'bg-[#141416]' : 'bg-white/5'}`}>
+          <p className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-[#65656B]' : 'text-slate-400/90'}`}>
+            Signed in
+          </p>
+          <p className="text-xs font-bold text-white truncate" title={activeSession.displayName}>
+            {activeSession.displayName}
+          </p>
+          <p className={`text-[10px] font-semibold ${isDark ? 'text-[#85858B]' : 'text-slate-400'}`}>
+            {activeSession.role === 'Admin' ? 'Staff' : activeSession.role === 'ProjectManager' ? 'Plant / Ops · PM' : activeSession.role}
+          </p>
+          <button
+            onClick={logout}
+            className="mt-2 w-full flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-red-500/90 hover:bg-red-600 text-white transition-all cursor-pointer"
+            title="Log out and return to the Login Portal"
+            aria-label="Log out"
+          >
+            <LogOut size={13} />
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -293,7 +336,7 @@ export function MobileNav() {
 export function TopBar() {
   const { setSidebarOpen, liveDateTime, theme, toggleTheme } = useApp();
   const { t } = useLanguage();
-  const { activeSession, logout, setIsPortalOpen } = useClientAccess();
+  const { activeSession, logout, openPortalFromDashboard } = useClientAccess();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const isDark = theme === 'dark';
 
@@ -367,7 +410,7 @@ export function TopBar() {
         <SyncExcelButton variant="secondary" label="Sync Excel" />
 
         <button
-          onClick={() => setIsPortalOpen(true)}
+          onClick={() => openPortalFromDashboard()}
           className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
             isDark
               ? 'text-[#38BDF8] bg-[#101D2D] border-[#1E3754] hover:bg-[#162B44]'
@@ -392,12 +435,8 @@ export function TopBar() {
           <span>{t('auditLog')}</span>
         </button>
 
-        <div className="hidden sm:flex items-center gap-2">
-          <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border ${
-            isDark ? 'bg-[#141416] border-[#262629] text-[#B4B4B8]' : 'bg-[#F1F5F9] border-[#DCE5EE] text-[#475569]'
-          }`}>
-            DISPLAY <strong className={isDark ? 'text-[#FFFFFF]' : 'text-[#0B2239]'}>USD</strong>
-          </span>
+        <div className="hidden sm:flex items-center">
+          <CurrencySwitcher />
         </div>
 
         <div className={`hidden md:flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-md border ${
@@ -411,6 +450,20 @@ export function TopBar() {
           <span className="live-dot w-2.5 h-2.5 rounded-full bg-[#3FB984] animate-pulse" aria-hidden="true" />
           <span className={`text-xs font-bold uppercase tracking-wider hidden sm:inline ${isDark ? 'text-[#70D0A8]' : 'text-[#16A36A]'}`}>Live</span>
         </div>
+
+        <button
+          onClick={logout}
+          className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+            isDark
+              ? 'text-red-300 bg-red-950/40 border-red-900 hover:bg-red-900/50'
+              : 'text-red-700 bg-red-50 border-red-200 hover:bg-red-100'
+          }`}
+          title={`Log out ${activeSession.displayName} and return to the Login Portal`}
+          aria-label="Log out"
+        >
+          <LogOut size={13} />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
 
         <button
           onClick={logout}

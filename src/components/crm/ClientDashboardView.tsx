@@ -6,7 +6,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { useData } from '../../context/DataContext';
 import { useClientAccess } from '../../context/ClientAccessContext';
-import { ProjectJourney } from '../projects/ProjectJourney';
+import { ProjectJourney, buildProjectStages } from '../projects/ProjectJourney';
 import type { ProjectMaster } from '../../data/projectData';
 import {
   getClientDocumentsForProject,
@@ -104,18 +104,21 @@ export function ClientDashboardView() {
     return 'Proposal / Contract Phase';
   };
 
-  // Helper for progress percentage
+  // Helper for progress percentage — derived strictly from the project's actual
+  // milestone records via the same calculation the Project Journey uses.
+  // No invented fallback percentages.
   const getProgress = (p: ProjectMaster): number => {
-    if (p.designProgressPercent != null && p.designProgressPercent > 0) {
-      return p.designProgressPercent;
-    }
-    if (p.contractStatus === 'Signed') return 65;
-    return 30;
+    const stages = buildProjectStages(p);
+    if (stages.length === 0) return 0;
+    // Weighted average across the 7 lifecycle stages using their real progress values.
+    const total = stages.reduce((sum, s) => sum + Math.min(Math.max(s.progressPercent || 0, 0), 100), 0);
+    return Math.round(total / stages.length);
   };
 
-  // Helper for target delivery
+  // Helper for target delivery — uses only configured project dates. If none are
+  // configured, reports it as not configured rather than inventing a date.
   const getTargetDelivery = (p: ProjectMaster): string => {
-    return p.deliveryRequest || p.eta || p.productionComplete || '15 Nov 2026';
+    return p.deliveryRequest || p.deliveryTimeline || p.eta || p.productionComplete || 'Not configured';
   };
 
   return (

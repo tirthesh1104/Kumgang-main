@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type {
   ActiveUserSession,
   ClientPermissions,
@@ -47,10 +47,14 @@ interface ClientAccessContextType {
   clients: ClientRecord[];
   activeSession: ActiveUserSession;
   clientAuditLogs: AccessHistoryRecord[];
+  // `false` until stored-session validation completes. While false, no
+  // dashboard may render — the Login Portal is the screen shown.
+  isSessionReady: boolean;
   
   // Role & Session Handlers
   switchRole: (role: UserRole, clientToSimulate?: any) => void;
   loginClient: (usernameOrClientId: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  recordStaffLogin: (identifier: string, role: 'Admin' | 'ProjectManager') => void;
   logout: () => void;
 
   // Client CRUD & Management
@@ -65,6 +69,8 @@ interface ClientAccessContextType {
   // Portal View Control
   isPortalOpen: boolean;
   setIsPortalOpen: (open: boolean) => void;
+  portalSource: 'landing' | 'dashboard';
+  openPortalFromDashboard: () => void;
 
   // Security Authorization Verification Gateway
   authorizeAction: (req: Omit<AuthorizationRequest, 'session'>) => AuthorizationResult;
@@ -83,14 +89,47 @@ function formatTimestamp(date = new Date()): string {
   return `${day} ${month} ${year}, ${hours}:${minutes}:${seconds}`;
 }
 
-const DEFAULT_ADMIN_SESSION: ActiveUserSession = {
-  userId: 'ADMIN-001',
-  username: 'admin',
-  displayName: 'Prakash Shinde (Admin)',
-  role: 'Admin',
-  token: 'admin-token-session-live',
-  loginTime: formatTimestamp(),
+const DEFAULT_GUEST_SESSION: ActiveUserSession = {
+  userId: 'anonymous',
+  username: 'guest',
+  displayName: 'Guest (Unauthenticated)',
+  role: 'None',
+  permissions: DEFAULT_CLIENT_PERMISSIONS,
+  assignedProjects: [],
+  token: '',
+  loginTime: '',
 };
+
+// A stored session is NEVER trusted on shape alone: the token must be present
+// and non-empty, otherwise the visitor stays unauthenticated on the portal.
+function isValidStoredSession(parsed: any): parsed is ActiveUserSession {
+  if (!parsed || typeof parsed !== 'object') return false;
+  if (!parsed.userId || !parsed.role) return false;
+  if (parsed.role === 'None') return false;
+  if (!['Admin', 'ProjectManager', 'Developer', 'Client'].includes(parsed.role)) return false;
+  if (typeof parsed.token !== 'string' || parsed.token.trim() === '') return false;
+  if (parsed.role === 'Client') {
+    if (!parsed.clientId) return false;
+    if (!Array.isArray(parsed.assignedProjects)) return false;
+  }
+  return true;
+}
+
+// Reads the persisted client register without touching React state — used by
+// the one-time session validator so a Client session is only restored when its
+// account still exists and is Active.
+function loadPersistedClients(): ClientRecord[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_CLIENTS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed as ClientRecord[];
+    }
+  } catch {
+    // corrupted register → treat as empty; session stays unauthenticated
+  }
+  return [];
+}
 
 export function ClientAccessProvider({ children }: { children: React.ReactNode }) {
   // Initialize clients register from localStorage (or empty array if none)
@@ -107,19 +146,11 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     return [];
   });
 
-  // Active Session (Default: Admin)
-  const [activeSession, setActiveSession] = useState<ActiveUserSession>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_SESSION_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.userId && parsed.role) return parsed;
-      }
-    } catch {
-      // fallback
-    }
-    return DEFAULT_ADMIN_SESSION;
-  });
+  // Active Session (Default: Unauthenticated — portal shows first until a real login)
+  const [activeSession, setActiveSession] = useState<ActiveUserSession>(DEFAULT_GUEST_SESSION);
+  // `false` until stored-session validation completes — AppLayout gates on this
+  // so no dashboard ever flickers before authentication is checked.
+  const [isSessionReady, setIsSessionReady] = useState(false);
 
   // Client Security Audit Logs
   const [clientAuditLogs, setClientAuditLogs] = useState<AccessHistoryRecord[]>(() => {
@@ -135,8 +166,17 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     return [];
   });
 
-  // Portal Landing Page Open State
-  const [isPortalOpen, setIsPortalOpen] = useState(false);
+  // Portal Landing Page Open State — default OPEN: the Login Portal is the first
+  // screen. Only a validated session (restored or fresh login) may close it.
+  const [isPortalOpen, setIsPortalOpen] = useState<boolean>(true);
+
+  // Portal source: 'landing' (initial / after logout) | 'dashboard' (opened from topbar)
+  const [portalSource, setPortalSource] = useState<'landing' | 'dashboard'>('landing');
+
+  // Skip saving the guest session after logout (so refresh stays on landing page).
+  // Initialized `true` so the very first render (guest session) never writes a
+  // session token for an unauthenticated visitor.
+  const skipSaveRef = useRef(true);
 
   // Persist clients when updated
   useEffect(() => {
@@ -147,14 +187,72 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     }
   }, [clients]);
 
-  // Persist active session when updated
+  // Persist active session whenever it changes (unless intentionally skipped).
+  // The guest/unauthenticated session is never persisted.
   useEffect(() => {
+    if (skipSaveRef.current) {
+      skipSaveRef.current = false;
+      return;
+    }
+    if (activeSession.role === 'None' || !activeSession.token) return;
     try {
       localStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify(activeSession));
     } catch (e) {
       console.error('Error saving active session to localStorage', e);
     }
   }, [activeSession]);
+
+  // Validate any stored session exactly once on load. A stored role alone is
+  // NEVER proof of authentication: the token must be present and non-empty,
+  // and a Client session must reference its clientId + assigned projects.
+  // Valid sessions are restored (portal closes, dashboard opens); anything
+  // else is discarded and the Login Portal stays as the first screen.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_SESSION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (isValidStoredSession(parsed)) {
+          if (parsed.role === 'Client') {
+            const storedClients = loadPersistedClients();
+            const match = storedClients.find(c => c.clientId === parsed.clientId);
+            if (match && match.accountStatus === 'Active') {
+              setActiveSession({
+                ...parsed,
+                assignedProjects: match.assignedProjects,
+                permissions: match.permissions,
+                displayName: `${match.companyName} (${match.contactPerson || 'Authorized Client'})`,
+              });
+              setIsPortalOpen(false);
+              setPortalSource('landing');
+            } else {
+              try { localStorage.removeItem(STORAGE_SESSION_KEY); } catch { /* ignore */ }
+              setIsPortalOpen(true);
+              setPortalSource('landing');
+            }
+          } else {
+            setActiveSession(parsed);
+            setIsPortalOpen(false);
+            setPortalSource('landing');
+          }
+        } else {
+          try { localStorage.removeItem(STORAGE_SESSION_KEY); } catch { /* ignore */ }
+          setIsPortalOpen(true);
+          setPortalSource('landing');
+        }
+      } else {
+        setIsPortalOpen(true);
+        setPortalSource('landing');
+      }
+    } catch {
+      try { localStorage.removeItem(STORAGE_SESSION_KEY); } catch { /* ignore */ }
+      setIsPortalOpen(true);
+      setPortalSource('landing');
+    } finally {
+      setIsSessionReady(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Persist audit logs
   useEffect(() => {
@@ -203,8 +301,24 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     }
   }, [activeSession]);
 
+  // Central role gate for every credential-management mutation below. Each write
+  // passes through the authorization policy in securityServer.ts, so enforcement
+  // does not depend on which UI controls happen to be visible for a role.
+  // NOTE: this app uses simulated/local auth (localStorage sessions, no backend);
+  // this is the application-level gate, not a network boundary.
+  const authorizeCredentialAction = useCallback((
+    actionType: Extract<AuthorizationRequest['actionType'], 'credential_manage' | 'credential_admin'>
+  ): AuthorizationResult => verifyServerAuthorization({ session: activeSession, actionType }),
+  [activeSession]);
+
   // Register a New Client
   const registerClient = useCallback(async (input: RegisterClientInput) => {
+    const authz = authorizeCredentialAction('credential_manage');
+    if (!authz.allowed) {
+      addAuditRecord('AUTHZ_DENIED', `Blocked client registration attempt: ${authz.message}`);
+      return { success: false, error: authz.message };
+    }
+
     if (!input.companyName || !input.contactPerson || !input.email) {
       return { success: false, error: 'Company Name, Contact Person, and Email are required fields.' };
     }
@@ -249,10 +363,16 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     );
 
     return { success: true, client: newClient };
-  }, [clients, addAuditRecord]);
+  }, [clients, addAuditRecord, authorizeCredentialAction]);
 
   // Update Existing Client
   const updateClient = useCallback(async (internalId: string, changes: Partial<ClientRecord>) => {
+    const authz = authorizeCredentialAction('credential_manage');
+    if (!authz.allowed) {
+      addAuditRecord('AUTHZ_DENIED', `Blocked client record update: ${authz.message}`);
+      return { success: false, error: authz.message };
+    }
+
     const existing = clients.find(c => c.internalId === internalId);
     if (!existing) return { success: false, error: 'Client record not found.' };
 
@@ -267,10 +387,16 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     );
 
     return { success: true };
-  }, [clients, addAuditRecord]);
+  }, [clients, addAuditRecord, authorizeCredentialAction]);
 
   // Update Client Permissions
   const updateClientPermissions = useCallback(async (internalId: string, permissions: ClientPermissions) => {
+    const authz = authorizeCredentialAction('credential_admin');
+    if (!authz.allowed) {
+      addAuditRecord('AUTHZ_DENIED', `Blocked client permission change: ${authz.message}`);
+      return { success: false, error: authz.message };
+    }
+
     const existing = clients.find(c => c.internalId === internalId);
     if (!existing) return { success: false, error: 'Client record not found.' };
 
@@ -285,10 +411,16 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     );
 
     return { success: true };
-  }, [clients, addAuditRecord]);
+  }, [clients, addAuditRecord, authorizeCredentialAction]);
 
   // Update Account Status (Active, Suspended, etc.)
   const updateClientStatus = useCallback(async (internalId: string, status: AccountStatus) => {
+    const authz = authorizeCredentialAction('credential_admin');
+    if (!authz.allowed) {
+      addAuditRecord('AUTHZ_DENIED', `Blocked account status change to ${status}: ${authz.message}`);
+      return { success: false, error: authz.message };
+    }
+
     const existing = clients.find(c => c.internalId === internalId);
     if (!existing) return { success: false, error: 'Client record not found.' };
 
@@ -307,10 +439,16 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     );
 
     return { success: true };
-  }, [clients, addAuditRecord]);
+  }, [clients, addAuditRecord, authorizeCredentialAction]);
 
   // Reset Client Password
   const resetClientPassword = useCallback(async (internalId: string, newPassword: string) => {
+    const authz = authorizeCredentialAction('credential_manage');
+    if (!authz.allowed) {
+      addAuditRecord('AUTHZ_DENIED', `Blocked password reset: ${authz.message}`);
+      return { success: false, error: authz.message };
+    }
+
     const existing = clients.find(c => c.internalId === internalId);
     if (!existing) return { success: false, error: 'Client record not found.' };
 
@@ -327,7 +465,7 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     );
 
     return { success: true };
-  }, [clients, addAuditRecord]);
+  }, [clients, addAuditRecord, authorizeCredentialAction]);
 
   // Client Authenticated Login
   const loginClient = useCallback(async (usernameOrClientId: string, password: string) => {
@@ -377,6 +515,9 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     };
 
     setActiveSession(clientSession);
+    // Close the portal so the authorized Client dashboard opens.
+    setIsPortalOpen(false);
+    setPortalSource('landing');
 
     // Update lastLoginAt
     setClients(prev =>
@@ -392,11 +533,53 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     return { success: true };
   }, [clients, addAuditRecord]);
 
+  // Record a genuine successful Staff / Project-Manager (Plant Operations) login.
+  // Uses the identifier the user actually entered (Employee No. / Supervisor ID / Email)
+  // so the Developer "Access Records" section reflects real, stored authentication events.
+  const recordStaffLogin = useCallback((identifier: string, role: 'Admin' | 'ProjectManager') => {
+    const record: AccessHistoryRecord = {
+      id: `SEC-LOG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: formatTimestamp(),
+      userId: identifier,
+      userRole: role,
+      action: 'LOGIN_SUCCESS',
+      details: role === 'Admin'
+        ? `Staff login successful for ${identifier}.`
+        : `Plant Operations / Project Manager login successful for ${identifier}.`,
+    };
+    setClientAuditLogs(prev => [record, ...prev]);
+  }, []);
+
   // Switch Role / Mode (Admin, ProjectManager, Developer, Client)
+  // SIMULATED evaluation login for Staff / PM / Developer (no backend
+  // credential verification — documented limitation). Always closes the portal
+  // and opens the authorized dashboard for the chosen role.
   const switchRole = useCallback((role: UserRole, clientToSimulate?: ClientRecord) => {
+    if (role === 'None') {
+      skipSaveRef.current = true;
+      try {
+        localStorage.removeItem(STORAGE_SESSION_KEY);
+      } catch {
+        // ignore
+      }
+      setActiveSession(DEFAULT_GUEST_SESSION);
+      setPortalSource('landing');
+      setIsPortalOpen(true);
+      return;
+    }
+    setPortalSource('landing');
     setIsPortalOpen(false);
     if (role === 'Admin') {
-      setActiveSession(DEFAULT_ADMIN_SESSION);
+      setActiveSession({
+        userId: 'USR-001',
+        username: 'admin',
+        displayName: 'KKI Administrator',
+        role: 'Admin',
+        permissions: DEFAULT_CLIENT_PERMISSIONS,
+        assignedProjects: [],
+        token: `admin-session-token-${Date.now()}`,
+        loginTime: formatTimestamp(),
+      });
       addAuditRecord('ROLE_SWITCH', 'Switched user role to Administrator.');
     } else if (role === 'ProjectManager') {
       setActiveSession({
@@ -404,7 +587,9 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
         username: 'project_manager',
         displayName: 'Project Manager (KKI)',
         role: 'ProjectManager',
-        token: 'pm-token-live',
+        permissions: DEFAULT_CLIENT_PERMISSIONS,
+        assignedProjects: [],
+        token: `pm-session-token-${Date.now()}`,
         loginTime: formatTimestamp(),
       });
       addAuditRecord('ROLE_SWITCH', 'Switched user role to Project Manager.');
@@ -414,7 +599,9 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
         username: 'dev_tech',
         displayName: 'Technical Developer',
         role: 'Developer',
-        token: 'dev-token-live',
+        permissions: DEFAULT_CLIENT_PERMISSIONS,
+        assignedProjects: [],
+        token: `dev-session-token-${Date.now()}`,
         loginTime: formatTimestamp(),
       });
       addAuditRecord('ROLE_SWITCH', 'Switched user role to Developer.');
@@ -452,17 +639,26 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     }
   }, [addAuditRecord]);
 
-  // Logout - strictly clears client/staff session and resets to unauthenticated state
+  // Logout - strictly clears the session and returns to the unauthenticated
+  // landing state. Business data (clients, audit logs) is preserved.
   const logout = useCallback(() => {
     addAuditRecord('LOGOUT', `User ${activeSession.displayName} logged out.`);
+    skipSaveRef.current = true;
     try {
       localStorage.removeItem(STORAGE_SESSION_KEY);
     } catch {
       // ignore
     }
-    setActiveSession(DEFAULT_ADMIN_SESSION);
+    setActiveSession(DEFAULT_GUEST_SESSION);
+    setPortalSource('landing');
     setIsPortalOpen(true);
   }, [activeSession, addAuditRecord]);
+
+  // Open the portal from the dashboard topbar (keep the existing session, allow close)
+  const openPortalFromDashboard = useCallback(() => {
+    setPortalSource('dashboard');
+    setIsPortalOpen(true);
+  }, []);
 
   // Security Verification Gateway
   const authorizeAction = useCallback((req: Omit<AuthorizationRequest, 'session'>): AuthorizationResult => {
@@ -481,10 +677,14 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     clients,
     activeSession,
     clientAuditLogs,
+    isSessionReady,
     isPortalOpen,
     setIsPortalOpen,
+    portalSource,
+    openPortalFromDashboard,
     switchRole,
     loginClient,
+    recordStaffLogin,
     logout,
     registerClient,
     updateClient,
@@ -498,9 +698,13 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
     clients,
     activeSession,
     clientAuditLogs,
+    isSessionReady,
     isPortalOpen,
+    portalSource,
+    openPortalFromDashboard,
     switchRole,
     loginClient,
+    recordStaffLogin,
     logout,
     registerClient,
     updateClient,

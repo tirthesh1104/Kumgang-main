@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
@@ -37,47 +37,34 @@ interface ProjectJourneyProps {
   project?: ProjectMaster;
 }
 
-// Stage 3D Illustration Component
-function StageIllustration({
+// Stage Icon Component — clean, compact professional status visual
+function StageIcon({
   stageId,
-  stageNumber,
-  isActive
+  isActive,
+  isCompleted,
 }: {
   stageId: string;
-  stageNumber: number;
   isActive?: boolean;
+  isCompleted?: boolean;
 }) {
-  const [imageError, setImageError] = useState(false);
+  let iconEl: React.ReactNode = null;
+  if (stageId === 'contract') iconEl = <FileText size={26} />;
+  else if (stageId === 'design') iconEl = <Layers size={26} />;
+  else if (stageId === 'production') iconEl = <HardHat size={26} />;
+  else if (stageId === 'loading') iconEl = <PackageCheck size={26} />;
+  else if (stageId === 'shipment') iconEl = <Ship size={26} />;
+  else if (stageId === 'delivery') iconEl = <Truck size={26} />;
+  else if (stageId === 'payment') iconEl = <Wallet size={26} />;
 
-  // Map stage IDs to high-quality 3D illustrated assets
-  const illustrationSrc = `/illustrations/${stageId}.png`;
-
-  if (imageError) {
-    // Fallback if image fails to load
-    return (
-      <div className={`w-24 h-24 mx-auto rounded-2xl flex flex-col items-center justify-center p-2 transition-transform duration-300 hover:scale-105 ${
-        isActive ? 'bg-purple-500/10 text-purple-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-      }`}>
-        {stageId === 'contract' && <FileText size={32} />}
-        {stageId === 'design' && <Layers size={32} />}
-        {stageId === 'production' && <HardHat size={32} />}
-        {stageId === 'loading' && <PackageCheck size={32} />}
-        {stageId === 'shipment' && <Ship size={32} />}
-        {stageId === 'delivery' && <Truck size={32} />}
-        {stageId === 'payment' && <Wallet size={32} />}
-      </div>
-    );
-  }
+  const bg = isCompleted
+    ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 ring-4 ring-emerald-200/60 dark:ring-emerald-900/60'
+    : isActive
+    ? 'bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 ring-4 ring-purple-200/60 dark:ring-purple-900/60'
+    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500';
 
   return (
-    <div className="w-28 h-28 mx-auto flex items-end justify-center relative select-none">
-      <img
-        src={illustrationSrc}
-        alt={`Stage ${stageNumber}`}
-        className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-transform duration-300 hover:scale-105"
-        onError={() => setImageError(true)}
-        loading="eager"
-      />
+    <div className={`w-14 h-14 mx-auto rounded-2xl flex items-center justify-center transition-all duration-300 ${bg}`}>
+      {iconEl}
     </div>
   );
 }
@@ -113,14 +100,14 @@ export function ProjectJourney({ stages: customStages, project }: ProjectJourney
 
   const activeStage = stages[currentStageIndex] || stages[0];
 
-  // Overall progress calculation
+  // Overall progress calculation — derived from configured project data only.
   const overallProgress = project?.designProgressPercent != null
     ? Math.min(Math.round(project.designProgressPercent), 100)
-    : (activeStage?.progressPercent != null ? activeStage.progressPercent : 72);
+    : (activeStage?.progressPercent != null ? Math.min(activeStage.progressPercent, 100) : 0);
 
-  const targetDeliveryDate = project?.deliveryRequest || project?.eta || '15 Nov 2026';
-  const projectName = project?.project || 'Westlands Towers';
-  const blockName = project?.block ? `Block ${project.block}` : (project?.projectId || 'BLD4');
+  const targetDeliveryDate = project?.deliveryRequest || project?.deliveryTimeline || project?.eta || 'Not configured';
+  const projectName = project?.project || 'Project';
+  const blockName = project?.block ? `Block ${project.block}` : (project?.projectId || '—');
 
   // Translation helpers
   const txtLifecycle = isKo ? '생애주기' : 'LIFECYCLE';
@@ -194,198 +181,109 @@ export function ProjectJourney({ stages: customStages, project }: ProjectJourney
         </div>
       </div>
 
-      {/* 2. 7-Stage Horizontal Timeline Container */}
-      <div className="py-6 overflow-x-auto scrollbar-thin">
-        <div className="min-w-[940px] pt-4 pb-2">
-          <div className="grid grid-cols-7 gap-3 sm:gap-4 relative">
-            {/* Connected Progress Line behind step circles */}
-            {/* The line sits right behind the circular milestone markers (row top ~ 124px) */}
-            <div className="absolute top-[124px] left-[7.14%] right-[7.14%] h-[3px] -z-0">
-              {/* Base background line */}
-              <div className="absolute inset-0 bg-[#E2E8F0] dark:bg-slate-800 rounded-full" />
-              {/* Progress active gradient fill */}
-              <div
-                className="absolute top-0 left-0 bottom-0 rounded-full transition-all duration-700 ease-out"
-                style={{
-                  width: `${(currentStageIndex / (stages.length - 1)) * 100}%`,
-                  background: 'linear-gradient(90deg, #10B981 0%, #10B981 80%, #7C3AED 100%)'
-                }}
-              />
-            </div>
+      {/* 2. 7-Stage Horizontal Timeline — clean stage milestones (no stage cards) */}
+      <div className="py-4 overflow-x-auto scrollbar-thin">
+        <div className="min-w-[860px] pb-2">
+          {/* Timeline: connector line with integrated stage nodes */}
+          <div className="relative">
+            {/* Base track — spans between the first and last stage node centers */}
+            <div className="absolute top-20 left-[calc(100%/14)] right-[calc(100%/14)] h-1 bg-slate-200 dark:bg-slate-800 rounded-full" />
+            {/* Completed progress gradient — up to the current stage node */}
+            <div
+              className="absolute top-20 left-[calc(100%/14)] h-1 rounded-full transition-all duration-700 ease-out"
+              style={{
+                width: `calc(${currentStageIndex} * 100% / 7)`,
+                background: 'linear-gradient(90deg, #10B981 0%, #10B981 80%, #7C3AED 100%)'
+              }}
+            />
 
-            {stages.map((stage, idx) => {
-              const isPast = idx < currentStageIndex;
-              const isCurrent = idx === currentStageIndex;
+            {/* Stage Columns (borderless — timeline only) */}
+            <div className="relative grid grid-cols-7">
+              {stages.map((stage, idx) => {
+                const isPast = idx < currentStageIndex;
+                const isCurrent = idx === currentStageIndex;
 
-              // Color badge definition matching Screenshot 2
-              let badgeText = isKo ? '대기' : 'PENDING';
-              let badgeClass = 'bg-[#F1F5F9] text-[#64748B] dark:bg-[#1E293B] dark:text-[#94A3B8]';
+                let badgeText = isKo ? '대기' : 'Pending';
+                let badgeCls = 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+                if (stage.status === 'completed' || isPast) {
+                  badgeText = isKo ? '완료' : 'Done';
+                  badgeCls = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400';
+                } else if (stage.status === 'active' || isCurrent) {
+                  badgeText = isKo ? '진행 중' : 'In Progress';
+                  badgeCls = 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400';
+                }
 
-              if (stage.status === 'completed' || isPast) {
-                badgeText = isKo ? '완료' : 'DONE';
-                badgeClass = 'bg-[#DCFCE7] text-[#15803D] dark:bg-[#143E2B] dark:text-[#4ADE80]';
-              } else if (stage.status === 'active' || isCurrent) {
-                badgeText = isKo ? '진행 중' : 'IN PROGRESS';
-                badgeClass = 'bg-[#F3E8FF] text-[#7E22CE] dark:bg-[#3B1E54] dark:text-[#C084FC]';
-              }
+                return (
+                  <div
+                    key={stage.id || idx}
+                    className="flex flex-col items-center text-center px-2"
+                  >
+                    {/* Stage illustration */}
+                    <StageIcon stageId={stage.id} isActive={isCurrent} isCompleted={isPast || stage.status === 'completed'} />
 
-              return (
-                <div
-                  key={stage.id || idx}
-                  className="flex flex-col items-center text-center relative px-1 group"
-                >
-                  {/* Stage 3D Illustration Graphic */}
-                  <div className="h-28 flex items-end justify-center mb-1 relative z-10">
-                    <StageIllustration
-                      stageId={stage.id}
-                      stageNumber={stage.stageNumber}
-                      isActive={isCurrent}
-                    />
-                  </div>
+                    {/* Timeline node sitting on the connector line */}
+                    <div className="relative z-10 mt-4 h-5 flex items-center justify-center">
+                      {isPast ? (
+                        <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow ring-2 ring-emerald-200">
+                          <Check size={11} strokeWidth={3} className="text-white" />
+                        </div>
+                      ) : isCurrent ? (
+                        <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center shadow ring-2 ring-purple-200">
+                          <div className="w-2 h-2 rounded-full bg-white" />
+                        </div>
+                      ) : (
+                        <div className="w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-700 shadow" />
+                      )}
+                    </div>
 
-                  {/* Circular Milestone Marker along the connector line */}
-                  <div className="h-7 flex items-center justify-center my-1 z-10 relative">
-                    {stage.status === 'completed' || isPast ? (
-                      <div className="w-6 h-6 rounded-full bg-[#10B981] text-white flex items-center justify-center shadow-xs ring-4 ring-[#10B981]/20">
-                        <Check size={13} strokeWidth={3.5} />
-                      </div>
-                    ) : isCurrent ? (
-                      <div className="w-6 h-6 rounded-full bg-[#7C3AED] text-white flex items-center justify-center ring-4 ring-[#7C3AED]/25 shadow-xs">
-                        <div className="w-2 h-2 rounded-full bg-white" />
-                      </div>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-[#94A3B8] text-white flex items-center justify-center ring-4 ring-[#94A3B8]/20 shadow-xs" />
-                    )}
-                  </div>
-
-                  {/* Stage Title and Number */}
-                  <div className="mt-2 w-full flex flex-col items-center">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    {/* Stage name */}
+                    <p className="mt-3.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                       {stage.label}
-                    </span>
-                    <h3 className="text-sm sm:text-base font-extrabold text-[#0B1A30] dark:text-white mt-0.5 leading-tight">
+                    </p>
+                    <h3 className="text-[11px] sm:text-xs font-extrabold text-slate-900 dark:text-white leading-tight mt-0.5">
                       {stage.title || stage.label.replace(/^\d+\.\s*/, '')}
                     </h3>
 
-                    {/* Status Badge */}
-                    <div className="mt-1.5">
-                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wide uppercase ${badgeClass}`}>
-                        {badgeText}
-                      </span>
-                    </div>
+                    {/* Status badge */}
+                    <span className={`mt-1.5 inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${badgeCls}`}>
+                      {badgeText}
+                    </span>
 
-                    {/* Dates & Micro Details */}
-                    <div className="mt-2.5 text-xs text-slate-600 dark:text-slate-400 leading-snug space-y-0.5 min-h-[38px] flex flex-col items-center justify-center">
-                      {stage.id === 'contract' && (
-                        <>
-                          <div>
-                            <span className="font-semibold text-slate-500">Actual: </span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">
-                              {stage.actualDate || project?.contractDate || '18-02-2026'}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400">
-                            {stage.subnote || blockName}
-                          </div>
-                        </>
-                      )}
-
-                      {stage.id === 'design' && (
-                        <>
-                          <div>
-                            <span className="font-semibold text-slate-500">Actual: </span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">
-                              {stage.actualDate || project?.shellPlanConfirmation || project?.mdCompletion || '30-01-2026'}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400">
-                            {stage.subnote || 'Shell Plan'}
-                          </div>
-                          <div className="text-[10px] text-slate-400">
-                            {stage.subtitle || 'All activities completed'}
-                          </div>
-                        </>
-                      )}
-
-                      {stage.id === 'production' && (
-                        <>
-                          <div>
-                            <span className="font-semibold text-slate-500">Planned Start: </span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">
-                              {stage.plannedDate || project?.productionStart || '29-06-2026'}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="font-semibold text-slate-500">Actual: </span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">
-                              {stage.actualDate || project?.productionComplete || '27-07-2026'}
-                            </span>
-                          </div>
-                        </>
-                      )}
-
-                      {stage.id === 'loading' && (
-                        <div>
-                          <span className="font-semibold text-slate-500">Actual: </span>
-                          <span className="font-bold text-slate-800 dark:text-slate-200">
-                            {stage.actualDate || project?.loadingDate || '15-05-2026'}
-                          </span>
+                    {/* Key date info */}
+                    <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 leading-snug space-y-0.5 w-full">
+                      {(stage.actualDate || stage.plannedDate) && (
+                        <div className="text-center">
+                          {stage.actualDate && stage.actualDate !== '—' && (
+                            <div className="font-medium truncate">{stage.actualDate}</div>
+                          )}
+                          {!stage.actualDate && stage.plannedDate && (
+                            <div className="text-slate-400 truncate">Plan: {stage.plannedDate}</div>
+                          )}
                         </div>
                       )}
-
-                      {stage.id === 'shipment' && (
-                        <>
-                          <div>
-                            <span className="font-semibold text-slate-500">Planned: </span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">
-                              {stage.plannedDate || project?.etd || '10-08-2026'}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="font-semibold text-slate-500">Actual: </span>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">
-                              {stage.actualDate || project?.eta || '28-07-2026'}
-                            </span>
-                          </div>
-                        </>
-                      )}
-
-                      {stage.id === 'delivery' && (
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 px-1 leading-snug">
-                          {stage.plannedDate
-                            ? `Planned: ${stage.plannedDate}`
-                            : (project?.deliveryTimeline || 'Planned: Material should reach at ICD bangalore on 105th Day from the date of shell plan approval.')}
-                        </div>
-                      )}
-
-                      {stage.id === 'payment' && (
-                        <div>
-                          <span className="font-semibold text-slate-500">Actual: </span>
-                          <span className="font-bold text-slate-800 dark:text-slate-200">
-                            {stage.actualDate || (project?.balanceUSD === 0 ? 'Settled' : '—')}
-                          </span>
-                        </div>
+                      {stage.subnote && (
+                        <div className="text-[9px] text-slate-400 dark:text-slate-500 truncate">{stage.subnote}</div>
                       )}
                     </div>
 
-                    {/* Active Stage Progress Bar (e.g. Shipment 72% in Screenshot 2) */}
-                    {isCurrent && stage.progressPercent != null && (
-                      <div className="w-full max-w-[110px] mt-2 flex flex-col items-center">
-                        <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                    {/* Progress bar — active stage, plus Payment's purple 100% accent */}
+                    {(isCurrent || (stage.id === 'payment' && stage.progressPercent === 100)) && stage.progressPercent != null && (
+                      <div className="w-full mt-2">
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] transition-all duration-500"
+                            className="h-full rounded-full bg-gradient-to-r from-purple-500 to-purple-700 transition-all"
                             style={{ width: `${stage.progressPercent}%` }}
                           />
                         </div>
-                        <span className="text-xs font-black text-[#7C3AED] dark:text-[#C084FC] mt-1">
+                        <span className="text-[9px] font-black text-purple-600 dark:text-purple-400 mt-0.5 block">
                           {stage.progressPercent}%
                         </span>
                       </div>
                     )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

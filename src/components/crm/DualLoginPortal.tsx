@@ -1,24 +1,23 @@
 import { useState, type FormEvent } from 'react';
 import {
   Users, Lock, Eye, EyeOff,
-  ArrowRight, AlertCircle, X, Send, RefreshCw,
-  HardHat, ChevronRight
+  ArrowRight, AlertCircle, X, RefreshCw,
+  HardHat, ChevronRight, Code2, KeyRound
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useClientAccess } from '../../context/ClientAccessContext';
-import { useData } from '../../context/DataContext';
+import { verifyPassword } from '../../utils/securityServer';
 import { GlobalFootprintMap, type MapNode, GLOBAL_NODES } from './GlobalFootprintMap';
 
 interface Props {
   onClose?: () => void;
 }
 
-type AuthTab = 'staff' | 'plant' | 'client';
+type AuthTab = 'staff' | 'plant' | 'client' | 'developer';
 
 export function DualLoginPortal({ onClose }: Props) {
   const { theme, showNotification } = useApp();
-  const { switchRole } = useClientAccess();
-  const { projects } = useData();
+  const { switchRole, activeSession, loginClient, recordStaffLogin } = useClientAccess();
   const isDark = theme === 'dark';
 
   // Active Tab: Staff | Plant | Client
@@ -26,6 +25,13 @@ export function DualLoginPortal({ onClose }: Props) {
 
   // Region Header Toggle
   const [selectedRegion, setSelectedRegion] = useState<'INDIA' | 'AFRICA' | 'GLOBAL'>('INDIA');
+
+  // Developer authentication state
+  const [showDevLogin, setShowDevLogin] = useState(false);
+  const [devPassword, setDevPassword] = useState('');
+  const [devError, setDevError] = useState<string | null>(null);
+
+  const isDeveloper = activeSession.role === 'Developer';
 
   // Selected Map Node
   const [selectedNode, setSelectedNode] = useState<MapNode>(GLOBAL_NODES[2]); // India default
@@ -48,13 +54,14 @@ export function DualLoginPortal({ onClose }: Props) {
   const [isPlantSubmitting, setIsPlantSubmitting] = useState(false);
 
   // Client Form State
-  const [clientAccessId, setClientAccessId] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
-  const [clientOtp, setClientOtp] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [generatedOtp, setGeneratedOtp] = useState('');
   const [clientError, setClientError] = useState<string | null>(null);
   const [isClientSubmitting, setIsClientSubmitting] = useState(false);
+
+  // Client password-based login (for Developer-issued credentials)
+  // Default to Client ID / Password — OTP is NOT required for normal client login.
+  const [clientPasswordId, setClientPasswordId] = useState('');
+  const [clientPassword, setClientPassword] = useState('');
+  const [showClientPassword, setShowClientPassword] = useState(false);
 
   // 1. Staff Login Submit
   const handleStaffLogin = (e: FormEvent) => {
@@ -74,6 +81,8 @@ export function DualLoginPortal({ onClose }: Props) {
     setTimeout(() => {
       setIsStaffSubmitting(false);
       switchRole('Admin');
+      // Record the genuine successful login under the identifier the user actually entered.
+      recordStaffLogin(staffEmpNo.trim() || staffEmail.trim(), 'Admin');
       showNotification('Authenticated as Administrator (Staff Mode).');
       if (onClose) onClose();
     }, 500);
@@ -98,95 +107,91 @@ export function DualLoginPortal({ onClose }: Props) {
       setIsPlantSubmitting(false);
       // Maps securely to existing ProjectManager role for plant operations
       switchRole('ProjectManager');
+      // Record the genuine successful login under the identifier the user actually entered.
+      recordStaffLogin(plantSupervisorId.trim() || plantEmail.trim(), 'ProjectManager');
       showNotification('Authenticated as Plant Operations / Project Manager.');
       if (onClose) onClose();
     }, 500);
   };
 
-  // 3. Client Send OTP
-  const handleSendClientCode = (e: FormEvent) => {
+  // Client password login (for Developer-issued Client ID + password credentials)
+  const handleClientPasswordLogin = async (e: FormEvent) => {
     e.preventDefault();
     setClientError(null);
 
-    const accessId = clientAccessId.trim().toUpperCase();
-    if (!accessId) {
-      setClientError('Please enter your Project Access ID (e.g. KKAF-2026-001 or KKI-2026-001)');
+    const clientId = clientPasswordId.trim().toUpperCase();
+    const password = clientPassword;
+
+    if (!clientId) {
+      setClientError('Please enter your Client ID.');
       return;
     }
-    if (!clientEmail.trim()) {
-      setClientError('Please enter your registered email address');
-      return;
-    }
-
-    // Verify project exists
-    const matchingProject = projects.find(
-      p => p.projectId.toUpperCase() === accessId || p.project.toUpperCase().includes(accessId)
-    );
-
-    if (!matchingProject) {
-      setClientError(`Project Access ID "${accessId}" not found. Please verify with your Kumkang project manager.`);
-      return;
-    }
-
-    // Generate secure 6-digit mock OTP
-    const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(mockOtp);
-    setIsOtpSent(true);
-    showNotification(`OTP Code sent to ${clientEmail}. Demo Code: ${mockOtp}`);
-  };
-
-  // 4. Client Verify OTP
-  const handleVerifyClientOtp = (e: FormEvent) => {
-    e.preventDefault();
-    setClientError(null);
-
-    if (!clientOtp.trim()) {
-      setClientError('Please enter the 6-digit OTP code');
-      return;
-    }
-
-    if (clientOtp.trim() !== generatedOtp && clientOtp.trim() !== '123456') {
-      setClientError('Invalid OTP code. Please enter the generated demo code.');
+    if (!password) {
+      setClientError('Please enter your password.');
       return;
     }
 
     setIsClientSubmitting(true);
-    setTimeout(() => {
-      setIsClientSubmitting(false);
-      const accessId = clientAccessId.trim().toUpperCase();
-      const matchingProject = projects.find(
-        p => p.projectId.toUpperCase() === accessId || p.project.toUpperCase().includes(accessId)
-      );
-
-      // Authenticate as Client with strict project isolation
-      switchRole('Client', {
-        userId: `CLIENT-${accessId}`,
-        username: clientEmail.split('@')[0],
-        displayName: matchingProject?.customer || 'Authorized Client',
-        assignedProjects: [matchingProject?.projectId || accessId],
-      });
-
-      showNotification(`Client Portal Authenticated for Project ${accessId}.`);
+    try {
+      const result = await loginClient(clientId, password);
+      if (!result.success) {
+        setClientError(result.error || 'Invalid Client ID or password.');
+        return;
+      }
+      showNotification(`Client Portal Authenticated (${clientId}).`);
       if (onClose) onClose();
-    }, 600);
+    } catch {
+      setClientError('Authentication failed. Please try again.');
+    } finally {
+      setIsClientSubmitting(false);
+    }
   };
 
-  // Quick Demo Handlers
-  const handleQuickClientDemo = (projectId: string, clientName: string) => {
-    switchRole('Client', {
-      userId: `DEMO-${projectId}`,
-      username: clientName.toLowerCase().replace(/\s+/g, '.'),
-      displayName: clientName,
-      assignedProjects: [projectId],
-    });
-    showNotification(`Quick Login: Entered Client Portal for ${clientName} (${projectId}).`);
-    if (onClose) onClose();
-  };
-
+  // Quick Role Handlers (evaluation shortcuts to existing roles — no fabricated data)
   const handleQuickRole = (role: 'Admin' | 'ProjectManager') => {
     switchRole(role);
     showNotification(`Quick Login: Signed in as ${role === 'Admin' ? 'Administrator' : 'Project Manager'}.`);
     if (onClose) onClose();
+  };
+
+  // Developer entry: open dashboard directly if already authenticated as Developer
+  const handleDeveloperEntry = () => {
+    if (isDeveloper) {
+      showNotification('Developer session active. Opening management dashboard.');
+      if (onClose) onClose();
+      return;
+    }
+    setShowDevLogin(true);
+    setDevError(null);
+  };
+
+  // Developer password authentication (secure developer-only access)
+  const handleDeveloperLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setDevError(null);
+    if (!devPassword.trim()) {
+      setDevError('Please enter the Developer access password.');
+      return;
+    }
+    // Developer access is verified against a configured SHA-256 hash of the authorized
+    // Developer password (VITE_DEVELOPER_PASSWORD_HASH). The plaintext password is never
+    // stored in source code, URLs, or logs. If no authorized hash is configured, the
+    // request is rejected — there is no unauthenticated bypass.
+    const configuredHash = (import.meta.env.VITE_DEVELOPER_PASSWORD_HASH as string | undefined)?.trim();
+    if (!configuredHash) {
+      setDevError('Developer access is not configured on this deployment. Set VITE_DEVELOPER_PASSWORD_HASH to enable secure Developer login.');
+      return;
+    }
+    const isValid = await verifyPassword(devPassword, configuredHash);
+    if (!isValid) {
+      setDevError('Invalid Developer password. Access denied.');
+      return;
+    }
+    setTimeout(() => {
+      switchRole('Developer');
+      showNotification('Authenticated as Developer. Management dashboard unlocked.');
+      if (onClose) onClose();
+    }, 300);
   };
 
   return (
@@ -251,6 +256,19 @@ export function DualLoginPortal({ onClose }: Props) {
               }`}
             >
               Global (HQ)
+            </button>
+            <div className="w-px h-5 bg-slate-300 dark:bg-slate-600 mx-0.5" />
+            <button
+              onClick={handleDeveloperEntry}
+              className={`px-3 py-1 rounded-lg transition-all flex items-center gap-1 ${
+                isDeveloper || activeTab === 'developer'
+                  ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 shadow-sm'
+                  : 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40'
+              }`}
+              title={isDeveloper ? 'Open Developer dashboard' : 'Developer access (requires authorization)'}
+            >
+              <Code2 size={13} />
+              Developer
             </button>
           </div>
 
@@ -334,45 +352,59 @@ export function DualLoginPortal({ onClose }: Props) {
               : 'bg-white border-slate-200 shadow-slate-200/50'
           }`}>
             
-            {/* 3-WAY TAB SELECTOR */}
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/70 rounded-xl mb-6">
+            {/* 4-WAY TAB SELECTOR */}
+            <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 dark:bg-slate-800/70 rounded-xl mb-6">
               <button
                 type="button"
                 onClick={() => setActiveTab('staff')}
-                className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
                   activeTab === 'staff'
                     ? 'bg-white dark:bg-[#1E2433] text-[#0E4E8A] dark:text-sky-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                <Users size={13} />
-                <span>Staff Login</span>
+                <Users size={12} />
+                <span>Staff</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('plant')}
-                className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
                   activeTab === 'plant'
                     ? 'bg-white dark:bg-[#1E2433] text-[#0E4E8A] dark:text-sky-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                <HardHat size={13} />
+                <HardHat size={12} />
                 <span>Plant / Ops</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('client')}
-                className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
                   activeTab === 'client'
                     ? 'bg-white dark:bg-[#1E2433] text-[#0E4E8A] dark:text-sky-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                <Lock size={13} />
-                <span>Client Login</span>
+                <Lock size={12} />
+                <span>Client</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setActiveTab('developer'); handleDeveloperEntry(); }}
+                className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                  activeTab === 'developer'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40'
+                }`}
+                title="Developer access (authorized personnel only)"
+              >
+                <Code2 size={12} />
+                <span>Dev</span>
               </button>
             </div>
 
@@ -625,7 +657,7 @@ export function DualLoginPortal({ onClose }: Props) {
               </div>
             )}
 
-            {/* TAB 3: CLIENT LOGIN (OTP PROTECTED) */}
+            {/* TAB 3: CLIENT LOGIN (CLIENT ID + PASSWORD) */}
             {activeTab === 'client' && (
               <div>
                 <div className="mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -633,8 +665,8 @@ export function DualLoginPortal({ onClose }: Props) {
                     <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
                       Authorized Client Project Portal
                     </h3>
-                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
-                      SECURE OTP
+                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase border bg-indigo-100 text-indigo-800 border-indigo-200">
+                      ID + PASSWORD
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5">
@@ -642,8 +674,7 @@ export function DualLoginPortal({ onClose }: Props) {
                   </p>
                 </div>
 
-                {!isOtpSent ? (
-                  <form onSubmit={handleSendClientCode} className="space-y-3.5 text-xs">
+                  <form onSubmit={handleClientPasswordLogin} className="space-y-3.5 text-xs">
                     {clientError && (
                       <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[11px] flex items-center gap-1.5">
                         <AlertCircle size={14} />
@@ -653,13 +684,13 @@ export function DualLoginPortal({ onClose }: Props) {
 
                     <div>
                       <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
-                        Project Access ID
+                        Client ID
                       </label>
                       <input
                         type="text"
-                        value={clientAccessId}
-                        onChange={e => setClientAccessId(e.target.value)}
-                        placeholder="e.g. KKAF-2026-001 or KKI-2026-001"
+                        value={clientPasswordId}
+                        onChange={e => setClientPasswordId(e.target.value)}
+                        placeholder="e.g. CLIENT-WEST-2026"
                         className={`w-full p-2.5 rounded-lg border font-mono outline-none font-medium transition-all ${
                           isDark
                             ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-sky-500'
@@ -670,125 +701,51 @@ export function DualLoginPortal({ onClose }: Props) {
 
                     <div>
                       <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
-                        Registered Client Email
+                        Password
                       </label>
-                      <input
-                        type="email"
-                        value={clientEmail}
-                        onChange={e => setClientEmail(e.target.value)}
-                        placeholder="client@developer.com"
-                        className={`w-full p-2.5 rounded-lg border outline-none font-medium transition-all ${
-                          isDark
-                            ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-sky-500'
-                            : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-[#0E4E8A]'
-                        }`}
-                      />
+                      <div className="relative">
+                        <input
+                          type={showClientPassword ? 'text' : 'password'}
+                          value={clientPassword}
+                          onChange={e => setClientPassword(e.target.value)}
+                          placeholder="Enter your password"
+                          className={`w-full p-2.5 pr-9 rounded-lg border outline-none font-medium transition-all ${
+                            isDark
+                              ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-sky-500'
+                              : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-[#0E4E8A]'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowClientPassword(!showClientPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showClientPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                      </div>
                     </div>
 
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed italic">
-                      A one-time verification passcode will be issued to your email to validate project authorization.
+                      Use the Client ID and password issued by your Kumkang Developer to access
+                      your assigned projects.
                     </p>
 
                     <button
                       type="submit"
+                      disabled={isClientSubmitting}
                       className="w-full py-2.5 px-4 rounded-xl font-extrabold bg-[#0E4E8A] hover:bg-[#0B3D6D] text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <Send size={14} /> Send Login Code
+                      {isClientSubmitting ? (
+                        <>
+                          <RefreshCw size={14} className="animate-spin" /> Authenticating...
+                        </>
+                      ) : (
+                        <>
+                          <Lock size={14} /> Sign In to Portal
+                        </>
+                      )}
                     </button>
                   </form>
-                ) : (
-                  <form onSubmit={handleVerifyClientOtp} className="space-y-3.5 text-xs">
-                    {clientError && (
-                      <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[11px] flex items-center gap-1.5">
-                        <AlertCircle size={14} />
-                        <span>{clientError}</span>
-                      </div>
-                    )}
-
-                    <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-slate-800 dark:text-slate-200">
-                      <span className="font-extrabold text-xs text-[#0E4E8A] dark:text-sky-400 block mb-0.5">
-                        One-Time Passcode Generated!
-                      </span>
-                      <p className="text-[11px]">
-                        Code dispatched for Project <strong>{clientAccessId}</strong> ({clientEmail}).
-                      </p>
-                      <div className="mt-2 text-xs font-mono font-extrabold bg-white dark:bg-black/40 p-2 rounded border border-sky-200 dark:border-sky-800 inline-block">
-                        Enter OTP: <span className="text-[#0E4E8A] dark:text-sky-300 font-black text-sm">{generatedOtp}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
-                        Enter 6-Digit OTP Code
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={6}
-                        value={clientOtp}
-                        onChange={e => setClientOtp(e.target.value)}
-                        placeholder="••••••"
-                        className={`w-full p-2.5 rounded-lg border text-center tracking-widest font-mono text-base font-extrabold outline-none transition-all ${
-                          isDark
-                            ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-sky-500'
-                            : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-[#0E4E8A]'
-                        }`}
-                      />
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsOtpSent(false)}
-                        className="w-1/3 py-2.5 px-3 rounded-xl font-bold border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
-                      >
-                        Back
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isClientSubmitting}
-                        className="w-2/3 py-2.5 px-4 rounded-xl font-extrabold bg-[#0E4E8A] hover:bg-[#0B3D6D] text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        {isClientSubmitting ? (
-                          <>
-                            <RefreshCw size={14} className="animate-spin" /> Verifying...
-                          </>
-                        ) : (
-                          <>
-                            Verify & Enter Portal <ArrowRight size={14} />
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {/* Quick Demo Clients */}
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
-                  <span className="text-[11px] font-bold text-slate-400 block">Quick Demo Client Accounts:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickClientDemo('KKAF-2026-001', 'Westlands Towers')}
-                      className="px-2 py-1 rounded-lg border text-[10px] font-bold text-sky-700 dark:text-sky-300 border-sky-300 bg-sky-50/60 dark:bg-sky-950/40 hover:bg-sky-100"
-                    >
-                      Westlands Towers (Kenya)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickClientDemo('KKAF-2026-002', 'Riverside Offices')}
-                      className="px-2 py-1 rounded-lg border text-[10px] font-bold text-amber-700 dark:text-amber-300 border-amber-300 bg-amber-50/60 dark:bg-amber-950/40 hover:bg-amber-100"
-                    >
-                      Riverside Offices (Kenya)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickClientDemo('KKI-2026-003', 'Apex Horizon')}
-                      className="px-2 py-1 rounded-lg border text-[10px] font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/40 hover:bg-emerald-100"
-                    >
-                      Apex Horizon (India)
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
           </div>
@@ -810,6 +767,86 @@ export function DualLoginPortal({ onClose }: Props) {
           <span>Version 2.4.0 (Remediated Production)</span>
         </div>
       </footer>
+
+      {/* Developer Secure Login Overlay */}
+      {showDevLogin && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl shadow-2xl border transition-all ${
+            isDark ? 'bg-[#13161F] border-[#252B3B]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center justify-between px-6 py-4 border-b ${
+              isDark ? 'border-[#252B3B]' : 'border-slate-200'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl ${isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>
+                  <KeyRound size={20} />
+                </div>
+                <div>
+                  <h3 className={`text-base font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    Developer Access
+                  </h3>
+                  <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Restricted to authorized technical personnel
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDevLogin(false)}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  isDark ? 'hover:bg-[#252B3B] text-slate-400' : 'hover:bg-slate-100 text-slate-500'
+                }`}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleDeveloperLogin} className="p-6 space-y-4">
+              {devError && (
+                <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[11px] flex items-center gap-1.5">
+                  <AlertCircle size={14} />
+                  <span>{devError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Developer Access Password
+                </label>
+                <div className="relative">
+                  <KeyRound size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                  <input
+                    type="password"
+                    value={devPassword}
+                    onChange={e => setDevPassword(e.target.value)}
+                    placeholder="Enter developer password"
+                    className={`w-full pl-9 pr-3 py-2.5 rounded-lg border outline-none font-medium text-xs transition-all ${
+                      isDark
+                        ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-purple-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-purple-500'
+                    }`}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className={`p-2.5 rounded-lg text-[11px] leading-relaxed ${
+                isDark ? 'bg-purple-500/10 text-purple-300 border border-purple-500/20' : 'bg-purple-50 text-purple-700 border border-purple-200'
+              }`}>
+                Developer access grants the Project Manager-style dashboard with the
+                Generate ID &amp; Password credential management tool. All actions are
+                audit-logged.
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 px-4 rounded-xl font-extrabold bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-xs"
+              >
+                <Code2 size={14} /> Unlock Developer Dashboard
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

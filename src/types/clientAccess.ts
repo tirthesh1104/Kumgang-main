@@ -1,4 +1,4 @@
-export type UserRole = 'Admin' | 'ProjectManager' | 'Developer' | 'Client';
+export type UserRole = 'Admin' | 'ProjectManager' | 'Developer' | 'Client' | 'None';
 
 export type AccountStatus = 'Active' | 'Inactive' | 'Suspended' | 'Expired';
 

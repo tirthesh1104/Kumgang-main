@@ -17,6 +17,7 @@ import {
   ArrowLeft, AlertTriangle, ChevronDown, ChevronUp, FileText, Printer, X, Edit3,
   Plus, Trash2, Edit2, Save, Upload, Paperclip, DollarSign
 } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string; totalContractUSD: number }) {
   const { theme } = useApp();
@@ -26,10 +27,10 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
   const project = getProjectById(projectId);
   const dynamicLastPi = getLastApprovedPIDate(projectId) || project?.lastPiRaisedDate || '—';
 
-  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
-  const exchangeRate = 83.5;
-  const currSymbol = currency === 'USD' ? '$' : '₹';
-  const mult = currency === 'USD' ? 1 : exchangeRate;
+  // Currency display is driven by the global CurrencyContext (valid, configured conversion
+  // rates). Original stored USD amounts are never mutated - only the display is converted.
+  const { selectedCurrency, setSelectedCurrency, getCurrencySymbol, formatCurrency: formatMoney } = useCurrency();
+  const currSymbol = getCurrencySymbol(selectedCurrency);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
@@ -128,14 +129,14 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
             isDark ? 'bg-[#18181B] border-[#303035]' : 'bg-slate-100 border-slate-300'
           }`}>
             <button
-              onClick={() => setCurrency('USD')}
-              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${currency === 'USD' ? 'bg-[#1688D4] text-white shadow-xs font-bold' : (isDark ? 'text-slate-400' : 'text-slate-700 hover:text-slate-900')}`}
+              onClick={() => setSelectedCurrency('USD')}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${selectedCurrency === 'USD' ? 'bg-[#1688D4] text-white shadow-xs font-bold' : (isDark ? 'text-slate-400' : 'text-slate-700 hover:text-slate-900')}`}
             >
               USD ($)
             </button>
             <button
-              onClick={() => setCurrency('INR')}
-              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${currency === 'INR' ? 'bg-[#1688D4] text-white shadow-xs font-bold' : (isDark ? 'text-slate-400' : 'text-slate-700 hover:text-slate-900')}`}
+              onClick={() => setSelectedCurrency('INR')}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${selectedCurrency === 'INR' ? 'bg-[#1688D4] text-white shadow-xs font-bold' : (isDark ? 'text-slate-400' : 'text-slate-700 hover:text-slate-900')}`}
             >
               INR (₹)
             </button>
@@ -226,7 +227,7 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                       />
                     ) : (
                       <span className={isDark ? 'text-[#F5F5F3]' : 'text-slate-900'}>
-                        {currSymbol}{(amtUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        {formatMoney(amtUSD)}
                       </span>
                     )}
                   </td>
@@ -273,7 +274,7 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                         }`}
                       />
                     ) : (
-                      <span>{currSymbol}{(paidUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                      <span>{formatMoney(paidUSD)}</span>
                     )}
                   </td>
 
@@ -282,7 +283,7 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
 
                   {/* Col 9: Balance Amount */}
                   <td className={`p-2.5 text-right font-bold font-mono ${isDark ? 'text-amber-400' : 'text-amber-800'}`}>
-                    {currSymbol}{(balUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    {formatMoney(balUSD)}
                   </td>
 
                   {/* Col 10: Balance % */}
@@ -378,16 +379,16 @@ function PaymentMatrixTable({ projectId, totalContractUSD }: { projectId: string
                 Total Milestone Summary
               </td>
               <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-sky-400' : 'text-sky-800'}`}>
-                {currSymbol}{(totalScheduledUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                {formatMoney(totalScheduledUSD)}
               </td>
               <td className={`p-2.5 text-right ${isDark ? 'text-slate-400' : 'text-slate-800 font-bold'}`}>100.0%</td>
               <td colSpan={2} className={`p-2.5 text-center ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>—</td>
               <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>
-                {currSymbol}{(totalReceivedUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                {formatMoney(totalReceivedUSD)}
               </td>
               <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-emerald-400' : 'text-emerald-800'}`}>{overallReceivedPct.toFixed(1)}%</td>
               <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-amber-400' : 'text-amber-800'}`}>
-                {currSymbol}{(totalBalanceUSD * mult).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                {formatMoney(totalBalanceUSD)}
               </td>
               <td className={`p-2.5 text-right font-extrabold ${isDark ? 'text-amber-400' : 'text-amber-800'}`}>{overallBalancePct.toFixed(1)}%</td>
               <td colSpan={2} className={`p-2.5 text-center font-sans text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-700 font-semibold'}`}>

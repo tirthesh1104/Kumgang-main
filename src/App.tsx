@@ -4,6 +4,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { DataProvider } from './context/DataContext';
 import { ClientAccessProvider, useClientAccess } from './context/ClientAccessContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import { Sidebar, MobileNav, TopBar } from './components/layout/Navigation';
 import { Dashboard } from './components/Dashboard';
 import { ProjectsPage } from './components/ProjectsPage';
@@ -28,6 +29,14 @@ import { PortfolioAnalysisDrawer } from './components/PortfolioAnalysisDrawer';
 function PageContent() {
   const { currentPage } = useApp();
   const { activeSession } = useClientAccess();
+
+  // Authentication guard: no valid session → no protected content. The portal
+  // stays as the screen in this state (AppLayout renders it while the session
+  // is missing / invalid / logged out), so protected routes can never render
+  // for an unauthenticated visitor — including direct URL navigation.
+  if (activeSession.role === 'None' || !activeSession.token) {
+    return null;
+  }
 
   // If user is logged in as a Client, strictly enforce Limited Access Client Dashboard View
   if (activeSession.role === 'Client') {
@@ -67,13 +76,25 @@ function PageContent() {
 
 function AppLayout() {
   const { theme } = useApp();
-  const { isPortalOpen, setIsPortalOpen } = useClientAccess();
+  const { activeSession, isSessionReady, isPortalOpen, portalSource, setIsPortalOpen } = useClientAccess();
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
 
   const isDark = theme === 'dark';
+  const isAuthenticated =
+    activeSession.role !== 'None' &&
+    typeof activeSession.token === 'string' &&
+    activeSession.token.trim() !== '';
 
-  if (isPortalOpen) {
-    return <DualLoginPortal onClose={() => setIsPortalOpen(false)} />;
+  // Required flow: Open Website → Login Portal → Successful Authentication →
+  // Authorized Dashboard → Logout → Login Portal.
+  // While session validation is in progress, or whenever there is no valid
+  // authenticated session, the Login Portal is the screen shown — the
+  // dashboard (sidebar, metrics, projects) never renders before auth.
+  if (!isSessionReady || !isAuthenticated || isPortalOpen) {
+    // Opened from the topbar while authenticated → closable overlay.
+    // Initial landing / post-logout / invalid session → mandatory portal.
+    const closable = isSessionReady && isAuthenticated && portalSource === 'dashboard';
+    return <DualLoginPortal onClose={closable ? () => setIsPortalOpen(false) : undefined} />;
   }
 
   return (
@@ -119,13 +140,15 @@ function AppLayout() {
 export default function App() {
   return (
     <LanguageProvider>
-      <DataProvider>
-        <AppProvider>
-          <ClientAccessProvider>
-            <AppLayout />
-          </ClientAccessProvider>
-        </AppProvider>
-      </DataProvider>
+      <CurrencyProvider>
+        <DataProvider>
+          <AppProvider>
+            <ClientAccessProvider>
+              <AppLayout />
+            </ClientAccessProvider>
+          </AppProvider>
+        </DataProvider>
+      </CurrencyProvider>
     </LanguageProvider>
   );
 }

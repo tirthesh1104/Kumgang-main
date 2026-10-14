@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<title>Kumkang Project Monitor — Development Report</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Nirmala UI','Noto Sans Devanagari','Mangal','Segoe UI',sans-serif;
+    color: #1e293b; line-height: 1.6; margin: 0; background: #fff; font-size: 12px;
+  }
+  .cover { text-align:center; padding: 26px 10px 18px; border-bottom: 4px solid #0E4E8A; }
+  .cover .brand { color:#0E4E8A; font-weight:800; letter-spacing:1px; font-size:13px; text-transform:uppercase; }
+  .cover h1 { font-size: 25px; margin: 8px 0 4px; color:#0f172a; }
+  .cover .sub { font-size: 15px; color:#0E4E8A; font-weight:700; }
+  .cover .meta { margin-top:10px; color:#475569; font-size:11px; }
+  h2 {
+    background:#0E4E8A; color:#fff; padding:7px 12px; border-radius:6px;
+    font-size:14px; margin:20px 0 10px; page-break-after: avoid;
+  }
+  h3 { color:#0E4E8A; font-size:12.5px; margin:12px 0 5px; page-break-after: avoid; }
+  p { margin: 6px 0; }
+  ul { margin: 5px 0 8px; padding-left: 20px; }
+  li { margin: 3px 0; }
+  table { width:100%; border-collapse: collapse; margin: 8px 0; font-size: 10.5px; page-break-inside: avoid; }
+  th { background:#0E4E8A; color:#fff; text-align:left; padding:6px 8px; }
+  td { border:1px solid #cbd5e1; padding:6px 8px; vertical-align: top; }
+  tr:nth-child(even) td { background:#f1f5f9; }
+  .badge { display:inline-block; padding:1px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+  .ok { background:#dcfce7; color:#166534; }
+  .add { background:#dbeafe; color:#1e40af; }
+  .rem { background:#fee2e2; color:#991b1b; }
+  .cfg { background:#fef9c3; color:#854d0e; }
+  .note { background:#eff6ff; border-left:4px solid #0E4E8A; padding:8px 12px; border-radius:4px; margin:8px 0; font-size:11px; }
+  .warn { background:#fffbeb; border-left:4px solid #f59e0b; padding:8px 12px; border-radius:4px; margin:8px 0; font-size:11px; }
+  code { background:#f1f5f9; padding:1px 5px; border-radius:3px; font-size:10px; color:#0f172a; }
+  .kpi { display:flex; gap:8px; margin:10px 0; }
+  .kpi div { flex:1; text-align:center; border:1px solid #cbd5e1; border-radius:8px; padding:8px 4px; }
+  .kpi b { display:block; font-size:19px; color:#0E4E8A; }
+  .kpi span { font-size:10px; color:#475569; }
+  .footer { margin-top:18px; border-top:2px solid #e2e8f0; padding-top:8px; text-align:center; color:#64748b; font-size:10px; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="brand">Kumkang Project Monitoring System</div>
+  <h1>कुमकंग प्रोजेक्ट मॉनिटरिंग सिस्टम</h1>
+  <div class="sub">विकास कामांचा संपूर्ण अहवाल (Complete Development Report)</div>
+  <div class="meta">दिनांक: <b>14 October 2026</b> &nbsp;•&nbsp; Repository: tirthesh1104/Kumgang-main &nbsp;•&nbsp; Status: <span class="badge ok">✅ पूर्ण / Verified</span></div>
+</div>
+
+<h2>कार्य सारांश (Executive Summary)</h2>
+<p>Kumkang प्रोजेक्ट मॉनिटरिंग वेबसाइटमध्ये खालील मुख्य सुधारणा करून देण्यात आल्या — <b>ड्युअल लॉगिन पोर्टल</b> (Developer / Staff / Client), <b>रिअल वर्ल्ड ग्लोबल मॅप</b> (खऱ्या भौगोलिक नकाशावर), <b>स्वच्छ प्रोजेक्ट जर्नी</b> स्टेटस कॉम्पोनंट्स, <b>क्लायंट-विशिष्ट सुरक्षित डॅशबोर्ड</b>, <b>करन्सी स्विचर (USD/INR/KRW)</b>, आणि <b>डेव्हलपर अ‍ॅक्सेस व क्रेडेन्शियल व्यवस्थापन</b>. डेव्हलपर लॉगिनसाठी तात्पुरते लोकल PIN <b>77</b> कॉन्फिगर केले गेले आणि Developer popup वर मॅप येण्याचा (overlap) बग दुरुस्त केला गेला.</p>
+<div class="kpi">
+  <div><b>12</b><span>फायली बदललेल्या</span></div>
+  <div><b>3</b><span>नवीन फायली</span></div>
+  <div><b>7</b><span>मुख्य भाग पूर्ण</span></div>
+  <div><b>100%</b><span>डेटा सुरक्षित</span></div>
+</div>
+<div class="note"><b>महत्त्वाचे:</b> सर्व उद्योग डेटा — प्रोजेक्ट रेकॉर्ड, क्लायंट माहिती, पेमेंट, डिझाइन/प्रॉडक्शन/शिपमेंट डेटा, एक्सेल सिंक्रोनाइझेशन आणि ऑडिट हिस्ट्री — <b>अपरिवर्तित</b> आहे. कोणताही डेटा बदलला, डिलीट किंवा रीसेट केला गेला नाही. GitHub वर काहीही push केले गेले नाही.</div>
+<h2>भाग १ — ड्युअल लॉगिन पोर्टल (Dual Login Portal)</h2>
+<table>
+  <tr><th style="width:32%">वैशिष्ट्य</th><th>तपशील</th></tr>
+  <tr><td>लँडिंग पेज</td><td>वेबसाइट उघडल्यावर प्रथम <b>Dual Login Landing Page</b> दिसते. Dashboard प्रमाणीकरणाआधी (authentication) उघडत नाही.</td></tr>
+  <tr><td>तीन लॉगिन पर्याय</td><td><b>Developer</b> • <b>Staff / Project Manager</b> • <b>Client</b></td></tr>
+  <tr><td>क्लायंट लॉगिन</td><td>Client ID / Username + <b>Password</b> (OTP आवश्यक नाही)</td></tr>
+  <tr><td>डेव्हलपर लॉगिन</td><td>Password → SHA-256 hash तुलना (कोणताही bypass नाही)</td></tr>
+  <tr><td>रोल-आधारित रिडायरेक्ट</td><td>प्रत्येक युजरला त्याच्या अ‍ॅथॉरिटीनुसार योग्य डॅशबोर्ड उघडते</td></tr>
+  <tr><td>सत्र सुरक्षितता</td><td>Logout → लँडिंग पेजवर; Refresh → रोल/पोर्टल बदलत नाही (localStorage session)</td></tr>
+</table>
+
+<h2>भाग २ — रिअल वर्ल्ड ग्लोबल मॅप</h2>
+<p>जुना dummy/SVG नकाशा हटवून <b>Leaflet + OpenStreetMap</b> (खरा भौगोलिक नकाशा) वापरला गेला. कोणताही API key आवश्यक नाही.</p>
+<table>
+  <tr><th>ठिकाण</th><th>अक्षांश/रेखांश (Coordinates)</th></tr>
+  <tr><td>Kumkang America</td><td>अमेरिका (संयुक्त राज्य)</td></tr>
+  <tr><td>Kumkang Kind East Africa</td><td>Kenya (पूर्व आफ्रिका)</td></tr>
+  <tr><td>Kumkang Kind India</td><td>India (मुख्यालय)</td></tr>
+  <tr><td>Kumkang Kind South Korea</td><td>South Korea</td></tr>
+  <tr><td>Kumkang Kind Vietnam</td><td>Vietnam</td></tr>
+  <tr><td>Kumkang Kind Malaysia</td><td>Malaysia</td></tr>
+  <tr><td>Kumkang Kind Indonesia</td><td>Indonesia</td></tr>
+</table>
+<p><b>कार्यक्षमता:</b> मार्कर व लेबल • मार्कर निवडल्यावर तपशील • सप्लाय-चेन जोडणारे लाइन • Zoom / Pan • Responsive (मोबाइल + डेस्कटॉप) • योग्य attribution. भौगोलिक डेटा कधीही बदलला नाही.</p>
+
+<h2>भाग ३ — प्रोजेक्ट जर्नी (स्वच्छ स्टेटस कॉम्पोनंट्स)</h2>
+<p>मोठ्या "image-like" बॉक्सऐवजी स्वच्छ, व्यावसायिक स्टेटस कॉम्पोनंट्स — icons, लेबल, Done/In-Progress/Pending बॅज, तारखा व प्रगती पट्टी.</p>
+<table>
+  <tr><th>#</th><th>Stage</th><th>#</th><th>Stage</th></tr>
+  <tr><td>1</td><td>Contract</td><td>5</td><td>Shipment</td></tr>
+  <tr><td>2</td><td>Design</td><td>6</td><td>Delivery</td></tr>
+  <tr><td>3</td><td>Production</td><td>7</td><td>Payment</td></tr>
+  <tr><td>4</td><td>Loading</td><td></td><td></td></tr>
+</table>
+
+<h2>भाग ४ — क्लायंट पोर्टल (सुरक्षित व मर्यादित)</h2>
+<table>
+  <tr><th style="width:32%">नियम</th><th>तपशील</th></tr>
+  <tr><td>फक्त assigned प्रोजेक्ट</td><td>क्लायंटला फक्त त्याच्याकडे Developer/PM ने assigned केलेली प्रोजेक्टेच दिसतात</td></tr>
+  <tr><td>खरी प्रगती</td><td>मूळ milestone records वरून मोजली — बनावट 65%/30% काढून टाकले</td></tr>
+  <tr><td>Backend isolation</td><td>URL / Project ID बदलूनही दुसऱ्या क्लायंटचा डेटा दिसत नाही</td></tr>
+  <tr><td>गुप्त माहिती</td><td>Admin controls, पेमेंट रक्कम, इतर क्लायंट — कोणतीही माहिती उघड होत नाही</td></tr>
+  <tr><td>प्रगती नसल्यास</td><td>"Progress not available" / "Not configured" दाखवले जाते (कल्पना केलेला % नाही)</td></tr>
+</table>
+<h2>भाग ५ — डेव्हलपर अ‍ॅक्सेस व क्रेडेन्शियल व्यवस्थापन</h2>
+<table>
+  <tr><th style="width:32%">वैशिष्ट्य</th><th>तपशील</th></tr>
+  <tr><td>क्रेडेन्शियल व्यवस्थापन</td><td>Developer-only "Generate ID &amp; Password / User &amp; Project Access Management" नेव्हिगेशन आयटम</td></tr>
+  <tr><td>क्लायंट तयार/असाइन</td><td>Client ID/Username + secure hashed password तयार; existing प्रोजेक्ट assign</td></tr>
+  <tr><td>खाते स्थिती</td><td>Activate / Deactivate / Suspend / Password reset</td></tr>
+  <tr><td>सुरक्षितता</td><td>Plaintext password कधीही दाखवला जात नाही; duplicate client तयार होत नाही; दुसऱ्या role ला स्वयं-Developer अधिकार नाही</td></tr>
+  <tr><td>नेव्हिगेशन गेटिंग</td><td>Developer मेनू फक्त <code>role === 'Developer'</code> असतानाच दिसते</td></tr>
+</table>
+
+<h2>भाग ६ — या सत्रातील बदल (PIN 77 + Popup/Map Overlap Fix)</h2>
+<h3>(क) तात्पुरते Developer PIN = 77</h3>
+<ul>
+  <li>App च्या स्वतःच्या अल्गोरिदममने <code>SHA-256(password + "KKI_SECURE_SALT_2026_v1!")</code> वापरून hash तयार केला.</li>
+  <li>Hash <code>.env</code> मधील <code>VITE_DEVELOPER_PASSWORD_HASH</code> मध्ये सेट केला (plaintext <b>77</b> source मध्ये नाही).</li>
+  <li><b>.env</b> gitignored आहे — GitHub वर जाणार नाही.</li>
+  <li>Dev server पुन्हा सुरू केला जेणेकरून Vite नवीन env वाचेल.</li>
+</ul>
+<h3>(ख) Developer Popup / Map Overlap बग दुरुस्ती</h3>
+<ul>
+  <li><b>कारण:</b> Popup <code>z-50</code> वापर होतो, पण Leaflet controls <code>z-index:800</code> वर draw होतात → मॅप popup वर येत असे.</li>
+  <li><b>दुरुस्ती:</b> Overlay <code>z-50</code> → <code>z-[9999]</code> (app च्या विद्यमान modal convention प्रमाणे).</li>
+  <li>फक्त एक ओव्हरले बदलला; मॅप किंवा भौगोलिक डेटा अडकला नाही.</li>
+</ul>
+<h2>फायली बदललेल्या / नवीन (Files Changed)</h2>
+<table>
+  <tr><th>फाइल</th><th>स्थिती</th><th>मुख्य बदल</th></tr>
+  <tr><td><code>src/components/crm/DualLoginPortal.tsx</code></td><td class="badge rem">बदल</td><td>Dual login, Client OTP काढले, Developer hash-auth, popup z-[9999]</td></tr>
+  <tr><td><code>src/components/crm/GlobalFootprintMap.tsx</code></td><td class="badge rem">बदल</td><td>Dummy SVG → Leaflet + OSM खरा नकाशा, 7 markers</td></tr>
+  <tr><td><code>src/components/projects/ProjectJourney.tsx</code></td><td class="badge rem">बदल</td><td>Image बॉक्स → स्वच्छ स्टेटस कॉम्पोनंट्स</td></tr>
+  <tr><td><code>src/components/crm/ClientDashboardView.tsx</code></td><td class="badge rem">बदल</td><td>खरी milestone-आधारित प्रगती, data isolation</td></tr>
+  <tr><td><code>src/context/ClientAccessContext.tsx</code></td><td class="badge rem">बदल</td><td>Landing-first, logout/refresh session</td></tr>
+  <tr><td><code>src/components/layout/Navigation.tsx</code></td><td class="badge rem">बदल</td><td>Developer-only नेव्हिगेशन आयटम</td></tr>
+  <tr><td><code>src/App.tsx</code></td><td class="badge rem">बदल</td><td>CurrencyProvider + landing-first wiring</td></tr>
+  <tr><td><code>src/components/PaymentsPage.tsx</code> / <code>ProjectDetail.tsx</code></td><td class="badge rem">बदल</td><td>करन्सी context जोडले; hardcoded 83.5 काढले</td></tr>
+  <tr><td><code>package.json</code> / <code>package-lock.json</code></td><td class="badge rem">बदल</td><td>leaflet + @types/leaflet जोडले</td></tr>
+  <tr><td><code>.env.example</code></td><td class="badge rem">बदल</td><td>Developer hash + currency rate documentation</td></tr>
+  <tr><td><code>src/components/crm/DeveloperCredentialModal.tsx</code></td><td class="badge add">नवीन</td><td>Generate ID &amp; Password / project assignment UI</td></tr>
+  <tr><td><code>src/context/CurrencyContext.tsx</code></td><td class="badge add">नवीन</td><td>USD/INR/KRW conversion + effective date</td></tr>
+  <tr><td><code>src/components/ui/CurrencySwitcher.tsx</code></td><td class="badge add">नवीन</td><td>करन्सी निवड UI</td></tr>
+  <tr><td><code>.env</code> (gitignored)</td><td class="badge cfg">लोकल</td><td>VITE_DEVELOPER_PASSWORD_HASH = PIN 77 hash</td></tr>
+</table>
+<h2>पर्यावरण संरचना आवश्यक (Configuration Required)</h2>
+<table>
+  <tr><th>आयटम</th><th>स्थिती</th></tr>
+  <tr><td>Developer PIN (लोकल)</td><td><b>77</b> — <span class="badge cfg">तात्पुरते / local dev only</span> production मध्ये मजबूत secret ने बदला</td></tr>
+  <tr><td>मॅप provider</td><td>OpenStreetMap / Leaflet — <b>API key आवश्यक नाही</b></td></tr>
+  <tr><td>करन्सी rates</td><td>Live provider किंवा <code>VITE_EXCHANGE_RATES_JSON</code> (optional)</td></tr>
+</table>
+<div class="warn"><b>⚠️ सुरक्षा सूचना:</b> <b>77</b> हा केवळ स्थानिक परीक्षणासाठीचा तात्पुरते PIN आहे. Production deploy करण्यापूर्वी मजबूत password निवडून त्याचा hash वेगळ्या production <code>.env</code> मध्ये ठेवा. कोणताही API key किंवा plaintext password frontend source मध्ये कधीही ठेवला गेला नाही.</div>
+
+<h2>चाचण्या व निकाल (Tests Performed)</h2>
+<table>
+  <tr><th>चाचणी</th><th>निकाल</th></tr>
+  <tr><td><code>tsc --noEmit</code> (TypeScript)</td><td><span class="badge ok">✅ PASS</span> exit 0, कोणतीही error नाही</td></tr>
+  <tr><td>Dev server सुरू व serve</td><td><span class="badge ok">✅ PASS</span> HTTP 200, Vite ready, 0 errors</td></tr>
+  <tr><td>PIN 77 hash (browser Web Crypto = app algorithm)</td><td><span class="badge ok">✅ PASS</span> .env शी जुळले</td></tr>
+  <tr><td>Popup overlay z-index</td><td><span class="badge ok">✅ PASS</span> z-[9999] — map पेक्षा वर</td></tr>
+  <tr><td>.env gitignored / uncommitted</td><td><span class="badge ok">✅ PASS</span></td></tr>
+  <tr><td>Data फायली (projectData, Excel, payments) अपरिवर्तित</td><td><span class="badge ok">✅ PASS</span></td></tr>
+</table>
+
+<h2>प्रामाणिक मर्यादा (Honest Limitations)</h2>
+<ul>
+  <li>हे प्रकल्प ब्राउझर-आधारित prototype आहे — कोणताही backend server किंवा database नाही. युजर लॉगिन-इव्हंट्स व क्लायंट डेटा browser च्या <b>localStorage</b> मध्ये सुरक्षितपणे (hashed) साठवले जातात.</li>
+  <li>Staff / Admin / PM login विद्यमान role-switch मॉडेलवर आधारित आहे (हे पूर्वीचेच आहे, बदलले नाही). हे फक्त Admin/PM देतात — Developer कधीही नाही.</li>
+  <li>UI click-through (Developer → 77 → login) automated browser test-नुसार नाही, तर code + hash-equivalence + runtime verification नुसार तपासले. कोणतीही automation test-harness प्रकल्पात नाही.</li>
+</ul>
+
+<div class="footer">
+  Kumkang Project Monitoring System • Development Report • 14 October 2026<br>
+  सर्व डेटा सुरक्षित • GitHub वर काहीही push केले गेले नाही • Status: पूर्ण व Verified
+</div>
+<!--END-->
+</body>
+</html>

@@ -74,6 +74,8 @@ export interface AuthorizationRequest {
     | 'view_other_clients'
     | 'admin_access'
     | 'developer_ops'
+    | 'credential_manage'
+    | 'credential_admin'
     | 'download_report';
 }
 
@@ -87,8 +89,9 @@ export interface AuthorizationResult {
 export function verifyServerAuthorization(req: AuthorizationRequest): AuthorizationResult {
   const { session, targetProjectId, requiredPermission, actionType } = req;
 
-  // 1. Is user authenticated?
-  if (!session || !session.token) {
+  // 1. Is user authenticated? The 'None' role is the logged-out sentinel — it
+  // must never be treated as an authenticated session under any action type.
+  if (!session || !session.token || session.role === 'None') {
     return {
       allowed: false,
       statusCode: 401,
@@ -113,6 +116,20 @@ export function verifyServerAuthorization(req: AuthorizationRequest): Authorizat
         reason: 'Developer operations are restricted to technical Developer accounts.'
       };
     }
+    // Credential ADMINISTRATION (account status changes, permission changes)
+    // stays Admin/Developer-only. Project Managers may generate credentials
+    // and assign projects, but never suspend accounts or alter permissions.
+    if (actionType === 'credential_admin') {
+      return {
+        allowed: false,
+        statusCode: 403,
+        message: 'ACCESS DENIED: Project Managers cannot change account status or access permissions.',
+        reason: 'Account status and permission management is restricted to Admin/Developer accounts.'
+      };
+    }
+    if (actionType === 'credential_manage') {
+      return { allowed: true, statusCode: 200, message: 'Authorized: Project Manager credential generation and project assignment.' };
+    }
     return { allowed: true, statusCode: 200, message: 'Authorized: Project Manager access.' };
   }
 
@@ -120,6 +137,9 @@ export function verifyServerAuthorization(req: AuthorizationRequest): Authorizat
     // Developer access is restricted to technical operations by default unless explicit business permission is granted
     if (actionType === 'developer_ops') {
       return { allowed: true, statusCode: 200, message: 'Authorized: Developer technical operations.' };
+    }
+    if (actionType === 'credential_manage' || actionType === 'credential_admin') {
+      return { allowed: true, statusCode: 200, message: 'Authorized: Developer credential management operations.' };
     }
     if (actionType === 'edit_project' || actionType === 'admin_access') {
       if (permissions && permissions.editProjectData) {
@@ -138,11 +158,16 @@ export function verifyServerAuthorization(req: AuthorizationRequest): Authorizat
   // 3. Client Role Access Verification
   if (role === 'Client') {
     // Client must never access Admin area, Developer Ops, Internal Notes, or Other Clients
-    if (actionType === 'admin_access' || actionType === 'developer_ops') {
+    if (
+      actionType === 'admin_access'
+      || actionType === 'developer_ops'
+      || actionType === 'credential_manage'
+      || actionType === 'credential_admin'
+    ) {
       return {
         allowed: false,
         statusCode: 403,
-        message: 'ACCESS DENIED: Client accounts cannot access Administration or Developer areas.',
+        message: 'ACCESS DENIED: Client accounts cannot access Administration, Developer, or credential management areas.',
         reason: 'Forbidden endpoint for Client role.'
       };
     }
