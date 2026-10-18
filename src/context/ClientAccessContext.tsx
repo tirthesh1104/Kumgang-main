@@ -719,6 +719,7 @@ export function ClientAccessProvider({ children }: { children: React.ReactNode }
   return <ClientAccessContext.Provider value={value}>{children}</ClientAccessContext.Provider>;
 }
 
+// oxlint-disable-next-line react/only-export-components
 export function useClientAccess() {
   const ctx = useContext(ClientAccessContext);
   if (!ctx) throw new Error('useClientAccess must be used within ClientAccessProvider');

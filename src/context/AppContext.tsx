@@ -67,21 +67,32 @@ function parseStateFromURL(): {
   projectId: string | null;
   country: string | null;
   folder: string | null;
+  explicit: boolean;
 } {
   try {
     const params = new URLSearchParams(window.location.search);
+    // Every page in the NavPage union must be deep-linkable, otherwise a
+    // reload or shared link silently falls back to the dashboard.
     const validPages: NavPage[] = [
       'dashboard', 'projects', 'project-detail', 'design',
-      'production', 'shipment', 'payments', 'delays', 'reports', 'crm', 'pipeline'
+      'production', 'shipment', 'site-execution', 'payments', 'delays',
+      'reports', 'crm', 'pipeline', 'pi-approvals'
     ];
     const rawPage = params.get('page') as NavPage | null;
-    const page = rawPage && validPages.includes(rawPage) ? rawPage : 'dashboard';
+    // A page route is only "explicit" when a valid `?page=` param is present.
+    // Landing URLs — the bare root, `?Page` (capital P / no value), or any URL
+    // without a valid `?page=` param — are NOT explicit: they represent the
+    // Landing Page, not the dashboard. This resolves the `?page=dashboard` vs
+    // `?Page` routing conflict so a landing URL is never treated as a
+    // dashboard deep-link.
+    const explicit = !!rawPage && validPages.includes(rawPage);
+    const page = explicit ? (rawPage as NavPage) : 'dashboard';
     const projectId = params.get('id');
     const country = params.get('country');
     const folder = params.get('folder');
-    return { page, projectId, country, folder };
-  } catch (e) {
-    return { page: 'dashboard', projectId: null, country: null, folder: null };
+    return { page, projectId, country, folder, explicit };
+  } catch {
+    return { page: 'dashboard', projectId: null, country: null, folder: null, explicit: false };
   }
 }
 
@@ -121,14 +132,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSelectedFolder(state.folder || null);
     };
 
-    // Replace initial state on mount so first history entry is valid
+    // Normalize the URL on mount so the first history entry is valid, but ONLY
+    // when the visitor landed on an explicit `?page=` route (e.g. ?page=projects).
+    // A landing URL (bare root, `?Page`, or anything without a valid page param)
+    // is left untouched — it is NOT rewritten to `?page=dashboard`, so the
+    // Landing Page route stays the initial route and no dashboard URL auto-appears.
     const init = parseStateFromURL();
-    const initUrl = buildURLString(init.page, init.projectId, init.country, init.folder);
-    window.history.replaceState(
-      { page: init.page, projectId: init.projectId, country: init.country, folder: init.folder },
-      '',
-      initUrl
-    );
+    if (init.explicit) {
+      const initUrl = buildURLString(init.page, init.projectId, init.country, init.folder);
+      window.history.replaceState(
+        { page: init.page, projectId: init.projectId, country: init.country, folder: init.folder },
+        '',
+        initUrl
+      );
+    }
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -301,6 +318,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// oxlint-disable-next-line react/only-export-components
 export function useApp() {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp must be used within AppProvider');
