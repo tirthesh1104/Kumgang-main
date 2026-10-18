@@ -13,14 +13,13 @@ interface KPICardProps {
 }
 
 function AnimatedNumber({ value }: { value: string | number }) {
-  const valStr = String(value);
-  // Extract numerical parts if present
-  const numMatch = valStr.match(/[\d,.]+/);
-  const rawNum = numMatch ? parseFloat(numMatch[0].replace(/,/g, '')) : null;
-
   const [displayValue, setDisplayValue] = useState<string | number>(value);
 
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
+    const valStr = String(value);
+    const numMatch = valStr.match(/[\d,.]+/);
+    const rawNum = numMatch ? parseFloat(numMatch[0].replace(/,/g, '')) : null;
     if (rawNum == null || isNaN(rawNum)) {
       setDisplayValue(value);
       return;
@@ -30,6 +29,7 @@ function AnimatedNumber({ value }: { value: string | number }) {
     const end = rawNum;
     const duration = 350; // ms
     const startTime = performance.now();
+    let rafId = 0;
 
     const updateCount = (now: number) => {
       const elapsed = now - startTime;
@@ -45,12 +45,16 @@ function AnimatedNumber({ value }: { value: string | number }) {
       setDisplayValue(`${prefix}${formattedCurrent}${suffix}`);
 
       if (progress < 1) {
-        requestAnimationFrame(updateCount);
+        rafId = requestAnimationFrame(updateCount);
       }
     };
 
-    requestAnimationFrame(updateCount);
-  }, [value, rawNum]);
+    rafId = requestAnimationFrame(updateCount);
+    // Only re-run when the source value changes. Derived values (valStr,
+    // numMatch, rawNum) are computed inside the effect so their object
+    // identity can never retrigger the animation loop.
+    return () => cancelAnimationFrame(rafId);
+  }, [value]);
 
   return <>{displayValue}</>;
 }

@@ -122,7 +122,6 @@ function parseDetailList2() {
   let paymentIdCounter = 0;
   
   // Determine section markers
-  let signedEndRow = -1;
   let notSignedStartRow = -1;
   let cancelStartRow = -1;
   
@@ -130,7 +129,7 @@ function parseDetailList2() {
     const row = raw[i];
     const firstCell = toStr(row[0]);
     
-    if (firstCell.includes('TOTAL (SIGNED CONTRACT)')) { signedEndRow = i; continue; }
+    if (firstCell.includes('TOTAL (SIGNED CONTRACT)')) { continue; }
     if (firstCell.includes('TOTAL (NOT SIGNED YET)')) { notSignedStartRow = i; continue; }
     if (firstCell.includes('TOTAL (CANCEL)')) { cancelStartRow = i; continue; }
     if (firstCell.includes('Sub Total') || toStr(row[1]).includes('Sub Total')) continue;

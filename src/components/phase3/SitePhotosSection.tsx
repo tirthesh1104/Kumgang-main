@@ -65,7 +65,8 @@ export function SitePhotosSection({ projectId }: SitePhotosSectionProps) {
   const [uploadErrorMsg, setUploadErrorMsg] = useState('');
   const [previewPhoto, setPreviewPhoto] = useState<SitePhotoRecord | null>(null);
 
-  // Synchronize state whenever projectId, project, or siteExec change
+  // Synchronize state whenever projectId, project, or siteExec change.
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     setSiteRequirementDate(
       siteExec?.siteRequirementDate || project?.siteRequirementDate || ''

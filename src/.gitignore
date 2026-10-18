@@ -1,0 +1,12 @@
+# NOTE: `testCredentialsStore.ts` is intentionally NOT gitignored.
+#
+# It contains ONLY salted SHA-256 hashes (never plaintext), and it is imported by
+# production code (src/components/crm/DualLoginPortal.tsx and src/testCredentials.ts).
+# Gitignoring it would break fresh clones and the Vercel build (module not found).
+#
+# If you previously added a rule like `src/testCredentialsStore.ts` here, remove it:
+# a pattern inside src/ resolves relative to src/, so it would target the non-existent
+# src/src/testCredentialsStore.ts and never match the real file.
+#
+# To rotate credentials, run: npx tsx scripts/seedTestCredentials.ts
+# Passwords are distributed out-of-band to authorized testers. See TESTING_GUIDE.md.

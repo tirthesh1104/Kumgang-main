@@ -263,7 +263,8 @@ export function DeveloperCredentialModal({ isOpen, onClose, mode = 'developer' }
       setAccountStatus('Active');
       setResetPassword(false);
       setIsCreatingNew(false);
-    } catch (err) {
+    } catch {
+      // Unexpected error — show generic message to user
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);

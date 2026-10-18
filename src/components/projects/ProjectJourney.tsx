@@ -565,6 +565,7 @@ function buildDefaultStages(): JourneyStage[] {
 }
 
 // Build 7 project stages from project master data matching Screenshot 2
+// oxlint-disable-next-line react/only-export-components
 export function buildProjectStages(project: ProjectMaster): JourneyStage[] {
   const design = getDesignForProject(project.projectId);
   const productionList = getProductionForProject(project.projectId);

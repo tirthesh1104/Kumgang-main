@@ -370,7 +370,7 @@ export function addWeeksToDate(dateStr: string | null | undefined, weeks = 13): 
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
-  } catch (e) {
+  } catch {
     return null;
   }
 }

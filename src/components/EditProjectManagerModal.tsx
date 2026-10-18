@@ -13,7 +13,8 @@ export function EditProjectManagerModal() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync form state whenever modal opens or projectManager updates
+  // Sync form state whenever modal opens or projectManager updates.
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     if (isEditModalOpen) {
       setFormData({ ...projectManager });

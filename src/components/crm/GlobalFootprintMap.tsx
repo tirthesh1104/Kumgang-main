@@ -20,6 +20,7 @@ export interface MapNode {
 }
 
 // Verified geographic coordinates for all Kumkang locations
+// oxlint-disable-next-line react/only-export-components
 export const GLOBAL_NODES: MapNode[] = [
   {
     id: 'us',
@@ -162,13 +163,27 @@ export function GlobalFootprintMap({ selectedNodeId, onSelectNode, className = '
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
     // Initialize Leaflet map
+    // Wider bounds so all seven nodes — Americas (US), East Africa (Kenya),
+    // South Asia (India), East Asia (Korea), and Southeast Asia (Vietnam, Malaysia,
+    // Indonesia) — are visible in the initial view without label collisions.
+    // We use fitBounds with generous padding so the map engine picks the best zoom
+    // for the container width rather than forcing a fixed zoom level.
+    const GLOBAL_BOUNDS: L.LatLngBoundsExpression = [
+      [45.0, -130.0],  // NW corner (northern US / Canada latitude for comfortable headroom)
+      [-15.0, 160.0],  // SE corner (south of Indonesia / Java Sea)
+    ];
     const map = L.map(mapContainerRef.current, {
-      center: [20, 30],
+      center: [15.0, 30.0],   // centred slightly north of the equator, over Indian Ocean
       zoom: 2,
+      minZoom: 1,
       zoomControl: true,
       attributionControl: true,
       scrollWheelZoom: true,
     });
+
+    // Frame the initial view to include every known node comfortably.
+    // maxZoom:3 prevents the map from zooming in too close on narrow containers.
+    map.fitBounds(GLOBAL_BOUNDS, { padding: [56, 56], maxZoom: 3 });
 
     // Use OpenStreetMap (light/clean tile layer)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -203,10 +218,19 @@ export function GlobalFootprintMap({ selectedNodeId, onSelectNode, className = '
         title: node.name,
       }).addTo(map);
 
-      // Tooltip with location name
+      // Compact, readable tooltip. Only the HQ node shows a permanent label to
+      // avoid East Africa / Southeast Asia cluster collisions. All other nodes
+      // show their name on hover/click so testers can identify each location
+      // without fighting overlapping text.
       marker.bindTooltip(
         `<div style="font-size:11px;font-weight:800;color:#0E4E8A;white-space:nowrap;">${node.name}${node.sublabel ? '<br><span style="font-size:10px;color:#0284C7;">' + node.sublabel + '</span>' : ''}</div>`,
-        { permanent: true, direction: 'top', className: 'kumkang-map-tooltip', offset: [0, -8] }
+        {
+          permanent: node.isHQ || false,
+          direction: 'top',
+          className: 'kumkang-map-tooltip',
+          offset: [0, -10],
+          sticky: false,
+        }
       );
 
       marker.on('click', () => {
@@ -224,25 +248,30 @@ export function GlobalFootprintMap({ selectedNodeId, onSelectNode, className = '
 
     mapInstanceRef.current = map;
 
+    // Capture ref values in local variables for cleanup — prevents stale .current access.
+    const capturedMarkers = markersRef.current;
+
     return () => {
       map.remove();
       mapInstanceRef.current = null;
-      markersRef.current.clear();
+      capturedMarkers.clear();
       linesRef.current = [];
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Update markers when selectedNodeId changes externally
+  // Update markers when selectedNodeId changes externally.
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     const node = GLOBAL_NODES.find(n => n.id === selectedNodeId);
-    if (node) {
-      setActiveNode(node);
-      markersRef.current.forEach((m, id) => {
-        const n = GLOBAL_NODES.find(gn => gn.id === id);
-        if (n) m.setIcon(createNodeIcon(n.isHQ || false, id === selectedNodeId));
-      });
-    }
+    if (!node) return;
+    // Capture refs locally so the closure is stable for the effect's lifetime
+    const markers = markersRef.current;
+    setActiveNode(prev => (prev.id === node.id ? prev : node));
+    markers.forEach((m, id) => {
+      const n = GLOBAL_NODES.find(gn => gn.id === id);
+      if (n) m.setIcon(createNodeIcon(n.isHQ || false, id === selectedNodeId));
+    });
   }, [selectedNodeId]);
 
   return (
@@ -262,7 +291,7 @@ export function GlobalFootprintMap({ selectedNodeId, onSelectNode, className = '
       </div>
 
       {/* Leaflet Map Container */}
-      <div className="relative w-full" style={{ height: '360px' }}>
+      <div className="relative w-full" style={{ height: '400px' }}>
         {/* CSS animation for pulsing markers */}
         <style>{`
           @keyframes pulse {

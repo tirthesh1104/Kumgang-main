@@ -137,7 +137,7 @@ export async function dispatchPIStageEmail(
         recipientRole,
       };
     }
-  } catch (err: any) {
+  } catch {
     // Network fallback for offline / local Vite dev server
     return {
       success: false,

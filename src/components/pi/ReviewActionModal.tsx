@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, CheckCircle, XCircle, PauseCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useData } from '../../context/DataContext';
@@ -24,15 +24,17 @@ export function ReviewActionModal({ pi, defaultAction = 'APPROVE', token, onClos
   const [action, setAction] = useState<PIApprovalAction>(defaultAction);
   const [comment, setComment] = useState('');
   const [reason, setReason] = useState('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const tokenValidation = token ? validateSecureActionToken(token, pi) : null;
+  const tokenError =
+    tokenValidation && !tokenValidation.valid
+      ? tokenValidation.reason || 'Invalid or expired action token'
+      : null;
 
-  useEffect(() => {
-    if (tokenValidation && !tokenValidation.valid) {
-      setErrorMsg(tokenValidation.reason || 'Invalid or expired action token');
-    }
-  }, [tokenValidation]);
+  // Submit/validation errors only. Token errors are derived above so they can
+  // never go stale when `token` or `pi` changes.
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const errorMsg = submitError ?? tokenError;
 
   // Reviewer role and email based on current stage
   const currentStageName = pi.currentStage === 'PM_REVIEW'
@@ -58,9 +60,10 @@ export function ReviewActionModal({ pi, defaultAction = 'APPROVE', token, onClos
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if ((action === 'REJECT' || action === 'PUT_ON_HOLD') && !reason.trim()) {
-      setErrorMsg(t('reasonRequired'));
+      setSubmitError(t('reasonRequired'));
       return;
     }
+    setSubmitError(null);
 
     const res = processPIApprovalAction(
       pi.id,
@@ -75,7 +78,7 @@ export function ReviewActionModal({ pi, defaultAction = 'APPROVE', token, onClos
       if (onSuccess) onSuccess();
       onClose();
     } else {
-      setErrorMsg(res.error || 'Failed to process approval action');
+      setSubmitError(res.error || 'Failed to process approval action');
     }
   };
 
@@ -146,7 +149,7 @@ export function ReviewActionModal({ pi, defaultAction = 'APPROVE', token, onClos
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => { setAction('APPROVE'); setErrorMsg(null); }}
+                onClick={() => { setAction('APPROVE'); setSubmitError(null); }}
                 className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                   action === 'APPROVE'
                     ? 'bg-emerald-600 text-white border-emerald-500 shadow-md'
@@ -161,7 +164,7 @@ export function ReviewActionModal({ pi, defaultAction = 'APPROVE', token, onClos
 
               <button
                 type="button"
-                onClick={() => { setAction('REJECT'); setErrorMsg(null); }}
+                onClick={() => { setAction('REJECT'); setSubmitError(null); }}
                 className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                   action === 'REJECT'
                     ? 'bg-rose-600 text-white border-rose-500 shadow-md'
@@ -176,7 +179,7 @@ export function ReviewActionModal({ pi, defaultAction = 'APPROVE', token, onClos
 
               <button
                 type="button"
-                onClick={() => { setAction('PUT_ON_HOLD'); setErrorMsg(null); }}
+                onClick={() => { setAction('PUT_ON_HOLD'); setSubmitError(null); }}
                 className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                   action === 'PUT_ON_HOLD'
                     ? 'bg-amber-600 text-white border-amber-500 shadow-md'

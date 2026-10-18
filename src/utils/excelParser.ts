@@ -44,7 +44,7 @@ function normalizeHeader(header: string): string {
 function parseNumeric(val: any): number | null {
   if (val === null || val === undefined || val === '') return null;
   if (typeof val === 'number') return isNaN(val) ? null : val;
-  const cleaned = String(val).replace(/[\$,\s]/g, '');
+  const cleaned = String(val).replace(/[$,\s]/g, '');
   const num = parseFloat(cleaned);
   return isNaN(num) ? null : num;
 }

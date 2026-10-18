@@ -223,6 +223,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 }
 
+// oxlint-disable-next-line react/only-export-components
 export function useCurrency() {
   const ctx = useContext(CurrencyContext);
   if (!ctx) throw new Error('useCurrency must be used within CurrencyProvider');

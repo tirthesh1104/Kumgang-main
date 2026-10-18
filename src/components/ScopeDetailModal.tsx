@@ -29,6 +29,7 @@ type SortDirection = 'asc' | 'desc';
 function AnimatedNumber({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState<number>(() => value);
 
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     if (value === 0) {
       setDisplayValue(0);
@@ -38,6 +39,7 @@ function AnimatedNumber({ value }: { value: number }) {
     const end = value;
     const duration = 350;
     const startTime = performance.now();
+    let rafId = 0;
 
     const updateCount = (now: number) => {
       const elapsed = now - startTime;
@@ -48,12 +50,12 @@ function AnimatedNumber({ value }: { value: number }) {
       setDisplayValue(current);
 
       if (progress < 1) {
-        requestAnimationFrame(updateCount);
+        rafId = requestAnimationFrame(updateCount);
       }
     };
 
-    const handle = requestAnimationFrame(updateCount);
-    return () => cancelAnimationFrame(handle);
+    rafId = requestAnimationFrame(updateCount);
+    return () => cancelAnimationFrame(rafId);
   }, [value]);
 
   if (value === 0) return <>0</>;
@@ -164,6 +166,7 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     if (isOpen) {
       setActiveFilter(initialFilter);
@@ -285,7 +288,9 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
     }
   };
 
-  // Animation & Transition state for smooth layout shifts
+  // Displayed (animated) table state. Initial values come from the first render's
+  // page; subsequent syncs happen via the open-transition effect and the
+  // filter/page transition effect below — never derive-then-set in render.
   const [displayedProjects, setDisplayedProjects] = useState(paginatedProjects);
   const [displayPage, setDisplayPage] = useState(currentPage);
   const [displayedTotal, setDisplayedTotal] = useState(sortedProjects.length);
@@ -301,19 +306,17 @@ export function ScopeDetailModal({ isOpen, scope, scopeData, onClose, initialFil
   const prefersReducedMotion = typeof window !== 'undefined'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Sync displayedProjects initially or whenever modal opens
+  // Mark the next transition as "initial" whenever the modal opens. The actual
+  // displayed-page sync happens in the transition effect below, so this effect
+  // only writes a ref (no state) and has no missing dependencies.
   useEffect(() => {
     if (isOpen) {
-      setDisplayedProjects(paginatedProjects);
-      setDisplayPage(currentPage);
-      setDisplayedTotal(sortedProjects.length);
-      setRowAnimationState('idle');
-      setTableHeight('auto');
       isInitialMount.current = true;
     }
   }, [isOpen]);
 
-  // Handle smooth animated layout shift when activeFilter, searchQuery, or currentPage changes
+  // Handle smooth animated layout shift when activeFilter, searchQuery, or currentPage changes.
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     if (!isOpen) return;
 

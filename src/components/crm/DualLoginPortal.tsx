@@ -2,11 +2,16 @@ import { useState, type FormEvent } from 'react';
 import {
   Users, Lock, Eye, EyeOff,
   ArrowRight, AlertCircle, X, RefreshCw,
-  HardHat, ChevronRight, Code2, KeyRound
+  HardHat, ChevronRight, Code2, KeyRound, ShieldCheck
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useClientAccess } from '../../context/ClientAccessContext';
 import { verifyPassword } from '../../utils/securityServer';
+import {
+  TEST_ACCOUNT_IDS,
+  verifyTestPassword,
+} from '../../testAuth';
+import TEST_PASSWORD_HASHES from '../../testCredentialsStore';
 import { GlobalFootprintMap, type MapNode, GLOBAL_NODES } from './GlobalFootprintMap';
 
 interface Props {
@@ -20,23 +25,17 @@ export function DualLoginPortal({ onClose }: Props) {
   const { switchRole, activeSession, loginClient, recordStaffLogin } = useClientAccess();
   const isDark = theme === 'dark';
 
-  // Active Tab: Staff | Plant | Client
   const [activeTab, setActiveTab] = useState<AuthTab>('staff');
-
-  // Region Header Toggle
   const [selectedRegion, setSelectedRegion] = useState<'INDIA' | 'AFRICA' | 'GLOBAL'>('INDIA');
 
-  // Developer authentication state
   const [showDevLogin, setShowDevLogin] = useState(false);
   const [devPassword, setDevPassword] = useState('');
   const [devError, setDevError] = useState<string | null>(null);
 
   const isDeveloper = activeSession.role === 'Developer';
 
-  // Selected Map Node
-  const [selectedNode, setSelectedNode] = useState<MapNode>(GLOBAL_NODES[2]); // India default
+  const [selectedNode, setSelectedNode] = useState<MapNode>(GLOBAL_NODES[2]);
 
-  // Staff Form State
   const [staffEmpNo, setStaffEmpNo] = useState('');
   const [staffEmail, setStaffEmail] = useState('');
   const [staffPassword, setStaffPassword] = useState('');
@@ -45,7 +44,6 @@ export function DualLoginPortal({ onClose }: Props) {
   const [staffError, setStaffError] = useState<string | null>(null);
   const [isStaffSubmitting, setIsStaffSubmitting] = useState(false);
 
-  // Plant / Operations Form State
   const [plantSupervisorId, setPlantSupervisorId] = useState('');
   const [plantEmail, setPlantEmail] = useState('');
   const [plantPassword, setPlantPassword] = useState('');
@@ -53,22 +51,35 @@ export function DualLoginPortal({ onClose }: Props) {
   const [plantError, setPlantError] = useState<string | null>(null);
   const [isPlantSubmitting, setIsPlantSubmitting] = useState(false);
 
-  // Client Form State
   const [clientError, setClientError] = useState<string | null>(null);
   const [isClientSubmitting, setIsClientSubmitting] = useState(false);
 
-  // Client password-based login (for Developer-issued credentials)
-  // Default to Client ID / Password — OTP is NOT required for normal client login.
   const [clientPasswordId, setClientPasswordId] = useState('');
   const [clientPassword, setClientPassword] = useState('');
   const [showClientPassword, setShowClientPassword] = useState(false);
 
-  // 1. Staff Login Submit
-  const handleStaffLogin = (e: FormEvent) => {
+  const [showAdminTestLogin, setShowAdminTestLogin] = useState(false);
+  const [showPmTestLogin, setShowPmTestLogin] = useState(false);
+
+  const [adminTestId, setAdminTestId] = useState('');
+  const [adminTestPassword, setAdminTestPassword] = useState('');
+  const [adminTestError, setAdminTestError] = useState<string | null>(null);
+  const [isAdminTestSubmitting, setIsAdminTestSubmitting] = useState(false);
+
+  const [pmTestId, setPmTestId] = useState('');
+  const [pmTestPassword, setPmTestPassword] = useState('');
+  const [pmTestError, setPmTestError] = useState<string | null>(null);
+  const [isPmTestSubmitting, setIsPmTestSubmitting] = useState(false);
+
+  // Staff login: accepts the dedicated test account (TST-STAFF-01) with verified
+  // password, or a legitimate staff ID/email pattern (EMP-*, ADMIN-*, *@kumkang.*).
+  // No unauthenticated bypass — any other combination is rejected.
+  const handleStaffLogin = async (e: FormEvent) => {
     e.preventDefault();
     setStaffError(null);
 
-    if (!staffEmpNo.trim() && !staffEmail.trim()) {
+    const identifier = staffEmpNo.trim() || staffEmail.trim();
+    if (!identifier) {
       setStaffError('Please enter Employee No. or Email Address');
       return;
     }
@@ -78,22 +89,70 @@ export function DualLoginPortal({ onClose }: Props) {
     }
 
     setIsStaffSubmitting(true);
-    setTimeout(() => {
-      setIsStaffSubmitting(false);
+    try {
+      // Path 1 — Test account (TST-STAFF-01 + TestStaff@2026!K)
+      const testId = identifier.toUpperCase();
+      if (testId === TEST_ACCOUNT_IDS.staff) {
+        const storedHash = TEST_PASSWORD_HASHES.staff;
+        if (!storedHash) {
+          setStaffError('Staff test account is not configured on this deployment.');
+          return;
+        }
+        const isValid = await verifyTestPassword(staffPassword, storedHash);
+        if (!isValid) {
+          setStaffError('Invalid test ID or password. Access denied.');
+          return;
+        }
+        switchRole('Admin');
+        recordStaffLogin(testId, 'Admin');
+        showNotification('Authenticated as TEST Internal Staff (Administrator).');
+        if (onClose) onClose();
+        return;
+      }
+
+      // Path 2 — Legitimate-format staff ID or kumkang email
+      const isLegitFormat =
+        /^EMP-\d{4}-\d+$/i.test(identifier) ||
+        /^ADMIN-\d+$/i.test(identifier) ||
+        /^[^@]+@kumkang\.\w+$/.test(identifier);
+
+      if (!isLegitFormat) {
+        setStaffError(
+          'Unrecognized ID format. Use your Employee Number (EMP-2026-xxx / ADMIN-001) ' +
+          'or corporate email, or use the test ID TST-STAFF-01.'
+        );
+        return;
+      }
+
+      // For legitimate staff IDs the app has no stored password hash (no backend).
+      // We verify against the staff test hash as a demo credential so the form
+      // behaves consistently. Production would call a server endpoint here.
+      const isValid = await verifyTestPassword(staffPassword, TEST_PASSWORD_HASHES.staff);
+      if (!isValid) {
+        setStaffError(
+          'Invalid credentials. For testing, use Employee ID EMP-2026-081 with the ' +
+          'test password, or use the dedicated test account TST-STAFF-01.'
+        );
+        return;
+      }
+
       switchRole('Admin');
-      // Record the genuine successful login under the identifier the user actually entered.
-      recordStaffLogin(staffEmpNo.trim() || staffEmail.trim(), 'Admin');
+      recordStaffLogin(identifier, 'Admin');
       showNotification('Authenticated as Administrator (Staff Mode).');
       if (onClose) onClose();
-    }, 500);
+    } finally {
+      setIsStaffSubmitting(false);
+    }
   };
 
-  // 2. Plant / Operations Login Submit
-  const handlePlantLogin = (e: FormEvent) => {
+  // Plant/Ops login: accepts TST-OPS-01 with verified password, or a legitimate
+  // supervisor ID / ops email pattern. No unauthenticated bypass.
+  const handlePlantLogin = async (e: FormEvent) => {
     e.preventDefault();
     setPlantError(null);
 
-    if (!plantSupervisorId.trim() && !plantEmail.trim()) {
+    const identifier = plantSupervisorId.trim() || plantEmail.trim();
+    if (!identifier) {
       setPlantError('Please enter Supervisor ID or Plant Operations Email');
       return;
     }
@@ -103,18 +162,60 @@ export function DualLoginPortal({ onClose }: Props) {
     }
 
     setIsPlantSubmitting(true);
-    setTimeout(() => {
-      setIsPlantSubmitting(false);
-      // Maps securely to existing ProjectManager role for plant operations
+    try {
+      // Path 1 — Test account (TST-OPS-01 + TestOps@2026!K)
+      const testId = identifier.toUpperCase();
+      if (testId === TEST_ACCOUNT_IDS.plantOperations) {
+        const storedHash = TEST_PASSWORD_HASHES.plantOperations;
+        if (!storedHash) {
+          setPlantError('Plant Operations test account is not configured on this deployment.');
+          return;
+        }
+        const isValid = await verifyTestPassword(plantPassword, storedHash);
+        if (!isValid) {
+          setPlantError('Invalid test ID or password. Access denied.');
+          return;
+        }
+        switchRole('ProjectManager');
+        recordStaffLogin(testId, 'ProjectManager');
+        showNotification('Authenticated as TEST Plant / Operations (Project Manager).');
+        if (onClose) onClose();
+        return;
+      }
+
+      // Path 2 — Legitimate-format supervisor ID or ops email
+      const isLegitFormat =
+        /^SUP-/i.test(identifier) ||
+        /^PM-/i.test(identifier) ||
+        /^OPS-/i.test(identifier) ||
+        /^[^@]+@kumkang\.\w+$/.test(identifier);
+
+      if (!isLegitFormat) {
+        setPlantError(
+          'Unrecognized ID format. Use your Supervisor ID (SUP-SITE-xx / PM-OPS) ' +
+          'or ops email, or use the test ID TST-OPS-01.'
+        );
+        return;
+      }
+
+      // Demo: verify against ops test hash (no backend in current deployment).
+      const isValid = await verifyTestPassword(plantPassword, TEST_PASSWORD_HASHES.plantOperations);
+      if (!isValid) {
+        setPlantError(
+          'Invalid credentials. For testing, use the dedicated test account TST-OPS-01.'
+        );
+        return;
+      }
+
       switchRole('ProjectManager');
-      // Record the genuine successful login under the identifier the user actually entered.
-      recordStaffLogin(plantSupervisorId.trim() || plantEmail.trim(), 'ProjectManager');
+      recordStaffLogin(identifier, 'ProjectManager');
       showNotification('Authenticated as Plant Operations / Project Manager.');
       if (onClose) onClose();
-    }, 500);
+    } finally {
+      setIsPlantSubmitting(false);
+    }
   };
 
-  // Client password login (for Developer-issued Client ID + password credentials)
   const handleClientPasswordLogin = async (e: FormEvent) => {
     e.preventDefault();
     setClientError(null);
@@ -147,14 +248,6 @@ export function DualLoginPortal({ onClose }: Props) {
     }
   };
 
-  // Quick Role Handlers (evaluation shortcuts to existing roles — no fabricated data)
-  const handleQuickRole = (role: 'Admin' | 'ProjectManager') => {
-    switchRole(role);
-    showNotification(`Quick Login: Signed in as ${role === 'Admin' ? 'Administrator' : 'Project Manager'}.`);
-    if (onClose) onClose();
-  };
-
-  // Developer entry: open dashboard directly if already authenticated as Developer
   const handleDeveloperEntry = () => {
     if (isDeveloper) {
       showNotification('Developer session active. Opening management dashboard.');
@@ -165,7 +258,6 @@ export function DualLoginPortal({ onClose }: Props) {
     setDevError(null);
   };
 
-  // Developer password authentication (secure developer-only access)
   const handleDeveloperLogin = async (e: FormEvent) => {
     e.preventDefault();
     setDevError(null);
@@ -173,10 +265,6 @@ export function DualLoginPortal({ onClose }: Props) {
       setDevError('Please enter the Developer access password.');
       return;
     }
-    // Developer access is verified against a configured SHA-256 hash of the authorized
-    // Developer password (VITE_DEVELOPER_PASSWORD_HASH). The plaintext password is never
-    // stored in source code, URLs, or logs. If no authorized hash is configured, the
-    // request is rejected — there is no unauthenticated bypass.
     const configuredHash = (import.meta.env.VITE_DEVELOPER_PASSWORD_HASH as string | undefined)?.trim();
     if (!configuredHash) {
       setDevError('Developer access is not configured on this deployment. Set VITE_DEVELOPER_PASSWORD_HASH to enable secure Developer login.');
@@ -194,18 +282,161 @@ export function DualLoginPortal({ onClose }: Props) {
     }, 300);
   };
 
+  const handleQuickRole = (role: 'Admin' | 'ProjectManager') => {
+    if (role === 'Admin') {
+      setShowAdminTestLogin(true);
+      setAdminTestError(null);
+      return;
+    }
+    setShowPmTestLogin(true);
+    setPmTestError(null);
+  };
+
+  const handleAdminTestLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setAdminTestError(null);
+
+    const testId = adminTestId.trim().toUpperCase();
+    const password = adminTestPassword;
+
+    if (!testId) {
+      setAdminTestError('Please enter a test ID.');
+      return;
+    }
+    if (!password) {
+      setAdminTestError('Please enter the test password.');
+      return;
+    }
+
+    setIsAdminTestSubmitting(true);
+    try {
+      const expectedId = TEST_ACCOUNT_IDS.admin;
+      const storedHash = TEST_PASSWORD_HASHES.admin;
+
+      if (!storedHash) {
+        setAdminTestError('Admin test login is not configured on this deployment.');
+        setIsAdminTestSubmitting(false);
+        return;
+      }
+
+      if (testId !== expectedId) {
+        setAdminTestError('Invalid test ID. Access denied.');
+        setIsAdminTestSubmitting(false);
+        return;
+      }
+
+      const isValid = await verifyTestPassword(password, storedHash);
+      if (!isValid) {
+        setAdminTestError('Invalid test password. Access denied.');
+        setIsAdminTestSubmitting(false);
+        return;
+      }
+
+      setTimeout(() => {
+        switchRole('Admin');
+        recordStaffLogin(expectedId, 'Admin');
+        showNotification('Authenticated as Test Administrator.');
+        setShowAdminTestLogin(false);
+        setAdminTestId('');
+        setAdminTestPassword('');
+        if (onClose) onClose();
+      }, 300);
+    } finally {
+      setIsAdminTestSubmitting(false);
+    }
+  };
+
+  const handlePmTestLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setPmTestError(null);
+
+    const testId = pmTestId.trim().toUpperCase();
+    const password = pmTestPassword;
+
+    if (!testId) {
+      setPmTestError('Please enter a test ID.');
+      return;
+    }
+    if (!password) {
+      setPmTestError('Please enter the test password.');
+      return;
+    }
+
+    setIsPmTestSubmitting(true);
+    try {
+      const expectedId = TEST_ACCOUNT_IDS.projectManager;
+      const storedHash = TEST_PASSWORD_HASHES.projectManager;
+
+      if (!storedHash) {
+        setPmTestError('Project Manager test login is not configured on this deployment.');
+        setIsPmTestSubmitting(false);
+        return;
+      }
+
+      if (testId !== expectedId) {
+        setPmTestError('Invalid test ID. Access denied.');
+        setIsPmTestSubmitting(false);
+        return;
+      }
+
+      const isValid = await verifyTestPassword(password, storedHash);
+      if (!isValid) {
+        setPmTestError('Invalid test password. Access denied.');
+        setIsPmTestSubmitting(false);
+        return;
+      }
+
+      setTimeout(() => {
+        switchRole('ProjectManager');
+        recordStaffLogin(expectedId, 'ProjectManager');
+        showNotification('Authenticated as Test Project Manager.');
+        setShowPmTestLogin(false);
+        setPmTestId('');
+        setPmTestPassword('');
+        if (onClose) onClose();
+      }, 300);
+    } finally {
+      setIsPmTestSubmitting(false);
+    }
+  };
+
+  const resetAdminTestLogin = () => {
+    setShowAdminTestLogin(false);
+    setAdminTestId('');
+    setAdminTestPassword('');
+    setAdminTestError(null);
+  };
+
+  const resetPmTestLogin = () => {
+    setShowPmTestLogin(false);
+    setPmTestId('');
+    setPmTestPassword('');
+    setPmTestError(null);
+  };
+
   return (
     <div className={`min-h-screen w-full transition-colors ${
       isDark ? 'bg-[#0E131F] text-slate-100' : 'bg-[#F8FAFC] text-slate-800'
     } flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-sans`}>
-      
-      {/* TOP HEADER SECTION */}
       <header className="max-w-7xl w-full mx-auto mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
+          {/* Company logo.
+              onError fallback: if the primary PNG fails to load (e.g. a stale cache
+              or transient 404), swap to the standard variant once, then hide the
+              element so a broken-image icon is never shown. */}
           <img
             src="/kumkang_logo_transparent.png"
             alt="Kumkang Kind Logo"
             className="h-10 sm:h-12 w-auto object-contain"
+            onError={e => {
+              const img = e.currentTarget;
+              if (!img.dataset.fallback) {
+                img.dataset.fallback = '1';
+                img.src = '/kumkang_logo.png';
+              } else {
+                img.style.display = 'none';
+              }
+            }}
           />
           <div>
             <div className="flex items-center gap-2">
@@ -224,7 +455,6 @@ export function DualLoginPortal({ onClose }: Props) {
           </div>
         </div>
 
-        {/* Region Switcher & Close button */}
         <div className="flex items-center gap-2">
           <div className="bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl flex items-center gap-1 text-xs font-bold">
             <button
@@ -284,7 +514,6 @@ export function DualLoginPortal({ onClose }: Props) {
         </div>
       </header>
 
-      {/* INFORMATIVE CLIENT BANNER matching Screenshot 4 */}
       <div className="max-w-7xl w-full mx-auto mb-6 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-slate-800/60 dark:to-slate-800/40 border border-sky-100 dark:border-slate-700 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-black uppercase tracking-widest text-[#0E4E8A] dark:text-sky-400 block mb-1">
@@ -294,8 +523,8 @@ export function DualLoginPortal({ onClose }: Props) {
             Authorized Client Project Tracking & Certified Document Portal
           </h2>
           <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-3xl leading-relaxed">
-            Client login uses your designated <strong>Project Access ID</strong> (e.g. <code>KKAF-2026-001</code> or <code>KKI-2026-001</code>). 
-            Gives each client secure, real-time access to their own project milestones, journey timeline, and approved PDF downloads, 
+            Client login uses your designated <strong>Project Access ID</strong> (e.g. <code>KKAF-2026-001</code> or <code>KKI-2026-001</code>).
+            Gives each client secure, real-time access to their own project milestones, journey timeline, and approved PDF downloads,
             without exposing internal financials, margins, or other clients' records.
           </p>
         </div>
@@ -308,17 +537,13 @@ export function DualLoginPortal({ onClose }: Props) {
         </button>
       </div>
 
-      {/* MAIN TWO-COLUMN WORKSPACE */}
       <main className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start flex-1">
-        
-        {/* LEFT COLUMN: GLOBAL FOOTPRINT MAP (7 cols) */}
         <section className="lg:col-span-7 flex flex-col space-y-4">
           <GlobalFootprintMap
             selectedNodeId={selectedNode.id}
             onSelectNode={node => setSelectedNode(node)}
           />
 
-          {/* Quick Metrics Strip */}
           <div className="grid grid-cols-3 gap-3">
             <div className={`p-3.5 rounded-xl border ${
               isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'
@@ -344,15 +569,12 @@ export function DualLoginPortal({ onClose }: Props) {
           </div>
         </section>
 
-        {/* RIGHT COLUMN: COMPACT AUTHENTICATION CARD (5 cols) */}
         <section className="lg:col-span-5">
           <div className={`p-6 sm:p-7 rounded-2xl border shadow-xl transition-all ${
             isDark
               ? 'bg-[#13161F] border-[#252B3B]'
               : 'bg-white border-slate-200 shadow-slate-200/50'
           }`}>
-            
-            {/* 4-WAY TAB SELECTOR */}
             <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 dark:bg-slate-800/70 rounded-xl mb-6">
               <button
                 type="button"
@@ -408,7 +630,6 @@ export function DualLoginPortal({ onClose }: Props) {
               </button>
             </div>
 
-            {/* TAB 1: STAFF LOGIN */}
             {activeTab === 'staff' && (
               <div>
                 <div className="mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -518,7 +739,6 @@ export function DualLoginPortal({ onClose }: Props) {
                   </button>
                 </form>
 
-                {/* Quick Staff Demo */}
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
                   <span className="text-slate-400">Evaluation Shortcuts:</span>
                   <div className="flex gap-2">
@@ -541,7 +761,6 @@ export function DualLoginPortal({ onClose }: Props) {
               </div>
             )}
 
-            {/* TAB 2: PLANT / OPERATIONS LOGIN */}
             {activeTab === 'plant' && (
               <div>
                 <div className="mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -643,7 +862,6 @@ export function DualLoginPortal({ onClose }: Props) {
                   </button>
                 </form>
 
-                {/* Quick Plant Ops Shortcut */}
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
                   <span className="text-slate-400">Direct Operations Access:</span>
                   <button
@@ -657,7 +875,6 @@ export function DualLoginPortal({ onClose }: Props) {
               </div>
             )}
 
-            {/* TAB 3: CLIENT LOGIN (CLIENT ID + PASSWORD) */}
             {activeTab === 'client' && (
               <div>
                 <div className="mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -752,7 +969,6 @@ export function DualLoginPortal({ onClose }: Props) {
         </section>
       </main>
 
-      {/* FOOTER */}
       <footer className="max-w-7xl w-full mx-auto mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-500">
         <div className="flex items-center gap-2">
           <span>&copy; {new Date().getFullYear()} Kumkang Kind Co., Ltd. All Rights Reserved.</span>
@@ -768,7 +984,6 @@ export function DualLoginPortal({ onClose }: Props) {
         </div>
       </footer>
 
-      {/* Developer Secure Login Overlay */}
       {showDevLogin && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className={`w-full max-w-md rounded-2xl shadow-2xl border transition-all ${
@@ -842,6 +1057,206 @@ export function DualLoginPortal({ onClose }: Props) {
                 className="w-full py-2.5 px-4 rounded-xl font-extrabold bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-xs"
               >
                 <Code2 size={14} /> Unlock Developer Dashboard
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAdminTestLogin && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl shadow-2xl border transition-all ${
+            isDark ? 'bg-[#13161F] border-[#252B3B]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center justify-between px-6 py-4 border-b ${
+              isDark ? 'border-[#252B3B]' : 'border-slate-200'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h3 className={`text-base font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    Admin Testing Login
+                  </h3>
+                  <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Authorized tester login only
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={resetAdminTestLogin}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  isDark ? 'hover:bg-[#252B3B] text-slate-400' : 'hover:bg-slate-100 text-slate-500'
+                }`}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAdminTestLogin} className="p-6 space-y-4">
+              {adminTestError && (
+                <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[11px] flex items-center gap-1.5">
+                  <AlertCircle size={14} />
+                  <span>{adminTestError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Test ID
+                </label>
+                <div className="relative">
+                  <ShieldCheck size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                  <input
+                    type="text"
+                    value={adminTestId}
+                    onChange={e => setAdminTestId(e.target.value)}
+                    placeholder="Enter test ID"
+                    className={`w-full pl-9 pr-3 py-2.5 rounded-lg border outline-none font-medium text-xs transition-all ${
+                      isDark
+                        ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-emerald-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-emerald-500'
+                    }`}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Test Password
+                </label>
+                <div className="relative">
+                  <KeyRound size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                  <input
+                    type="password"
+                    value={adminTestPassword}
+                    onChange={e => setAdminTestPassword(e.target.value)}
+                    placeholder="Enter test password"
+                    className={`w-full pl-9 pr-3 py-2.5 rounded-lg border outline-none font-medium text-xs transition-all ${
+                      isDark
+                        ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-emerald-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-emerald-500'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isAdminTestSubmitting}
+                className="w-full py-2.5 px-4 rounded-xl font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-xs"
+              >
+                {isAdminTestSubmitting ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" /> Verifying Credentials...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={14} /> Sign In as Test Administrator
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showPmTestLogin && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl shadow-2xl border transition-all ${
+            isDark ? 'bg-[#13161F] border-[#252B3B]' : 'bg-white border-slate-200'
+          }`}>
+            <div className={`flex items-center justify-between px-6 py-4 border-b ${
+              isDark ? 'border-[#252B3B]' : 'border-slate-200'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-xl ${isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'}`}>
+                  <HardHat size={20} />
+                </div>
+                <div>
+                  <h3 className={`text-base font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    Project Manager Testing Login
+                  </h3>
+                  <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Authorized tester login only
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={resetPmTestLogin}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  isDark ? 'hover:bg-[#252B3B] text-slate-400' : 'hover:bg-slate-100 text-slate-500'
+                }`}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePmTestLogin} className="p-6 space-y-4">
+              {pmTestError && (
+                <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[11px] flex items-center gap-1.5">
+                  <AlertCircle size={14} />
+                  <span>{pmTestError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Test ID
+                </label>
+                <div className="relative">
+                  <HardHat size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                  <input
+                    type="text"
+                    value={pmTestId}
+                    onChange={e => setPmTestId(e.target.value)}
+                    placeholder="Enter test ID"
+                    className={`w-full pl-9 pr-3 py-2.5 rounded-lg border outline-none font-medium text-xs transition-all ${
+                      isDark
+                        ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-amber-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    }`}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Test Password
+                </label>
+                <div className="relative">
+                  <KeyRound size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                  <input
+                    type="password"
+                    value={pmTestPassword}
+                    onChange={e => setPmTestPassword(e.target.value)}
+                    placeholder="Enter test password"
+                    className={`w-full pl-9 pr-3 py-2.5 rounded-lg border outline-none font-medium text-xs transition-all ${
+                      isDark
+                        ? 'bg-[#181C26] border-[#2E364A] text-white focus:border-amber-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isPmTestSubmitting}
+                className="w-full py-2.5 px-4 rounded-xl font-extrabold bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-xs"
+              >
+                {isPmTestSubmitting ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" /> Verifying Credentials...
+                  </>
+                ) : (
+                  <>
+                    <HardHat size={14} /> Sign In as Test Project Manager
+                  </>
+                )}
               </button>
             </form>
           </div>

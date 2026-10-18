@@ -45,6 +45,7 @@ export function ProformaInvoicePage() {
   const [selectedPIRecall, setSelectedPIRecall] = useState<ProformaInvoiceRecord | null>(null);
 
   // Auto-detect direct approval action links from external emails (?piActionToken=...&action=...)
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;

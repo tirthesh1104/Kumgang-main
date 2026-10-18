@@ -50,7 +50,8 @@ export function SiteExecutionSection({ projectId }: SiteExecutionSectionProps) {
   const [progressStatus, setProgressStatus] = useState('');
   const [weeklyRemarks, setWeeklyRemarks] = useState('');
 
-  // Synchronize local form fields whenever projectId, execInfo, or project change
+  // Synchronize local form fields whenever projectId, execInfo, or project change.
+  // oxlint-disable-next-line react/set-state-in-effect
   useEffect(() => {
     setSupervisorName(execInfo?.supervisorName || project?.supervisorName || '');
     setSupervisorContact(execInfo?.supervisorContact || project?.supervisorContact || '');

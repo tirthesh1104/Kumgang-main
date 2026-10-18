@@ -198,13 +198,25 @@ function SidebarContent() {
               }}
             />
             
-            {/* Exact original Kumkang logo */}
+            {/* Exact original Kumkang logo.
+                onError fallback: if the primary PNG fails to load (e.g. a stale
+                cache or transient 404), swap to the transparent variant once, then
+                hide the element so a broken-image icon is never shown. */}
             <motion.img
               src="/kumkang_logo.png"
               alt="Kumkang Kind"
               className="h-[28px] w-auto object-contain block relative z-10"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 350, damping: 20 }}
+              onError={e => {
+                const img = e.currentTarget;
+                if (!img.dataset.fallback) {
+                  img.dataset.fallback = '1';
+                  img.src = '/kumkang_logo_transparent.png';
+                } else {
+                  img.style.display = 'none';
+                }
+              }}
             />
           </motion.div>
 

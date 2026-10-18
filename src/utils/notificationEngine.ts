@@ -18,7 +18,7 @@ function parseDateString(dateStr: string | null | undefined): Date | null {
     }
     const d = new Date(dateStr);
     return isNaN(d.getTime()) ? null : d;
-  } catch (e) {
+  } catch {
     return null;
   }
 }

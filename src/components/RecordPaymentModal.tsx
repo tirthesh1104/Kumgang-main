@@ -58,7 +58,7 @@ export function RecordPaymentModal({ defaultProjectId, onClose }: RecordPaymentM
     }
 
     const newPayment: PaymentRecord = {
-      paymentId: `PAY-${Date.now()}`,
+      paymentId: `PAY-${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)}`,
       projectId: selectedProjectId,
       customer: selectedProj?.customer || 'Customer',
       project: selectedProj?.project || selectedProjectId,

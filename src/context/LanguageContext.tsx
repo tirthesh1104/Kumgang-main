@@ -47,6 +47,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// oxlint-disable-next-line react/only-export-components
 export function useLanguage() {
   const ctx = useContext(LanguageContext);
   if (!ctx) {
